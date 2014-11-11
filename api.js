@@ -1,22 +1,13 @@
 "use strict";
 
-var csv = require('fast-csv');
 var Game = require('./game');
 var Lobby = require('./Lobby');
 var User = require('./User');
 var express = require('express');
 var WebSocketServer = require('ws').Server;
 var _ = require('underscore');
-var God = require('./God');
-var GameData = require('./GameData');
-
-
-var cardDefinitions;
-var gpCardDefinitions;
-var godDefinitions;
 
 var gameByID = {};
-var serializedGameByID = {};
 
 var createApi = function(cb) {
   var app = express();
@@ -39,7 +30,6 @@ var createApi = function(cb) {
     });
   };
   var onGameChange = function(game) {
-    serializedGameByID[game.getID()] = game.toJSON();
     onObjectChange('game', game);
   };
   var onLobbyChange = function(lobby) {
@@ -154,19 +144,6 @@ var createApi = function(cb) {
     onLobbyChange(lobby);
     res.send({lobbyID: lobby.getID(), sequenceID: lobby.getSequenceID()});
   });
-  app.post('/lobby/:lobby_id/set_god', ensureAuthorized, function(req, res, next) {
-    var lobby_id = req.param('lobby_id');
-    var lobby = Lobby.getLobby(lobby_id);
-    if (!lobby) {
-      next(new Error('lobby not found'));
-      return;
-    }
-    var user_id = req.user.getID();
-    var god_name = req.param('god_name');
-    lobby.setGod(user_id, god_name);
-    onLobbyChange(lobby);
-    res.send({lobbyID: lobby.getID(), sequenceID: lobby.getSequenceID()});
-  });
   app.post('/lobby/:lobby_id/start', function(req, res, next) {
     var lobby_id = req.param('lobby_id');
     var lobby = Lobby.getLobby(lobby_id);
@@ -179,24 +156,9 @@ var createApi = function(cb) {
       next(new Error('not enough players'));
       return;
     }
-    var players = _.map(_.filter(playerIDs, function(userID) {
-      var god = lobby.getGodForUserID(userID);
-      return god !== undefined;
-    }), function(userID) {
-      var god = lobby.getGodForUserID(userID);
-      return new Game.Player(userID, god);
+    var players = _.map(playerIDs, function(userID) {
+      return new Game.Player(userID);
     });
-    var selected_gods = _.map(playerIDs, function(userID) {
-      return lobby.getGodForUserID(userID);
-    });
-    var remaining_gods = _.shuffle(_.difference(God.getAllGods(), selected_gods));
-    players = players.concat(_.map(_.filter(playerIDs, function(userID) {
-      var god = lobby.getGodForUserID(userID);
-      return god === undefined;
-    }), function(userID, index) {
-      var god = remaining_gods[index];
-      return new Game.Player(userID, god);
-    }));
     var game = new Game.Game(players);
     game.setUpGame();
     gameByID[game.getID()] = game;
@@ -217,28 +179,7 @@ var createApi = function(cb) {
     res.status(err.status || 400).send(err.message);
   });
 
-  // init server vars and express
-  GameData.readCardDefinitions(function(definitions) {
-    cardDefinitions = definitions;
-    if (!cardDefinitions || !gpCardDefinitions || !godDefinitions) {
-      return;
-    }
-    cb(app);
-  });
-  GameData.readGPCardDefinitions(function(definitions) {
-    gpCardDefinitions = definitions;
-    if (!cardDefinitions || !gpCardDefinitions || !godDefinitions) {
-      return;
-    }
-    cb(app);
-  });
-  GameData.readGodDefinitions(function(definitions) {
-    godDefinitions = definitions;
-    if (!cardDefinitions || !gpCardDefinitions || !godDefinitions) {
-      return;
-    }
-    cb(app);
-  });
+  cb(app);
 };
 
 module.exports = {

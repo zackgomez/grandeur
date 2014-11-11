@@ -1,6 +1,5 @@
 "use strict";
 var _ = require('underscore');
-var God = require('./God');
 
 var lobbyByID = {};
 
@@ -10,7 +9,6 @@ var Lobby = function(host_id, name) {
   this.hostID_ = host_id;
   this.name_ =  name;
   this.playerIDs_ = [host_id];
-  this.godByUserID_ = {};
 
   this.gameID_ = null;
 };
@@ -29,9 +27,6 @@ Lobby.prototype.getHostID = function() {
 Lobby.prototype.isOpen = function() {
   return this.gameID_ === null;
 };
-Lobby.prototype.getGodForUserID = function(userID) {
-  return this.godByUserID_[userID];
-};
 Lobby.prototype.toJSON = function() {
   return {
     id: this.id_,
@@ -40,8 +35,6 @@ Lobby.prototype.toJSON = function() {
     name: this.name_,
     playerIDs: this.playerIDs_,
     gameID: this.gameID_,
-    godByUserID: this.godByUserID_,
-    gods: God.getAllGods(),
   };
 };
 
@@ -55,19 +48,6 @@ Lobby.prototype.addPlayer = function(player_id) {
   this.playerIDs_.push(player_id);
   this.sequenceID_ += 1;
   return null;
-};
-Lobby.prototype.setGod = function(player_id, god_name) {
-  if (!_.contains(this.playerIDs_, player_id)) {
-    throw new Error('player not found');
-  }
-  if (god_name !== "Random") {
-    var god = God.getGodByName(god_name);
-    if (!god) {
-      throw new Error('god not found');
-    }
-  }
-  this.godByUserID_[player_id] = god;
-  this.sequenceID_ += 1;
 };
 Lobby.prototype.startGame = function(game_id) {
   this.gameID_ = game_id;
@@ -93,6 +73,6 @@ Lobby.getLobbyWithHostID = function(host_id) {
   });
 };
 
-Lobby.MAX_PLAYERS = 6;
+Lobby.MAX_PLAYERS = 4;
 
 module.exports = Lobby;
