@@ -68,50 +68,50 @@ var Card = React.createClass({
     this.props.onDoubleClick && this.props.onDoubleClick(this.props.card);
   },
   render: function() {
+    var card = this.props.card;
+    var cost = card.cost;
     return (
-      <div className={'card '+this.props.card.type}
+      <div className={'card card-color-'+this.props.card.color}
         onMouseEnter={this.handleMouseEnter} 
         onMouseLeave={this.handleMouseLeave}
         onClick={this.handleClick}
         onDoubleClick={this.handleDoubleClick}
         >
-        <div className="card-name">This is card!</div>
+        <div className="card-cost">{cost}</div>
+        <div className="card-points">{card.points || null}</div>
+        <div className="card-color">{card.color}</div>
+        <div className="card-level">{card.level}</div>
       </div>
     );
   },
 });
 
-var Pile = React.createClass({
-  onCardEnter: function(card) {
-  },
-  onCardLeave: function(card) {
-  },
+var DraftingView = React.createClass({
   render: function() {
-    var rendered_cards = [];
-
-    _.each(this.props.cards, function(card) {
-      var card_props = {
-        card:card,
-        key:card.id,
-        onClick:this.props.onCardClick,
-        onDoubleClick:this.props.onCardDoubleClick,
-        onCardEnter:this.onCardEnter,
-        onCardLeave:this.onCardLeave,
-      };
+    var game = this.props.game;
+    var levels = _.map(game.boards, function(board, i) {
+      var cards = _.map(board, function(card) {
+        var card_props = {
+          card:card,
+          key:card.id,
+          onClick:this.props.onCardClick,
+          onDoubleClick:this.props.onCardDoubleClick,
+          onCardEnter:this.onCardEnter,
+          onCardLeave:this.onCardLeave,
+        };
+        return Card(card_props);
+      }, this);
+      return (
+        <div className="drafting-level">
+          <div className="deck-size">{game.decks[i].cards.length}</div>
+          <div className="drafting-cards">{cards}</div>
+        </div>
+      );
     }, this);
     return (
-      <div className="pile">
-        <div className="pile-title">{this.props.title}</div>
-        <div className="pile-cards">{rendered_cards}</div>
+      <div className="drafting-view">
+        {levels}
       </div>
-    );
-  },
-});
-
-var GlobalAreaView = React.createClass({
-  render: function() {
-    return (
-      <div></div>
     );
   },
 });
@@ -254,7 +254,7 @@ var GamePage = React.createClass({
     return (
       <div className="game-view">
         <div className="left-pane">
-          <GlobalAreaView
+          <DraftingView
             session={this.props.session}
             game={this.state.game} />
         </div>

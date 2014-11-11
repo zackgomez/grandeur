@@ -5,6 +5,7 @@ var invariant_violation = require('./invariant_violation');
 var invariant = require('./invariant');
 var _ = require('underscore');
 var Colors = require('./Colors');
+var GameData = require('./GameData');
 
 var CARDS_PER_LEVEL = 4;
 
@@ -48,7 +49,7 @@ Deck.prototype.drawN = function(n) {
   var cards = [];
   _.times(Math.min(n, this.count()), function(n) {
     cards.push(this.cards_.pop());
-  });
+  }, this);
   return cards;
 };
 Deck.prototype.drawAll = function() {
@@ -138,11 +139,18 @@ Game.prototype.bumpSequenceID = function() {
 Game.prototype.setUpGame = function() {
   this.gameStartTimestamp_ = Date.now();
 
+  _.each(GameData.Cards, function(card_def) {
+    var i = card_def.level - 1;
+    invariant(i >= 0 && i < 3, 'invalid card level');
+    this.decks_[i].addCardsToTop([this.spawnCard(card_def)]);
+  }, this);
+
   _.each(this.decks_, function(deck, n) {
     deck.shuffle();
     this.boards_[n] = deck.drawN(CARDS_PER_LEVEL);
   }, this);
 
+  this.nobles_ = _.sample(GameData.Nobles);
 
   var playerCountToChipCount = {
     2: 4,
