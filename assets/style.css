@@ -1,0 +1,1437 @@
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed, 
+figure, figcaption, footer, header, hgroup, 
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  /*font-family:  "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif; */
+  font-family: 'Lato', sans-serif;
+  vertical-align: baseline;
+}
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure, 
+footer, header, hgroup, menu, nav, section {
+  display: block;
+}
+body {
+  line-height: 1;
+}
+ol, ul {
+  list-style: none;
+}
+blockquote, q {
+  quotes: none;
+}
+blockquote:before, blockquote:after,
+q:before, q:after {
+  content: '';
+  content: none;
+}
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+.hidden {
+  display: none;
+}
+
+div span body p h1 h2 h3 h4 h5 h6 button input form {
+  font-family: Helvetica Neue;
+  font-family: 'Open Sans', sans-serif;
+  font-family: 'Lato', sans-serif;
+}
+
+/* Cards */
+
+.card-space {
+  width: 83px;
+  margin: 12px;
+  display: inline-block;
+}
+.card {
+  background-color:#EEEEEE;
+  border: solid black 1px;
+  border-radius: 5px;
+  display: inline-block;
+  padding: 6px;
+  margin: 5px;
+  width: 83px;
+  height: 110px;
+  box-shadow: 1px 1px 3px #333333;
+  -webkit-user-select: none; /* Chrome/Safari */        
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE10+ */
+
+/* Rules below not implemented in browsers yet */
+-o-user-select: none;
+user-select: none;
+}
+
+.card.Any {
+  background-color:#EEEEEE;
+  box-shadow: inset 0px -12px 47px -1px  rgba(150,150,150,0.54);
+  /*1px 1px 1px #333333;*/
+}
+.card.Baeren {
+  /*-webkit-box-shadow: inset 0px -17px 35px 5px rgba(180,130,90,0.54);*/
+  box-shadow: inset 0px -12px 47px -1px  rgba(180,130,90,0.54);
+}
+.card.Derion {
+  box-shadow: inset 0px -12px 47px -1px  rgba(40,120,50,0.50);
+}
+.card.Zeona {
+  box-shadow: inset 0px -12px 47px -1px  rgba(190,160,50,0.44);
+}
+.card.Tyros {
+  box-shadow: inset 0px -12px 47px -1px  rgba(190,80,50,0.44);
+}
+.card.Elara {
+  box-shadow: inset 0px -12px 47px -1px  rgba(50,80,160,0.44);
+}
+.card.wrong-phase {
+  opacity:.6;
+}
+
+.face-down-card {
+  background-color: rgba(30,30,30,1);
+  border: solid white 2px;
+  border-radius: 5px;
+  display: inline-block;
+  padding: 6px;
+  margin: 5px;
+  width: 83px;
+  height: 110px;
+  line-height: 110px;
+  box-shadow: 1px 1px 3px #333333;
+  color: white;
+  text-align: center;
+  -webkit-user-select: none; /* Chrome/Safari */        
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE10+ */
+}
+.face-down-card:hover {
+  background-color: rgba(60,60,60,1);
+}
+.face-down-card.corresponding-phase {
+  /*background-color: rgba(215,50,50,1);*/
+  background-color: rgba(190,60,10,1);
+}
+.face-down-card.corresponding-phase:hover {
+  background-color: rgba(225,70,70,1);
+}
+
+.face-down-card.deck {
+  margin-top:-5px;
+  box-shadow:
+    0 0px 1px 1px rgba(0,0,0,0.21), /* The second layer shadow */
+    0px 3px 0px 0px #eee, /* The second layer */
+    0 4px 1px 1px rgba(0,0,0,0.23), /* The second layer shadow */
+    0px 6px 0px 0px #eee, /* The third layer */
+    0 7px 1px 1px rgba(0,0,0,0.25), /* The third layer shadow */
+    0px 9px 0px 0px #eee, /* The fourth layer */
+    0 10px 1px 1px rgba(0,0,0,0.26),/* The fourth layer shadow */
+    0px 12px 0px 0px #eee, /* The fifth layer */
+    0 13px 1px 1px rgba(0,0,0,0.24); /* The fifth layer shadow */
+}
+.face-down-card.deck.almost-full {
+  margin-top:-5px;
+  box-shadow:
+    0 0px 1px 1px rgba(0,0,0,0.21), /* The second layer shadow */
+    0px 3px 0px 0px #eee, /* The second layer */
+    0 4px 1px 1px rgba(0,0,0,0.23), /* The second layer shadow */
+    0px 6px 0px 0px #eee, /* The third layer */
+    0 7px 1px 1px rgba(0,0,0,0.23); /* The third layer shadow */
+}
+.face-down-card.deck.half-full {
+  margin-top:-5px;
+  box-shadow:
+    0 0px 1px 1px rgba(0,0,0,0.21), /* The second layer shadow */
+    0px 3px 0px 0px #eee, /* The second layer */
+    0 4px 1px 1px rgba(0,0,0,0.23); /* The second layer shadow */
+}
+.face-down-card.deck.empty {
+  margin-top:-5px;
+  box-shadow: none;
+}
+.hover-card .card {
+  position:fixed;
+  bottom: 10%;
+  right: 5%;
+  width: 225px;
+  height: 300px;
+  box-shadow: 5px 5px 25px #222222;
+  padding: 8px;
+  background-color: white;
+  opacity:1;
+}
+
+.hover-card .face-down-card {
+  position:fixed;
+  top: 15%;
+  right: 3%;
+  width: 225px;
+  height: 300px;
+  box-shadow: 5px 5px 25px #222222;
+  padding: 8px;
+}
+
+
+
+.hover-card .Any {
+  background-color:#FCFCFC;
+  box-shadow: inset 0px -30px 90px -1px  rgba(150,150,150,0.54),
+  5px 5px 25px #222222;;
+}
+.hover-card .Baeren {
+  box-shadow: inset 0px -30px 100px -1px   rgba(180,130,90,0.54),
+  5px 5px 25px #222222;;
+}
+.hover-card .Derion {
+  box-shadow: inset 0px -30px 100px -1px  rgba(40,120,50,0.50),
+  5px 5px 25px #222222;;
+}
+.hover-card .Zeona {
+  box-shadow: inset 0px -30px 100px -1px   rgba(190,160,50,0.44),
+  5px 5px 25px #222222;;
+}
+.hover-card .Tyros {
+  box-shadow: inset 0px -30px 100px -1px   rgba(190,80,50,0.44),
+  5px 5px 25px #222222;;
+}
+.hover-card  .Elara {
+  box-shadow: inset 0px -30px 100px -1px   rgba(50,80,160,0.44),
+  5px 5px 25px #222222;;
+}
+
+
+.card:hover {
+  background-color:#CCCCCC;
+}
+
+
+
+.card-name, .card-phase {
+  text-align: center;
+  font-weight: bold;
+  background-color: rgb(210, 210, 210);
+  background-color: rgba(0, 0, 0, 0.1);
+
+  font-size: 11px;
+  min-height: 12px;
+  margin-bottom: 1px;
+}
+
+.card-name {
+  padding-bottom:1px;
+}
+
+.KNOWLEDGE .card-name {
+  
+  background-color: rgba(200, 200, 0, 0.5);
+  background-color: rgba(220, 180, 10, 0.50);
+
+}
+.EPIC .card-name {
+  background-color: rgba(220, 80, 10, 0.55);
+  background-color: rgba(60, 10, 220, 0.5);
+  background-color: rgba(40, 0, 160, 0.5);
+}
+
+.hover-card .card-name, .hover-card .card-phase{
+  font-size:23px;
+  margin-bottom:5px;
+}
+
+.card-costs {
+  display: flex;
+  background-color: rgba(0, 0, 0, 0.07);
+  margin-top: 2px;
+  padding: 1px;
+  min-height: 12px;
+  border-radius:16px;
+}
+
+.gp-card-costs {
+  margin-top:-3px;
+  margin-bottom:2px;
+}
+
+.card-cost {
+  display: inline-block;
+  border-radius: 50%;
+  width: 11px;
+  height: 12px;
+  line-height: 12px;
+  font-size: 11px;
+  color: black;
+  text-align: center;
+  margin-right: 2px;
+  padding-right:1px;
+  font-weight: 300;
+
+}
+
+.card-cost.wood {
+  background-color: rgba(75, 190, 75, 1);
+}
+.card-cost.ore {
+  background-color: rgba(150, 150, 150, 1);
+}
+.card-cost.food {
+  background-color: rgba(160, 0, 0, 0.5);
+}
+.card-cost.gold {
+  background-color: rgba(190, 190, 75, 1);
+}
+.card-cost.gp {
+  color: #222222;
+  font-size: 8px;
+}
+.card-cost.gp-current {
+  background-color: rgba(90, 0, 120, 0.6);
+  color: white;
+  font-size: 10px;
+  width:12px;
+  padding-right:0;
+}
+
+.hover-card .card-cost {
+  width: 30px;
+  height: 30px;
+  line-height: 30px;
+  font-size: 22px;
+}
+
+.BASIC_BUILDING .card-costs {
+  margin:0;
+  min-height: 0;
+  height:0;
+  visibility: hidden;
+}
+
+.BASIC_BUILDING .card-effect {
+  padding-top:0;
+  font-size: 25px;
+  text-align: center;
+  color: rgba(0,0,0,.6);
+  background-color: rgba(0,0,0,.05);
+  border-radius:50%;
+  height:80%;
+  width:75%;
+  line-height: 85px;
+  vertical-align: middle;
+  margin-top:5px;
+}
+
+.hover-card .BASIC_BUILDING .card-effect {
+  height: 85%;
+  width: 85%;
+  font-size: 65px;
+  line-height: 245px;
+}
+
+
+.game-view {
+  display: flex;
+  max-width:100%;
+  background-image: url(data:image/png;base64,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);
+  background-color: rgb(185,185,190);
+  height:100%;
+}
+
+.right-pane {
+  width: 420px;
+  display: flex;
+  flex-direction: column;
+  margin-right:5px;
+  min-width:420px;
+  position:fixed;
+  right:0;
+  height:100%;
+}
+
+.left-pane {
+  width: 100%;
+  margin-right:425px;
+}
+
+.card-effect {
+  font-size:9px;
+  display: block;
+  display: -webkit-box;
+  max-width: 100%;
+  height: 64px;
+  margin: 0 auto;
+  line-height: 1;
+  -webkit-line-clamp: 7;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.self-view > .pile > .pile-cards {
+  display:flex;
+}
+.self-view > .pile > .pile-cards > div > .card {
+  max-height:50px;
+}
+.self-view > .pile > .pile-cards > div{
+  max-height:85px;
+}
+.self-view > .pile > .pile-cards > div > .card > .card-effect{
+  -webkit-line-clamp: 2;
+  max-height:16px;
+}
+.self-view > .pile > .pile-cards > div > .BASIC_BUILDING > .card-effect{
+  max-height:40px;
+  line-height:40px;
+  margin-top:-2px;
+}
+
+.player-view > .pile > .pile-cards {
+  display:flex;
+}
+.player-view > .pile > .pile-cards > div > .card {
+  max-height:50px;
+}
+.player-view > .pile > .pile-cards > div{
+  max-height:85px;
+}
+.player-view > .pile > .pile-cards > div > .card > .card-effect{
+  -webkit-line-clamp: 2;
+  max-height:16px;
+}
+.player-view > .pile > .pile-cards > div > .BASIC_BUILDING > .card-effect{
+  max-height:40px;
+  line-height:40px;
+  margin-top:-2px;
+}
+
+.basic-cards-view > .pile > .pile-cards > div > .card {
+  max-height:50px;
+}
+.basic-cards-view > .pile > .pile-cards > div > .card > .card-effect{
+  max-height:40px;
+  line-height:40px;
+  margin-top:-2px;
+}
+
+.hover-card .card-effect {
+  font-size:19px;
+  height: 300px;
+}
+
+
+
+
+/* Main Display */
+
+.global-area-view {
+  background-color:#279950;
+  background-color:rgb(50,120,80);
+  display: block;
+  margin: 5px;
+  margin-bottom:0px;
+  /*min-width:700px;*/
+}
+
+.basic-card-and-time-view {
+  display: flex;
+  margin-bottom: -5px;
+}
+.basic-cards-view {
+  overflow: hidden;
+  display:flex;
+  flex-grow:0;
+  min-width:458px;
+}
+
+.game-time-view {
+  padding-top:25px;
+  font-size: 18px;
+  padding-right:5px;
+  display:flex;
+  flex-grow: 5;
+}
+.game-time-view-table {
+  display:flex;
+  flex-direction:row;
+  flex-grow: 5;
+}
+.game-time-view-titles {
+  height: 25px;
+}
+
+.game-time-view-values th {
+  padding:10px;
+  color: white;
+  font-size: 22px;
+}
+
+.game-time-view-titles td {
+  font-size: 14px;
+  text-align: center;
+}
+
+.phase-td {
+  width: 175px;
+}
+.turn-td, .age-td{
+  width:70px;
+}
+.game-time-view-titles tr {
+}
+
+.state-buttons{
+  outline:none;
+  padding:5px;
+  float:right;
+  border: none;
+  background-color: rgba(165, 165, 165, 1);
+  border-radius:5px;
+  clear:right;
+  font-size:10px;
+  margin:2px;
+}
+.state-buttons button:active {
+  background-color: rgba(125, 125, 125, 1);
+}
+.pile {
+  padding: 5px;
+  padding-right: 10px;
+  padding-left: 10px;
+  margin: 5px;
+  background-color:rgba(255, 255, 255, 0.2);
+}
+
+.pile-cards {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.pile-title {
+  text-align: center;
+  font-size: 12px;
+  padding:1px;
+}
+
+.deck {
+  display: inline-block;
+  padding: 10px;
+  -webkit-user-select: none; /* Chrome/Safari */        
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE10+ */
+}
+.hand-and-deck-view {
+  display: flex;
+  margin-bottom: -5px;
+}
+
+
+.my-hand {
+  display: block;
+  flex-grow: 3;
+  min-height:170px;
+  flex-direction: row;
+  margin-right:-10px;
+  margin-bottom: -1px;
+}
+
+.my-hand > div {
+  min-height: 150px;
+}
+
+.god-powers-and-descriptions{
+  display: flex;
+  flex-direction:row;
+  margin:0;
+  padding:0;
+  margin-bottom:-6px;
+}
+.my-gps {
+  display:block;
+  flex-grow: 3;
+  min-height:145px;
+  flex-direction: row;
+  min-width:120px;
+  margin:0;
+  padding:0;
+}
+
+.my-gps-tab {
+  min-height: 155px;
+  display:block;
+  flex-grow: 3;
+  min-height:165px;
+  flex-direction: row;
+  min-width:120px;
+  margin-top:5px;
+}
+
+.my-gps > div {
+  min-height:140px;
+  padding-top:0px;
+}
+
+.gp-descriptions{
+  display:flex;
+  flex-basis: 260px;
+  background-color:rgba(255, 255, 255, 0.2);
+  margin:5px;
+  margin-left:-1px;
+}
+
+.self-view-god-info span, .self-view-god-info-item-ability-container span{
+  margin-top:5px;
+  text-align: center;
+  font-size:12px;
+  display:block;
+}
+
+.self-view-god-info-item-ability{
+  display:flex;
+  flex-direction:column;
+  /*background-color:rgba(255, 255, 255, 0.2);*/
+  margin: 2px;
+  padding: 6px;
+  text-align: left;
+}
+.self-view-god-info-item-ability-container{
+  display:flex;
+  flex-direction:column;
+
+  font-size: 12px;
+  width: 195px;
+  height:100%;
+  margin-bottom: 0;
+}
+
+self-view-god-info-item-ability-description {
+  text-align: left;
+}
+
+.god-active {
+  font-size: 14px;
+  height: 22px;
+  text-align: center;
+  outline:none;
+  margin:10px;
+  margin-bottom: 0;
+  height:25px;
+  font-family: Helvetica Neue;
+  font-family: 'Lato', sans-serif;
+  padding:5px;
+  float:right;
+  color:white;
+  border: none;
+  outline:none;
+  border-radius:5px;
+}
+.god-active.used {
+  color: rgba(220,220,220,1);
+  background-color: rgba(40,40,40,1);
+}
+.god-active.unused {
+  color: black;
+  background-color:  rgba(220,220,220,1);
+}
+.god-active.unused:hover{
+  color: black;
+  background-color:  rgba(200,200,200,1);
+}
+.god-active.unused:active{
+  color: black;
+  background-color:  rgba(180,180,180,1);
+}
+
+.self-view-god-info {
+  padding-top:3px;
+  flex-basis:300px;
+}
+
+.self-view-god-info-item {
+  margin: 2px;
+  padding: 6px;
+  /*background-color:rgba(255, 255, 255, 0.2);*/
+  font-size: 11px;
+}
+
+.gp-deck {
+  display: flex;
+  flex-direction: row;
+  flex-grow: 0;
+  margin:10px;
+  border-left: white 2px solid;
+  padding:10px;
+  padding-right:5px;
+  padding-bottom:5px;
+  padding-left:9px;
+  width:120px;
+  min-width:110px;
+  margin-right:0;
+  -webkit-user-select: none; /* Chrome/Safari */        
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE10+ */
+}
+
+/* Play Resource View(s) */
+
+.player-resource-views {
+  flex-shrink: 0;
+  flex-grow: 0;
+  float: right;
+}
+
+.player-resource-view {
+  outline: solid black 1px;
+  outline:none;
+  display: block;
+  height: 60px;
+  padding: 5px;
+  padding-top:0;
+  margin-top: 4px;
+  margin-bottom: 4px;
+  flex-direction:row;
+  background-color: white;
+}
+
+.player-nonwar-resource-view {
+  margin:0;
+  top:0;
+  min-width:250px;
+  display:inline-block;
+  padding-top:5px;
+
+}
+.player-war-resource-view {
+  display:inline-block;
+  border-left: 1px solid black;
+  border-right: 1px solid black;
+  height: 60px;
+  padding-left:5px;
+  padding-top:5px;
+  position: relative;
+  border-right: 1px solid #000000; 
+
+  border-left: 1.5px solid rgb(190,190,190) ;
+  border-right: 1.5px solid rgb(190,190,190) ;
+  
+}
+
+.player-war-resource-view:after, .player-war-resource-view:before {
+  left: 100%;
+  top: 50%;
+  border: solid transparent;
+  content: " ";
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none;
+}
+
+.player-war-resource-view:after {
+  border-color: rgba(255, 255, 255, 0);
+  border-left-color: white;
+  border-width: 11px;
+  margin-top: -11px;
+}
+.player-war-resource-view.current-player:after {
+  border-left-color: rgba(240,240,255,1);
+}
+.player-war-resource-view.war:after {
+  border-left-color: rgba(255,230,230,1);
+}
+.player-war-resource-view:before {
+  border-color: rgba(0, 0, 0, 0);
+  border-left-color: #000000;
+  border-width: 12px;
+  margin-top: -12px;
+  border-left-color: rgb(190,190,190);
+}
+.player-war-resource-view.current-player {
+  height: 95px;
+}
+.player-war-resource-view.war {
+  background-color: rgba(255, 230, 230, 1);
+}
+
+.player-resource-view.current-player {
+  background-color: rgba(200, 200, 255, 0.2);
+  background-color: rgba(238, 238, 255, 1);
+
+  height:95px;
+}
+
+.player-resource-view.insufficient {
+  background-color: rgba(120, 10, 0, 0.25);
+}
+
+.player-war-result-view {
+  display: inline-block;
+  text-align: center;
+  width:44px;
+  height: 60px;
+  float:right;
+  margin-right:5px;
+  margin-top:5px;
+}
+
+.roll-result-value {
+  display: inline-block;
+  margin-top:5px;
+  font-size:19px;
+  margin-left:5px;
+  margin-bottom:-1px;
+}
+
+.roll-result-title {
+  top:10px;
+}
+
+.roll-result-dice {
+  font-size:21px;
+  margin-left:3px;
+  padding:0;
+}
+.roll-result-die {
+   opacity:.70;
+}
+
+.roll-result-die + .roll-result-die  {
+  padding-left:2px;
+}
+
+.ready-status {
+  display: inline-block;
+  border: solid black 1px;
+  float:left;
+  margin-left: 0px;
+  height: 10px;
+  width: 20px;
+  margin-right:-10px;
+}
+
+
+.ready-status.ready {
+  background-color: green;
+}
+.ready-status.not-ready {
+  background-color: red;
+}
+
+
+.god-active-status {
+  display: inline-block;
+  border: solid black 1px;
+  float:right;
+  margin-right: 4px;
+  height: 10px;
+  width: 10px;
+}
+.god-active-status.used {
+  background-color: black;
+}
+.god-active-status.unused {
+  background-color: white;
+}
+.god-card-count {
+  display: inline-block;
+  margin-left: 4px;
+}
+
+.self-view {
+  margin: 5px;
+  background-color:#4455cc;
+  background-color:rgba(50,80,120,1);
+
+}
+
+.player-view {
+  margin: 5px;
+  background-color:rgba(30, 30, 70, 0.8);
+}
+
+.self-view, .player-view, .global-area-view {
+  padding-bottom: 1px;
+  padding-top: 1px;
+}
+
+.player-name, .war-view-title, .roll-result-title {
+  display: block;
+  text-align: center;
+}
+
+.player-status {
+  font-size: 10px;
+  padding: 2px;
+  display: inline-block;
+  width: 83px;
+  height: 19px;
+  margin:1px;
+  margin-left:5px;
+  text-align: center;
+  outline:none;
+
+}
+
+.player-status.ready {
+  color: black;
+  background-color: green;
+}
+
+.player-status.waiting {
+  color: black;
+  background-color: red;
+}
+
+.resource-counter {
+  margin-top: 6px;
+  margin-bottom: 10px;
+  font-weight: lighter;
+  display:inline-block;
+  float:left;
+  width:25px;
+  margin-right:5px;
+  margin-left:1px;
+}
+
+.resource-button {
+  display: inline-block;
+  color: white;
+  width: 25px;
+  height:15px;
+  text-align: center;
+  padding:5px;
+  border: none;
+  outline:none;
+  border-radius:3px;
+  vertical-align: middle;
+  padding-bottom:15px;
+  padding-top:0px;
+}
+
+.resource-up {
+  background-color: rgba(100, 100, 200, .9);
+}
+.resource-up:hover {
+  background-color: rgba(80, 80, 180, .9);
+}
+.resource-up:active {
+  background-color: rgba(50, 50, 150, .9);
+}
+.resource-down {
+  background-color: rgba(200, 50, 0, .9);
+}
+.resource-down:hover {
+  background-color: rgba(180, 30, 0, .9);
+}
+.resource-down:active {
+  background-color: rgba(150, 10, 0, .9);
+}
+
+.resource-name{
+  border-radius: 3px; 
+  padding-left: 5px;
+  padding-right: 5px;
+  outline:none;
+  width:15px;
+  margin:3px;
+  margin-left:0;
+  margin-top:0;
+  text-align: center;
+}
+.resource-name.wood{
+  background-color: rgba(0, 100, 0, 0.4);
+}
+.resource-name.ore{
+  background-color: rgba(0, 0, 0, 0.4);
+}
+.resource-name.gold{  
+  background-color: rgba(100, 100, 0, 0.4);
+}
+.resource-name.food{
+  background-color: rgba(100, 0, 0, 0.4);
+}
+.resource-name.favor{
+  background-color: rgba(80, 0, 80, 0.35);
+}
+.resource-name.military, .resource-name.spent_military{
+  background-color: rgba(100, 50, 0, 0.35);
+}
+.resource-name.intellect, .resource-name.spent_intellect{
+  background-color: rgba(0, 50, 100, 0.35);
+}
+.resource-name.spent_variable{
+  background-color: rgba(0, 100, 0, 0.4);
+}
+.resource-name.vps{
+  background-color: rgba(0, 0, 0, 0.45);
+  color:rgba(225, 195, 0, 1);
+}
+
+.resource-name.wood.insufficient{
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(0, 100, 0, 0.4),
+    rgba(0, 100, 0, 0.4) 7px,
+    rgba(240, 0, 0, 0.7) 7px,
+    rgba(240, 0, 0, 0.7) 14px
+  );
+}
+.resource-name.ore.insufficient{
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(0, 0, 0, 0.4),
+    rgba(0, 0, 0, 0.4) 7px,
+    rgba(240, 0, 0, 0.7) 7px,
+    rgba(240, 0, 0, 0.7) 14px
+  );
+}
+.resource-name.gold.insufficient{
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(100, 100, 0, 0.4),
+    rgba(100, 100, 0, 0.4) 7px,
+    rgba(240, 0, 0, 0.7) 7px,
+    rgba(240, 0, 0, 0.7) 14px
+  );
+}
+.resource-name.food.insufficient{
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(100, 0, 0, 0.4),
+    rgba(100, 0, 0, 0.4) 7px,
+    rgba(240, 0, 0, 0.7) 7px,
+    rgba(240, 0, 0, 0.7) 14px
+  );
+}
+.resource-name.favor.insufficient{
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(100, 0, 100, 0.35),
+    rgba(100, 0, 100, 0.35) 7px,
+    rgba(240, 0, 0, 0.7) 7px,
+    rgba(240, 0, 0, 0.7) 14px
+  );
+}
+.resource-value {
+  display: inline-block;
+  text-align: center;
+  width:25px;
+  margin-top:0px;
+}
+
+.resource-value.zero {
+}
+.resource-value.insufficient {
+  color: red;
+}
+/*.resource-name.insufficient {
+  border-color: red;
+  border-width: 1px;
+  border-style: solid;
+  
+}*/
+
+.game-log-view {
+  outline: solid black 1px;
+  padding: 2px;
+  flex-basis: 50%;
+  
+  overflow-x: hidden;
+  background-color: white;
+  outline:none;
+  margin-bottom:5px;
+  padding-bottom:5px;
+}
+
+game-log-items {
+}
+
+.game-log-item {
+  background-color: #E0E0E0;
+  padding: 5px;
+  margin: 5px;
+}
+
+.user-name {
+  display:inline-block;
+  font-weight: bold;
+}
+.game-log-item .card-name {
+  font-size: inherit;
+  display:inline-block;
+  font-weight: bold;
+  background-color: #BBBBBB;
+  border-radius: 1px;
+  padding-left:2px;
+  padding-right:2px;
+}
+
+.chat-log-view {
+  outline: solid black 1px;
+  padding: 2px;
+  min-height: 180px;
+  padding-top:4px;
+  background-color: white;
+  outline:none;
+  margin-bottom:4px;
+}
+
+.chat-form {
+  display:inline-block;
+  float:right;
+}
+.chat-form input {
+  width: 185px;
+}
+.chat-log-items {
+  overflow-x: hidden;
+  max-height:158px;
+  width:100%;
+  margin-bottom:5px;
+}
+
+.roll-die-button {
+  margin:2px;
+  margin-left:5px;
+  float:right;
+}
+
+.chat-log-item {
+  background-color: #E0E0E0;
+  padding: 5px;
+  margin: 5px;
+}
+.chat-log-item.die-roll {
+  background-color: #FF9999;
+  background-color: rgba(0,0,255,.25);
+}
+.chat-log-item .user-name {
+  font-weight: bold;
+}
+
+.game-log-item, .chat-log-item {
+  font-size:15px;
+}
+.draft-text {
+  color: white;
+  font-size: 12px;
+  text-align: center;
+}
+.draft-text.highlight {
+  color: rgba(255, 255, 120, 1);
+  font-weight: bold;
+  font-size: 13px;
+}
+.card-note {
+  color: white;
+  font-size: 12px;
+  text-align: center;
+  
+}
+
+/* Informative Highlighting */
+
+.hand-and-deck-view.god-power-phase, 
+.global-area-view.planning-phase, 
+.global-area-view.mobilization-phase,
+.global-area-view.resolution-phase  {
+  /*background-color:rgba(190,60,10,1);*/
+  /*border: solid 2px rgba(200,70,30,1);*/
+  /*-webkit-box-shadow: inset 0 0 20px black;
+    -moz-box-shadow: inset 0 0 20px black;
+    box-shadow: inset 0 0 20px black;
+    -webkit-transition: .75s; 
+    transition: .75s;*/
+}
+
+/* Lobby css */
+.login-container {
+  font-size:20px;
+  margin: 0 auto;
+  width: 500px;
+  height: 100px;
+  margin-top:7%;
+  padding:10px;
+  background-color: rgba(100, 100, 100, .3)
+}
+.login-username-form {
+  margin:20px;
+}
+.login-username-input {
+  font-size:20px;
+  font-weight: lighter;
+}
+.lobby-button {
+  font-size:20px;
+  padding:5px;
+  float:right;
+  color:white;
+  border: none;
+  outline:none;
+  background-color: rgba(80, 80, 80, 1);
+  border-radius:5px;
+}
+.lobby-button:active {
+  background-color: rgba(40, 40, 40, 1);
+}
+.lobby-button.login-button {
+  background-color: rgba(90, 90, 200, 1);
+}
+.lobby-button.login-button:active {
+  background-color: rgba(50, 50, 160, 1);
+}
+.lobby-button.create-lobby-button {
+  background-color: rgba(60, 200, 80, 1);
+}
+.lobby-button.create-lobby-button:active {
+  background-color: rgba(20, 160, 40, 1);
+}
+.lobby-button.start-game-button {
+  background-color: rgba(60, 200, 80, 1);
+}
+.lobby-button.start-game-button:active {
+  background-color: rgba(20, 160, 40, 1);
+}
+.lobby-button.add-bot-button {
+  float:none;
+  font-size:15px;
+}
+.lobby-god-info {
+  margin: 5px;
+  padding: 5px;
+  width: 70%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+  background: rgba(70,90,110,1);
+  margin-left: auto;
+  margin-right: auto;
+}
+.lobby-god-info-descriptor-item {
+  padding: 5px;
+  position:relative;
+  width: 60%;
+  background: rgba(90,110,170,1);
+  margin-left: auto;
+  margin-right: auto;
+}
+.lobby-god-info-abilities-item {
+  margin: 5px;
+  padding: 5px;
+  width: 15%;
+  background: rgba(90,110,170,1);
+  margin-left: auto;
+  margin-right: auto;
+}
+.lobby-god-info-abilities {
+  margin: 5px;
+  padding: 5px;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  text-align: left;
+  margin-left: auto;
+  margin-right: auto;
+}
+.lobby-god-info-buildings {
+  margin: 5px;
+  padding: 5px;
+  width: 100%;
+  text-align: left;
+  margin-left: auto;
+  margin-right: auto;
+}
+.lobby-god-info-buildings-item {
+  margin: 5px;
+  padding: 5px;
+  width: 100%;
+  background: rgba(10,110,170,1);
+  margin-left: auto;
+  margin-right: auto;
+}
+.home-container {
+  font-size:20px;
+  margin: 0 auto;
+  width: 500px;
+  height: 100px;
+  margin-top:7%;
+  padding:10px;
+  background-color: rgba(100, 100, 100, .3)
+}
+.lobby-container {
+  font-size:20px;
+  margin: 0 auto;
+  width: 500px;
+  min-height: 100px;
+  margin-top:7%;
+  padding:10px;
+  background-color: rgba(100, 100, 100, .3)
+}
+.lobby-player-list{
+  margin-left:30px;
+  list-style-type:disc;
+}
+
+/* Ribbon styling */
+
+.ribbon {
+ font-size: 23px !important;
+ /* This ribbon is based on a 16px font side and a 24px vertical rhythm. I've used em's to position each element for scalability. If you want to use a different font size you may have to play with the position of the ribbon elements */
+
+ width: 50%;
+    
+ position: relative;
+ text-align: center;
+ background: rgba(90,110,170,1);
+ color: #fff;
+ font-size:30px;
+ padding: 1em 2em; /* Adjust to suit */
+ margin: 2em auto 3em; /* Based on 24px vertical rhythm. 48px bottom margin - normally 24 but the ribbon 'graphics' take up 24px themselves so we double it. */
+}
+.ribbon:before, .ribbon:after {
+ content: "";
+ position: absolute;
+ display: block;
+ bottom: -1em;
+ border: 1.5em solid rgba(60,70,110,1);
+ z-index: -1;
+}
+.ribbon:before {
+ left: -2em;
+ border-right-width: 1.5em;
+ border-left-color: transparent;
+}
+.ribbon:after {
+ right: -2em;
+ border-left-width: 1.5em;
+ border-right-color: transparent;
+}
+.ribbon .ribbon-content:before, .ribbon .ribbon-content:after {
+ content: "";
+ position: absolute;
+ display: block;
+ border-style: solid;
+ border-color: rgba(60,70,110,1) transparent transparent transparent;
+ bottom: -1em;
+}
+.ribbon .ribbon-content:before {
+ left: 0;
+ border-width: 1em 0 0 1em;
+}
+.ribbon .ribbon-content:after {
+ right: 0;
+ border-width: 1em 1em 0 0;
+}
+
+/*TABS*/
+.tabs-switcher {
+  margin-left:5px;
+  margin-right:5px;
+  margin-bottom: -5px;
+
+}
+.tab {
+  border:none;
+  background-color:rgba(10, 10, 40, 0.8);
+  color:rgb(230,230,230);
+  padding:5px;
+  padding-left:15px;
+  padding-right:15px;
+  bottom:0;
+  vertical-align: bottom;
+}
+.tab:hover {
+  background-color:rgba(20, 20, 55, 0.8);
+}
+.tabs-panel {
+  display: none;
+  margin-top: 0;
+}
+.tabs-panel_selected {
+  display: block;
+}
+.tab + .tab {
+  /*margin-left: .5em;*/
+  border-left:1px solid rgba(10, 10, 30, 1);
+}
+.tab_selected {
+  text-decoration: none;
+  color: white;
+  font-weight: bold;
+  padding:7px;
+  background-color:rgba(30, 30, 70, 0.8);
+  padding-left:15px;
+  padding-right:15px;
+}
+.tab_selected:hover{
+  background-color:rgba(30, 30, 70, 0.8);
+}
+.tab-god_name {
+  color:rgb(210,210,210);
+  font-weight: normal;
+  padding-left:5px;
+}
+.tab, .tab_selected {
+  outline:none;
+}
+
+.my-gps-tab > div > .tabs-switcher{
+  color:black;
+  font-weight:normal;
+  
+  display:flex;
+}
+.my-gps-tab > div > .tabs-switcher > .tab {
+  border:none;
+  background-color: rgba(255, 255, 255, 0);
+  margin:auto;
+  color:rgb(40,40,40);
+  height:100%;
+  padding:0;
+  padding-top:5px;
+  font-size:12px;
+  background-color:rgba(255, 255, 255, 0.1);
+  width:50%;
+  margin-bottom:2px;
+  padding-top:3px;
+
+}
+.my-gps-tab > div > .tabs-switcher > .tab + .tab
+{
+  margin-left:3px;
+}
+.my-gps-tab > div > .tabs-switcher > .tab:hover {
+  color:rgb(20,20,20);
+  background-color:rgba(255, 255, 255, 0.15);
+
+}
+.my-gps-tab > div > .tabs-switcher > .tab_selected {
+  color:black;
+  margin-bottom:0px;
+  padding-top:5px;
+  background-color:rgba(255, 255, 255, 0.2);
+  font-weight: normal;
+}
+.my-gps-tab > div > .tabs-switcher > .tab_selected:hover {
+  background-color:rgba(255, 255, 255, 0.2);
+}
+
+
+
+
