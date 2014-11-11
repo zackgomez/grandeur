@@ -4,24 +4,15 @@ var ActionTypes = require('./ActionTypes');
 var invariant_violation = require('./invariant_violation');
 var invariant = require('./invariant');
 var _ = require('underscore');
-var fs = require('fs');
+var Colors = require('./Colors');
 
-var TURNS_PER_AGE = 8;
+var CARDS_PER_LEVEL = 4;
 
-var Colors = {
-  RED: 'red',
-  BLUE: 'blue',
-  GREEN: 'green',
-  BLACK: 'black',
-  WHITE: 'white',
-  JOKER: 'joker',
-};
-
-function Card(id, level, color, costs) {
+function Card(id, level, color, cost) {
   this.id = id;
   this.level = level;
   this.color = color;
-  this.costs = costs;
+  this.cost = cost;
 
   return this;
 }
@@ -30,7 +21,7 @@ Card.prototype.toJSON = function() {
     id: this.id,
     level: this.level,
     color: this.color,
-    costs: this.costs,
+    cost: this.cost,
   };
 };
 
@@ -53,9 +44,17 @@ Deck.prototype.drawOne = function() {
   }
   return null;
 };
+Deck.prototype.drawN = function(n) {
+  var cards = [];
+  _.times(Math.min(n, this.count()), function(n) {
+    cards.push(this.cards_.pop());
+  });
+  return cards;
+};
 Deck.prototype.drawAll = function() {
   var ret = this.cards_;
   this.cards_ = [];
+  ret.reverse();
   return ret;
 };
 Deck.prototype.toJSON = function() {
@@ -69,6 +68,7 @@ function Player(userID) {
 
   this.hand = [];
   this.board = [];
+  this.nobles = [];
   this.chips = {};
 
   return this;
@@ -81,6 +81,7 @@ Player.prototype.toJSON = function () {
     userID: this.userID_,
     hand: this.hand,
     board: this.board,
+    nobles: this.nobles,
     chips: this.chips,
   };
 };
@@ -91,6 +92,15 @@ function Game(players) {
 
   this.lastCardID_ = 100;
   this.cardsByID_ = {};
+
+  this.decks_ = _.times(3, function(n) {
+    return new Deck();
+  });
+  this.boards_ = _.times(3, function(n) {
+    return [];
+  });
+  this.nobles_ = [];
+  this.chipSupply_ = {};
 
   this.turn_ = 0;
 
@@ -115,10 +125,9 @@ Game.prototype.getPlayerByID = function(userID) {
   });
 };
 Game.prototype.spawnCard = function(card_def) {
-  invariant_violation('unimplemented');
-  var card = new Card(this.lastCardID_, card_def.name, card_def.type, card_def.cost, card_def.ages, card_def.effect);
+  var card = new Card(this.lastCardID_, card_def.level, card_def.color, card_def.cost);
   this.lastCardID_ += 1;
-  this.cardsByID_[card.getID()] = card;
+  this.cardsByID_[card.id] = card;
   return card;
 };
 
@@ -128,6 +137,22 @@ Game.prototype.bumpSequenceID = function() {
 
 Game.prototype.setUpGame = function() {
   this.gameStartTimestamp_ = Date.now();
+
+  _.each(this.decks_, function(deck, n) {
+    deck.shuffle();
+    this.boards_[n] = deck.drawN(CARDS_PER_LEVEL);
+  }, this);
+
+
+  var playerCountToChipCount = {
+    2: 4,
+    3: 5,
+    4: 7,
+  }
+  _.each(Colors, function(color) {
+    this.chipSupply_[color] = color === Colors.JOKER ?
+      5 : playerCountToChipCount[this.players_.length];
+  }, this);
 };
 
 Game.prototype.addActionHelper = function(action) {
@@ -166,6 +191,11 @@ Game.prototype.toJSON = function() {
     id: this.id_,
     sequenceID: this.sequenceID_,
     turn: this.turn_,
+
+    decks: _.invoke(this.decks_, 'toJSON'),
+    boards: this.boards_,
+    nobles: this.nobles_,
+    chipSupply: this.chipSupply_,
 
     players: _.invoke(this.players_, 'toJSON'),
     currentPlayerID: this.currentPlayerID_,

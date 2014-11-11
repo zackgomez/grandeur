@@ -52,9 +52,7 @@ var createApi = function(cb) {
       return;
     }
 
-    var start_time = Date.now();
     var serialized = game.toJSON();
-    console.log('serialization time ', Date.now() - start_time);
     res.send(serialized);
   });
   
@@ -66,7 +64,6 @@ var createApi = function(cb) {
       return;
     }
     var action = req.param('action');
-    console.log('add action', action);
     game.addAction(action);
     if (req.param('includeGameState')) {
       res.send(game.toJSON());
