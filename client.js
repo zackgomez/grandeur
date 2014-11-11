@@ -228,13 +228,11 @@ var GamePage = React.createClass({
   componentWillMount: function() {
     if (typeof window !== 'undefined') {
       this.props.session.GameStore().addListener(this.onGameStateChange);
-      HoverCardStore.addListener(this.onHoverCardChange);
     }
   },
   componentWillUnmount: function() {
     if (typeof window !== 'undefined') {
       this.props.session.GameStore().removeListener(this.onGameStateChange);
-      HoverCardStore.removeListener(this.onHoverCardChange);
     }
   },
 
