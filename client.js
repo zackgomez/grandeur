@@ -154,6 +154,20 @@ var NobleSupplyView = React.createClass({
   },
 });
 
+var DeckView = React.createClass({
+  render: function() {
+    var dots = _.times(this.props.level, function() {
+      return <span className="level-dot" />;
+    });
+    return (
+      <div className={'deck level-' + this.props.level}>
+        {this.props.size}
+        <div className="level-dots">{dots}</div>
+      </div>
+    );
+  },
+});
+
 var DraftingView = React.createClass({
   render: function() {
     var game = this.props.game;
@@ -171,11 +185,12 @@ var DraftingView = React.createClass({
       }, this);
       return (
         <div key={i} className="drafting-level">
-          <div className="deck-size">{game.decks[i].cards.length}</div>
+          <DeckView level={i+1} size={game.decks[i].cards.length} />
           <div className="drafting-cards">{cards}</div>
         </div>
       );
     }, this);
+    levels.reverse();
     return (
       <div className="drafting-view">
         <NobleSupplyView session={this.props.session} game={this.props.game} />
