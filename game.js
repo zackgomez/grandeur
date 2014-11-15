@@ -89,7 +89,7 @@ Player.prototype.toJSON = function () {
 
 function Game(players) {
   this.id_ = _.uniqueId('game_');
-  this.players_ = players;
+  this.players_ = _.shuffle(players);
 
   this.lastCardID_ = 100;
   this.cardsByID_ = {};
@@ -159,8 +159,12 @@ Game.prototype.setUpGame = function() {
   }
   _.each(Colors, function(color) {
     this.chipSupply_[color] = color === Colors.JOKER ?
-      5 : playerCountToChipCount[this.players_.length];
+      5 : (playerCountToChipCount[this.players_.length] || 7);
   }, this);
+  console.log('player to chip count', playerCountToChipCount, this.players_.length);
+  console.log('chips supply', this.chipSupply_);
+
+  this.currentPlayerID_ = this.players_[0].getID();
 };
 
 Game.prototype.addActionHelper = function(action) {

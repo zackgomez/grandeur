@@ -8,6 +8,7 @@ var Colors = {
   JOKER: 'joker',
 };
 
+/*
 Colors.prototype.Ordering = [
   Colors.WHITE,
   Colors.BLUE,
@@ -16,5 +17,6 @@ Colors.prototype.Ordering = [
   Colors.BLACK,
   Colors.JOKER,
 ];
+*/
 
 module.exports = Colors;

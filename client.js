@@ -21,6 +21,8 @@ var NotFound    = ReactRouter.NotFound;
 var Link        = ReactRouter.Link;
 var GameStore = require('./GameStore');
 var Immutable = require('immutable');
+var Colors = require('./Colors');
+
 
 var navigateToHref = function(href, cb) {
   cb = cb || function() {};
@@ -86,6 +88,27 @@ var Card = React.createClass({
   },
 });
 
+var ChipView = React.createClass({
+  render: function() {
+    return <span className="chip">{this.props.color}: </span>
+  },
+});
+
+var ChipSupplyView = React.createClass({
+  render: function() {
+    var chips = _.map(Colors, function (color) {
+      return <div key={color} className={'chip-pile ' + color}>
+        <ChipView color={color} />{this.props.game.chipSupply[color]}
+      </div>;
+    }, this);
+    return (
+      <div className="chip-supply">
+        {chips}
+      </div>
+    );
+  },
+});
+
 var DraftingView = React.createClass({
   render: function() {
     var game = this.props.game;
@@ -110,7 +133,10 @@ var DraftingView = React.createClass({
     }, this);
     return (
       <div className="drafting-view">
-        {levels}
+        <div className="drafting-levels">
+          {levels}
+        </div>
+        <ChipSupplyView session={this.props.session} game={this.props.game} />
       </div>
     );
   },
