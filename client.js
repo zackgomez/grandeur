@@ -71,7 +71,13 @@ var Card = React.createClass({
   },
   render: function() {
     var card = this.props.card;
-    var cost = card.cost;
+    var costs = [];
+    _.each(Colors, function(color) {
+      var color_cost = card.cost[color];
+      if (!color_cost) { return; }
+      costs.push(<div key={color} className={'color-cost ' + color}>{color_cost}</div>);
+    });
+    console.log('rendering card', card);
     return (
       <div className={'card card-color-'+this.props.card.color}
         onMouseEnter={this.handleMouseEnter} 
@@ -79,18 +85,25 @@ var Card = React.createClass({
         onClick={this.handleClick}
         onDoubleClick={this.handleDoubleClick}
         >
-        <div className="card-cost">{cost}</div>
-        <div className="card-points">{card.points || null}</div>
-        <div className="card-color">{card.color}</div>
-        <div className="card-level">{card.level}</div>
+        <div className="card-header">
+          <div className="card-points">{card.points || null}</div>
+          <GemView color={card.color} />
+        </div>
+        <div className="card-cost">{costs}</div>
       </div>
     );
   },
 });
 
+var GemView = React.createClass({
+  render: function() {
+    return <span className={'gem gem-'+this.props.color}></span>;
+  },
+});
+
 var ChipView = React.createClass({
   render: function() {
-    return <span className="chip">{this.props.color}: </span>
+    return <span className={'chip ' + this.props.color} />;
   },
 });
 
@@ -98,7 +111,7 @@ var ChipSupplyView = React.createClass({
   render: function() {
     var chips = _.map(Colors, function (color) {
       return <div key={color} className={'chip-pile ' + color}>
-        <ChipView color={color} />{this.props.game.chipSupply[color]}
+        <ChipView color={color} /><span className="chip-count">{this.props.game.chipSupply[color]}</span>
       </div>;
     }, this);
     return (
@@ -112,7 +125,6 @@ var ChipSupplyView = React.createClass({
 var NobleView = React.createClass({
   render: function() {
     var noble = this.props.noble;
-    console.log('rendering noble', noble);
     var costs = [];
     _.each(Colors, function(color) {
       var color_cost = noble.cost[color];

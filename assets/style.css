@@ -78,42 +78,80 @@ div span body p h1 h2 h3 h4 h5 h6 button input form {
   margin-right:425px;
 }
 
-.state-buttons{
-  outline:none;
-  padding:5px;
-  float:right;
-  border: none;
-  background-color: rgba(165, 165, 165, 1);
-  border-radius:5px;
-  clear:right;
-  font-size:10px;
-  margin:2px;
-}
-.state-buttons button:active {
-  background-color: rgba(125, 125, 125, 1);
-}
-.pile {
-  padding: 5px;
-  padding-right: 10px;
-  padding-left: 10px;
-  margin: 5px;
-  background-color:rgba(255, 255, 255, 0.2);
-}
-
-.pile-cards {
-  display: flex;
-  flex-wrap: wrap;
-}
-
-.deck {
+.card {
+  background-color:#EEEEEE;
+  border: solid black 1px;
+  border-radius: 5px;
   display: inline-block;
-  padding: 10px;
+  padding: 6px;
+  margin: 5px;
+  width: 80px;
+  height: 110px;
+  box-shadow: 1px 1px 2px #333333;
   -webkit-user-select: none; /* Chrome/Safari */        
   -moz-user-select: none; /* Firefox */
   -ms-user-select: none; /* IE10+ */
 }
 
-.color-cost {
+/*
+.card.card-color-white {
+}
+// etc...
+*/
+
+.card .card-header {
+  display: flex;
+  justify-content: space-between;
+  border: solid black 1px;
+  padding: 3px;
+  margin-bottom: 2px;
+}
+
+.card .card-points {
+}
+
+span.gem {
+  width: 15px;
+  height: 15px;
+}
+
+.gem-white {
+  background-color: white;
+}
+.gem-black {
+  background-color: black;
+}
+.gem-blue {
+  background-color: blue;
+}
+.gem-green {
+  background-color: green;
+}
+.gem-red {
+  background-color: red;
+}
+
+.card .card-cost {
+  display: flex;
+  flex-direction: column;
+}
+
+.card-cost .color-cost {
+  display: inline-block;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  line-height: 15px;
+  font-size: 14px;
+  color: black;
+  text-align: center;
+  margin-right: 2px;
+  padding-right:1px;
+  font-weight: 300;
+  border: solid white 2px;
+}
+
+.noble-cost .color-cost {
   border-radius: 3px; 
   padding-left: 5px;
   padding-right: 5px;
@@ -123,9 +161,11 @@ div span body p h1 h2 h3 h4 h5 h6 button input form {
   margin-left:0;
   margin-top:0;
   text-align: center;
+  border: solid white 2px;
 }
 .color-cost.white {
   background-color: white;
+  border: solid black 2px;
 }
 .color-cost.black {
   background-color: black;
@@ -173,6 +213,48 @@ div span body p h1 h2 h3 h4 h5 h6 button input form {
   padding-bottom: 1px;
 }
 
+
+.chip-supply {
+  display: flex;
+}
+.chip-pile {
+  display: inline-block;
+  margin-left: 10px;
+}
+.chip-count {
+  font-size: 24px;
+  vertical-align: 50%;
+}
+
+.chip-pile .chip-count {
+  margin-left: 5px;
+}
+
+.chip {
+  display: inline-block;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  border: solid black 1px;
+}
+.chip.white {
+  background-color: white;
+}
+.chip.black {
+  background-color: black;
+}
+.chip.red {
+  background-color: red;
+}
+.chip.blue {
+  background-color: blue;
+}
+.chip.green {
+  background-color: green;
+}
+.chip.joker {
+  background-color: gold;
+}
 
 .game-log-view {
   outline: solid black 1px;

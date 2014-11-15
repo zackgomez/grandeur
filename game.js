@@ -9,11 +9,12 @@ var GameData = require('./GameData');
 
 var CARDS_PER_LEVEL = 4;
 
-function Card(id, level, color, cost) {
+function Card(id, level, color, cost, points) {
   this.id = id;
   this.level = level;
   this.color = color;
   this.cost = cost;
+  this.points = points;
 
   return this;
 }
@@ -23,6 +24,7 @@ Card.prototype.toJSON = function() {
     level: this.level,
     color: this.color,
     cost: this.cost,
+    points: this.points,
   };
 };
 
@@ -126,7 +128,7 @@ Game.prototype.getPlayerByID = function(userID) {
   });
 };
 Game.prototype.spawnCard = function(card_def) {
-  var card = new Card(this.lastCardID_, card_def.level, card_def.color, card_def.cost);
+  var card = new Card(this.lastCardID_, card_def.level, card_def.color, card_def.cost, card_def.points);
   this.lastCardID_ += 1;
   this.cardsByID_[card.id] = card;
   return card;
