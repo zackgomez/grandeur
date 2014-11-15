@@ -109,6 +109,39 @@ var ChipSupplyView = React.createClass({
   },
 });
 
+var NobleView = React.createClass({
+  render: function() {
+    var noble = this.props.noble;
+    console.log('rendering noble', noble);
+    var costs = [];
+    _.each(Colors, function(color) {
+      var color_cost = noble.cost[color];
+      if (!color_cost) { return; }
+      costs.push(<div key={color} className={'color-cost ' + color}>{color_cost}</div>);
+    });
+    return (
+      <div className="noble-tile">
+        <div className="noble-points-container"><div className="noble-points">{noble.points}</div></div>
+        <div className="noble-cost">{costs}</div>
+      </div>
+    );
+  },
+});
+
+var NobleSupplyView = React.createClass({
+  render: function() {
+    console.log('noble supply',  this.props.game.nobles);
+    var nobles = _.map(this.props.game.nobles, function(noble, i) {
+      return <NobleView key={i} noble={noble} />
+    });
+    return (
+      <div className="noble-supply">
+        {nobles}
+      </div>
+    );
+  },
+});
+
 var DraftingView = React.createClass({
   render: function() {
     var game = this.props.game;
@@ -125,7 +158,7 @@ var DraftingView = React.createClass({
         return Card(card_props);
       }, this);
       return (
-        <div className="drafting-level">
+        <div key={i} className="drafting-level">
           <div className="deck-size">{game.decks[i].cards.length}</div>
           <div className="drafting-cards">{cards}</div>
         </div>
@@ -133,6 +166,7 @@ var DraftingView = React.createClass({
     }, this);
     return (
       <div className="drafting-view">
+        <NobleSupplyView session={this.props.session} game={this.props.game} />
         <div className="drafting-levels">
           {levels}
         </div>

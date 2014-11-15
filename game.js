@@ -150,7 +150,7 @@ Game.prototype.setUpGame = function() {
     this.boards_[n] = deck.drawN(CARDS_PER_LEVEL);
   }, this);
 
-  this.nobles_ = _.sample(GameData.Nobles);
+  this.nobles_ = _.sample(GameData.Nobles, this.players_.length + 1);
 
   var playerCountToChipCount = {
     2: 4,
@@ -161,8 +161,6 @@ Game.prototype.setUpGame = function() {
     this.chipSupply_[color] = color === Colors.JOKER ?
       5 : (playerCountToChipCount[this.players_.length] || 7);
   }, this);
-  console.log('player to chip count', playerCountToChipCount, this.players_.length);
-  console.log('chips supply', this.chipSupply_);
 
   this.currentPlayerID_ = this.players_[0].getID();
 };
