@@ -21,6 +21,7 @@ var black = Colors.BLACK;
 var white = Colors.WHITE;
 
 var cards = [
+  /* Level One Cards */
   {level: 1, color: green, points: 0, cost: {white: 1, blue: 1, red: 1, black: 1}},
   {level: 1, color: green, points: 0, cost: {white: 1, blue: 1, red: 1, black: 2}},
   {level: 1, color: green, points: 0, cost: {white: 1, blue: 3, green: 1}},
@@ -39,14 +40,14 @@ var cards = [
   {level: 1, color: blue, points: 0, cost: {white: 1, green: 1, red: 1, black: 1}},
   {level: 1, color: blue, points: 0, cost: {white: 1, green: 1, red: 2, black: 1}},
 
-  {level: 1, color: green, points: 0, cost: {white: 2, blue: 1, green: 1, black: 1}},
-  {level: 1, color: green, points: 0, cost: {white: 1, blue: 1, green: 1, black: 1}},
-  {level: 1, color: green, points: 0, cost: {white: 1, red: 1, black: 3}},
-  {level: 1, color: green, points: 0, cost: {white: 2, green: 1, black: 2}},
-  {level: 1, color: green, points: 0, cost: {blue: 2, green: 1}},
-  {level: 1, color: green, points: 0, cost: {white: 2, red: 2}},
-  {level: 1, color: green, points: 0, cost: {white: 3}},
-  {level: 1, color: green, points: 1, cost: {white: 4}},
+  {level: 1, color: red, points: 0, cost: {white: 2, blue: 1, green: 1, black: 1}},
+  {level: 1, color: red, points: 0, cost: {white: 1, blue: 1, green: 1, black: 1}},
+  {level: 1, color: red, points: 0, cost: {white: 1, red: 1, black: 3}},
+  {level: 1, color: red, points: 0, cost: {white: 2, green: 1, black: 2}},
+  {level: 1, color: red, points: 0, cost: {blue: 2, green: 1}},
+  {level: 1, color: red, points: 0, cost: {white: 2, red: 2}},
+  {level: 1, color: red, points: 0, cost: {white: 3}},
+  {level: 1, color: red, points: 1, cost: {white: 4}},
 
   {level: 1, color: white, points: 0, cost: {blue: 1, green: 1, red: 1, black: 1}},
   {level: 1, color: white, points: 0, cost: {blue: 1, green: 2, red: 1, black: 1}},
@@ -67,7 +68,7 @@ var cards = [
   {level: 1, color: black, points: 1, cost: {green: 4}},
 
 
-
+  /* Level 2 Cards */
   {level: 2, color: black, points: 1, cost: {white: 3, green: 3, black: 2}},
   {level: 2, color: black, points: 1, cost: {white: 3, blue: 2, green: 2}},
   {level: 2, color: black, points: 2, cost: {blue: 1, green: 4, red: 2}},
@@ -103,6 +104,7 @@ var cards = [
   {level: 2, color: green, points: 2, cost: {green: 5}},
   {level: 2, color: green, points: 3, cost: {green: 6}},
 
+  /* Level 3 Cards */
   {level: 3, color: white, points: 3, cost: {blue: 3, green: 3, red: 5, black: 3}},
   {level: 3, color: white, points: 4, cost: {white: 3, red: 3, black: 6}},
   {level: 3, color: white, points: 5, cost: {white: 3, black: 7}},
