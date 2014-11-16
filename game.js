@@ -172,20 +172,45 @@ Game.prototype.addActionHelper = function(action) {
   this.actions_.push(action);
 };
 
-Game.prototype.addAction = function(action) {
+Game.prototype.addAction = function(userID, action) {
+  var player = this.getPlayerByID(userID);
+  if (!player) {
+    console.log('could not find player', userID);
+    return;
+  }
   switch (action.type) {
     case ActionTypes.SEND_CHAT: {
-      var player = this.getPlayerByID(action.payload.userID);
-      if (!player) {
-        console.log('could not find player', action.payload.userID);
-        return;
-      }
       this.messages_.push(
         {
-          user: action.payload.userID,
+          user: userID,
           text: action.payload.text,
         }
       );
+      break;
+    }
+    case ActionTypes.DRAFT_CHIPS: {
+      var chips = action.payload.color_counts;
+      var max_chip_count = 0;
+      var chip_colors_request = _.size(chips.length);
+      if (chip_colors_request === 1) {
+        max_chip_count = 2;
+      } else if (chip_colors_request === 2 || chip_colors_request === 3) {
+        max_chip_count = 1;
+      }
+      var valid_draft = _.all(chips, function(count, color) {
+        if (color === Colors.JOKER) {
+          return count === 0;
+        }
+        return count <= max_chip_count && this.chipSupply_[color] > count;
+      }, this);
+      if (!valid_draft) {
+        console.log('invalid draft: ', chips);
+        throw new Error('invalid chip selection');
+      }
+      // TODO
+      break;
+    }
+    case ActionTypes.DRAFT_CARD: {
       break;
     }
     default:

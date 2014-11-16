@@ -22,6 +22,7 @@ var Link        = ReactRouter.Link;
 var GameStore = require('./GameStore');
 var Immutable = require('immutable');
 var Colors = require('./Colors');
+var invariant = require('./invariant');
 
 
 var navigateToHref = function(href, cb) {
@@ -35,8 +36,20 @@ var GameMutator = {
       gameID,
       ActionTypes.SEND_CHAT,
       {
-        userID: userID,
         text: text,
+      }
+    );
+  },
+  draftChips: function(gameID, colors) {
+    var color_counts = {};
+    _.each(colors, function(color) {
+      color_counts[color] = 1 + (color_counts[color] || 0);
+    });
+    this.sendAction(
+      gameID,
+      ActionTypes.DRAFT_CHIPS,
+      {
+        color_counts: color_counts,
       }
     );
   },
@@ -103,20 +116,95 @@ var GemView = React.createClass({
 
 var ChipView = React.createClass({
   render: function() {
-    return <span className={'chip ' + this.props.color} />;
+    return <span className={'chip ' + this.props.color + (this.props.highlighted ? ' highlighted' : '')} />;
+  },
+});
+
+var ChipSupplyActionsView = React.createClass({
+  onDraft: function() {
+    this.props.onDraftChips && this.props.onDraftChips(this.props.selectedChips);
+  },
+  onDoubleDraft: function() {
+    var selection = this.props.selectedChips;
+    invariant(selection.length === 1);
+    selection = selection.concat(selection[0]);
+    this.props.onDraftChips && this.props.onDraftChips(selection);
+  },
+  onClearSelection: function() {
+    this.props.onClearSelection && this.props.onClearSelection();
+  },
+  render: function() {
+    var game = this.props.game;
+    var selectedChips = this.props.selectedChips || [];
+    var draft_string = 'Draft ...';
+    var draft_two_string = 'Draft 2 ' + (selectedChips.length === 1 ? _.first(selectedChips) : '...');
+    return (
+      <div className="chip-supply-actions">
+        <button
+          disabled={selectedChips.length === 0 || selectedChips.length > 3}
+          onClick={this.onDraft} >
+          {draft_string}
+        </button>
+        <button
+          disabled={selectedChips.length !== 1}
+          onClick={this.onDoubleDraft} >
+          {draft_two_string}
+        </button>
+        <button
+          disabled={_.isEmpty(selectedChips)}
+          onClick={this.onClearSelection} >
+          Clear Selection
+        </button>
+      </div>
+    );
   },
 });
 
 var ChipSupplyView = React.createClass({
+  getInitialState: function() {
+    return {selectedChips: []};
+  },
+  onDraftChips: function(chips) {
+    console.log('would draft', chips);
+    GameMutator.draftChips(this.props.game.id, chips);
+  },
+  onClearSelection: function() {
+    this.setState({selectedChips: []});
+  },
+  onChipClick: function(color) {
+    if (color === Colors.JOKER) {
+      return;
+    }
+    if (_.contains(this.state.selectedChips, color)) {
+      this.setState({selectedChips: _.without(this.state.selectedChips, color)});
+    } else {
+      this.setState({selectedChips: this.state.selectedChips.concat(color)});
+    }
+  },
   render: function() {
     var chips = _.map(Colors, function (color) {
-      return <div key={color} className={'chip-pile ' + color}>
-        <ChipView color={color} /><span className="chip-count">{this.props.game.chipSupply[color]}</span>
-      </div>;
+      var onClickFunc = _.partial(this.onChipClick, color);
+      return (
+        <div key={color}
+             className={'chip-pile ' + color}
+             onClick={onClickFunc} >
+          <ChipView color={color}
+                    highlighted={_.contains(this.state.selectedChips, color)} />
+          <span className="chip-count">{this.props.game.chipSupply[color]}</span>
+        </div>
+      );
     }, this);
     return (
       <div className="chip-supply">
-        {chips}
+        <div className="chip-piles">
+          {chips}
+        </div>
+        <ChipSupplyActionsView
+          session={this.props.session}
+          selectedChips={this.state.selectedChips}
+          onDraftChips={this.onDraftChips}
+          onClearSelection={this.onClearSelection}
+          />
       </div>
     );
   },

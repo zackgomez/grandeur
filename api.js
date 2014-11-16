@@ -57,6 +57,7 @@ var createApi = function(cb) {
   });
   
   app.post('/game/:game_id/add_action', ensureAuthorized, function(req, res, next) {
+    var user_id = req.user.getID();
     var game_id = req.param('game_id');
     var game = gameByID[game_id];
     if (!game) {
@@ -64,7 +65,7 @@ var createApi = function(cb) {
       return;
     }
     var action = req.param('action');
-    game.addAction(action);
+    game.addAction(user_id, action);
     if (req.param('includeGameState')) {
       res.send(game.toJSON());
     } else {

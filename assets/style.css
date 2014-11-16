@@ -268,12 +268,21 @@ span.gem {
   margin-left: 5px;
 }
 
+.chip-supply-actions {
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
 .chip {
   display: inline-block;
   border-radius: 50%;
   width: 40px;
   height: 40px;
   border: solid black 1px;
+}
+.chip.highlighted {
+  box-shadow: 0px 0px 20px #64D2F0;
 }
 .chip.white {
   background-color: white;
