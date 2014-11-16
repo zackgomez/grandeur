@@ -140,6 +140,11 @@ Game.prototype.bumpSequenceID = function() {
 
 Game.prototype.setUpGame = function() {
   this.gameStartTimestamp_ = Date.now();
+  _.each(this.players_, function(player) {
+    _.each(Colors, function(color) {
+      player.chips[color] = 0;
+    });
+  });
 
   _.each(GameData.Cards, function(card_def) {
     var i = card_def.level - 1;
@@ -164,13 +169,50 @@ Game.prototype.setUpGame = function() {
       5 : (playerCountToChipCount[this.players_.length] || 7);
   }, this);
 
-  this.currentPlayerID_ = this.players_[0].getID();
+  this.currentPlayerIndex_ = this.players_.length - 1;
+  this.nextTurn();
 };
 
-Game.prototype.addActionHelper = function(action) {
+Game.prototype.nextTurn = function() {
+  this.currentPlayerIndex_ = (this.currentPlayerIndex_ + 1) % this.players_.length;
+
+  if (this.currentPlayerIndex_ === 0) {
+    this.turn_ += 1;
+    // TODO check for win condition
+  }
+
+  var currentPlayer = this.players_[this.currentPlayerIndex_];
+  this.addActionHelper(currentPlayer.getID(), {
+    type: ActionTypes.START_TURN,
+    payload: {},
+  });
+};
+
+Game.prototype.addActionHelper = function(userID, action) {
   action.timestamp = Date.now();
+  action.userID = userID;
   this.actions_.push(action);
 };
+
+var isValidChipSelection = function(color_counts, supply) {
+  var num_colors = _.size(color_counts);
+  if (color_counts[Colors.JOKER] > 0) {
+    return false;
+  }
+  if (num_colors <= 0 || num_colors > 3) {
+    return false;
+  }
+  // handle double chip draft
+  var first_count = _.head(_.values(color_counts));
+  if (num_colors == 1 && first_count == 2) {
+    return supply[_.keys(color_counts)[0]] >= 4;
+  }
+
+  // must be single chip draft and have enough resources
+  return _.all(color_counts, function(count, color) {
+    return supply[color] >= count;
+  });
+}
 
 Game.prototype.addAction = function(userID, action) {
   var player = this.getPlayerByID(userID);
@@ -190,27 +232,53 @@ Game.prototype.addAction = function(userID, action) {
     }
     case ActionTypes.DRAFT_CHIPS: {
       var chips = action.payload.color_counts;
-      var max_chip_count = 0;
-      var chip_colors_request = _.size(chips.length);
-      if (chip_colors_request === 1) {
-        max_chip_count = 2;
-      } else if (chip_colors_request === 2 || chip_colors_request === 3) {
-        max_chip_count = 1;
-      }
-      var valid_draft = _.all(chips, function(count, color) {
-        if (color === Colors.JOKER) {
-          return count === 0;
-        }
-        return count <= max_chip_count && this.chipSupply_[color] > count;
-      }, this);
+      var valid_draft = isValidChipSelection(chips, this.chipSupply_);
       if (!valid_draft) {
         console.log('invalid draft: ', chips);
         throw new Error('invalid chip selection');
       }
-      // TODO
+
+      _.each(chips, function(count, color) {
+        player.chips[color] += count;
+        this.chipSupply_[color] -= count;
+      }, this);
+      // TODO deal with chip overflow
+      this.nextTurn();
       break;
     }
-    case ActionTypes.DRAFT_CARD: {
+    case ActionTypes.RESERVE_CARD: {
+      var level = action.payload.level;
+      var cardID = action.payload.cardID;
+      if (!_.contains([1, 2, 3], level)) {
+        throw new Error('invalid level');
+      }
+      if (player.hand.length >= 3) {
+        throw new Error('not enough hand space');
+      }
+      var deck = this.decks_[level - 1];
+      var drafted_card = null;
+      if (!cardID) {
+        if (!deck.count()) {
+          throw new Error('not enough cards to draft from deck');
+        }
+        drafted_card = deck.drawOne();
+      } else {
+        var card = _.find(this.boards_[level - 1], function(card, i) {
+          return card.id === cardID;
+        });
+        if (!card) {
+          throw new Error('card not found');
+        }
+        drafted_card = card;
+        var index = _.indexOf(this.boards_[level - 1], card);
+        this.boards_[level - 1][index] = deck.drawOne();
+      }
+      player.hand.push(drafted_card);
+      if (this.chipSupply_[Colors.JOKER] > 0) {
+        player.chips[Colors.JOKER] += 1;
+        this.chipSupply_[Colors.JOKER] -= 1;
+      }
+      this.nextTurn();
       break;
     }
     default:
@@ -218,7 +286,7 @@ Game.prototype.addAction = function(userID, action) {
       return;
   }
   if (action.type !== ActionTypes.SEND_CHAT) {
-    this.addActionHelper(action);
+    this.addActionHelper(userID, action);
   }
   this.bumpSequenceID();
 };
@@ -235,7 +303,7 @@ Game.prototype.toJSON = function() {
     chipSupply: this.chipSupply_,
 
     players: _.invoke(this.players_, 'toJSON'),
-    currentPlayerID: this.currentPlayerID_,
+    currentPlayerIndex: this.currentPlayerIndex_,
 
     lastCardID: this.lastCardID_,
     cardsByID: this.cardsByID_,

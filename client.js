@@ -40,6 +40,35 @@ var GameMutator = {
       }
     );
   },
+  buildHandCard: function(gameID, cardID) {
+    this.sendAction(
+      gameID,
+      ActionTypes.BUILD_HAND_CARD,
+      {
+        cardID: cardID,
+      }
+    );
+  },
+  buildTableCard: function(gameID, level, cardID) {
+    this.sendAction(
+      gameID,
+      ActionTypes.BUILD_TABLE_CARD,
+      {
+        level: level,
+        cardID: cardID,
+      }
+    );
+  },
+  reserveCard: function(gameID, level, cardID) {
+    this.sendAction(
+      gameID,
+      ActionTypes.RESERVE_CARD,
+      {
+        level: level,
+        cardID: cardID,
+      }
+    );
+  },
   draftChips: function(gameID, colors) {
     var color_counts = {};
     _.each(colors, function(color) {
@@ -90,9 +119,8 @@ var Card = React.createClass({
       if (!color_cost) { return; }
       costs.push(<div key={color} className={'color-cost ' + color}>{color_cost}</div>);
     });
-    console.log('rendering card', card);
     return (
-      <div className={'card card-color-'+this.props.card.color}
+      <div className={'card card-color-'+this.props.card.color + (this.props.highlighted ? ' highlighted' : '')}
         onMouseEnter={this.handleMouseEnter} 
         onMouseLeave={this.handleMouseLeave}
         onClick={this.handleClick}
@@ -160,12 +188,26 @@ var ChipSupplyActionsView = React.createClass({
   },
 });
 
+var ChipPileView = React.createClass({
+  render: function() {
+    var color = this.props.color;
+    return (
+      <div key={color}
+           className={'chip-pile ' + color}
+           onClick={this.props.onClick} >
+        <ChipView color={color}
+                  highlighted={this.props.highlighted} />
+        <span className="chip-count">{this.props.count}</span>
+      </div>
+    );
+  },
+});
+
 var ChipSupplyView = React.createClass({
   getInitialState: function() {
     return {selectedChips: []};
   },
   onDraftChips: function(chips) {
-    console.log('would draft', chips);
     GameMutator.draftChips(this.props.game.id, chips);
   },
   onClearSelection: function() {
@@ -185,13 +227,13 @@ var ChipSupplyView = React.createClass({
     var chips = _.map(Colors, function (color) {
       var onClickFunc = _.partial(this.onChipClick, color);
       return (
-        <div key={color}
-             className={'chip-pile ' + color}
-             onClick={onClickFunc} >
-          <ChipView color={color}
-                    highlighted={_.contains(this.state.selectedChips, color)} />
-          <span className="chip-count">{this.props.game.chipSupply[color]}</span>
-        </div>
+        <ChipPileView
+          key={color}
+          color={color}
+          highlighted={_.contains(this.state.selectedChips, color)}
+          count={this.props.game.chipSupply[color]}
+          onClick={onClickFunc}
+          />
       );
     }, this);
     return (
@@ -230,7 +272,6 @@ var NobleView = React.createClass({
 
 var NobleSupplyView = React.createClass({
   render: function() {
-    console.log('noble supply',  this.props.game.nobles);
     var nobles = _.map(this.props.game.nobles, function(noble, i) {
       return <NobleView key={i} noble={noble} />
     });
@@ -248,32 +289,111 @@ var DeckView = React.createClass({
       return <span className="level-dot" />;
     });
     return (
-      <div className={'deck level-' + this.props.level}>
-        {this.props.size}
+      <div
+        className={'deck level-' + this.props.level + (this.props.highlighted ? ' highlighted' : '')}
+        onClick={this.props.onClick}
+      >
+        <div className="deck-size">{this.props.size}</div>
         <div className="level-dots">{dots}</div>
       </div>
     );
   },
 });
 
+var DraftingActionsView = React.createClass({
+  render: function() {
+    var game = this.game;
+    var has_selection = _.contains([1, 2, 3], this.props.selectedLevel);
+    var has_card_selection = has_selection && this.props.selectedCardID;
+    var selected_object_string = '...';
+    if (has_card_selection) {
+      selected_object_string = ' level ' + this.props.selectedLevel + ' card';
+    } else if (has_selection) {
+      selected_object_string = ' random level ' + this.props.selectedLevel + ' card';
+    }
+    return (
+      <div className="drafting-action-view">
+        <button
+          disabled={!has_card_selection}
+          onClick={this.props.onBuildCard}
+        >
+          Build {selected_object_string}
+        </button>
+        <button
+          disabled={!has_selection}
+          onClick={this.props.onReserveCard}
+        >
+          Reserve {selected_object_string}
+        </button>
+      </div>
+    );
+  },
+});
+
 var DraftingView = React.createClass({
+  getInitialState: function() {
+    return {
+      selectedLevel:null,
+      selectedCardID:null,
+    };
+  },
+  setSelection: function(level, cardID) {
+    this.setState({
+      selectedLevel: level,
+      selectedCardID: cardID,
+    });
+  },
+  onDeckClick: function(level) {
+    if (this.state.selectedLevel === level && this.state.selectedCardID === null) {
+      this.setSelection(null, null);
+    } else {
+      this.setSelection(level, null);
+    }
+  },
+  onCardClick: function(card, level) {
+    if (this.state.selectedCardID === card.id) {
+      this.setSelection(null, null);
+    } else {
+      this.setSelection(level, card.id);
+    }
+  },
+  onCardDoubleClick: function(card) {
+  },
+  onBuildCard: function() {
+    GameMutator.buildTableCard(this.props.game.id, this.state.selectedLevel, this.state.selectedCardID);
+    this.setSelection(null, null);
+  },
+  onReserveCard: function() {
+    GameMutator.reserveCard(this.props.game.id, this.state.selectedLevel, this.state.selectedCardID);
+    this.setSelection(null, null);
+  },
   render: function() {
     var game = this.props.game;
     var levels = _.map(game.boards, function(board, i) {
+      var level = i + 1;
       var cards = _.map(board, function(card) {
+        var onCardClick = _.partial(this.onCardClick, card, level);
         var card_props = {
           card:card,
           key:card.id,
-          onClick:this.props.onCardClick,
-          onDoubleClick:this.props.onCardDoubleClick,
+          onClick:onCardClick,
+          onDoubleClick:this.onCardDoubleClick,
           onCardEnter:this.onCardEnter,
           onCardLeave:this.onCardLeave,
+          highlighted:(this.state.selectedCardID === card.id),
         };
         return Card(card_props);
       }, this);
+      var is_deck_selected = this.state.selectedLevel === level && !this.state.selectedCardID;
+      var onDeckClick = _.partial(this.onDeckClick, level);
       return (
         <div key={i} className="drafting-level">
-          <DeckView level={i+1} size={game.decks[i].cards.length} />
+          <DeckView
+            level={level}
+            size={game.decks[i].cards.length}
+            highlighted={is_deck_selected}
+            onClick={onDeckClick}
+          />
           <div className="drafting-cards">{cards}</div>
         </div>
       );
@@ -282,10 +402,91 @@ var DraftingView = React.createClass({
     return (
       <div className="drafting-view">
         <NobleSupplyView session={this.props.session} game={this.props.game} />
-        <div className="drafting-levels">
-          {levels}
+        <div className="card-area">
+          <div className="drafting-levels">
+            {levels}
+          </div>
+          <DraftingActionsView
+            game={this.props.game}
+            selectedLevel={this.state.selectedLevel}
+            selectedCardID={this.state.selectedCardID}
+            onBuildCard={this.onBuildCard}
+            onReserveCard={this.onReserveCard}
+          />
         </div>
         <ChipSupplyView session={this.props.session} game={this.props.game} />
+      </div>
+    );
+  },
+});
+
+var PlayerView = React.createClass({
+  render: function() {
+    var player = this.props.game.players[this.props.playerIndex];
+    var chip_views = _.map(Colors, function(color) {
+      return <ChipPileView
+        key={color}
+        color={color}
+        count={player.chips[color] || 0}
+      />;
+    });
+    return (
+      <div className="player-view">
+        <div className="player-name">{player.userID}</div>
+        <PlayerHandView
+          session={this.props.session}
+          game={this.props.game}
+          playerIndex={this.props.playerIndex}
+        />
+        <div className="player-chips">
+          {chip_views}
+        </div>
+      </div>
+    );
+  },
+});
+
+var PlayerHandView = React.createClass({
+  getInitialState: function() {
+    return {
+      selectedCardID: null,
+    };
+  },
+  onCardClick: function(card) {
+                 console.log('player hand card click', card);
+    if (this.state.selectedCardID === card.id) {
+      this.setState({selectedCardID: null});
+    } else {
+      this.setState({selectedCardID: card.id});
+    }
+  },
+  onBuildCard: function() {
+    GameMutator.buildHandCard(this.props.game.id, this.state.selectedCardID);
+    this.setState({selectedCardID: null});
+  },
+  render: function() {
+    var player = this.props.game.players[this.props.playerIndex];
+    var cards = _.map(player.hand, function(card) {
+      return <Card
+        key={card.id}
+        card={card}
+        onClick={this.onCardClick}
+        highlighted={card.id === this.state.selectedCardID}
+      />;
+    }, this);
+    return (
+      <div className="player-hand-view">
+        <div className="player-hand-cards">
+          {cards}
+        </div>
+        <div className="player-hand-actions">
+          <button
+            onClick={this.onBuildCard}
+            disabled={!this.state.selectedCardID}
+          >
+            Build Card
+          </button>
+        </div>
       </div>
     );
   },
@@ -423,8 +624,12 @@ var GamePage = React.createClass({
     if (!sessionPlayer) {
       return loadingView;
     }
+    var game = this.state.game;
     var thisPlayer = _.find(this.state.game.players, function(player) {
       return player.userID === sessionPlayer.id;
+    });
+    var player_views = _.map(game.players, function(player, i) {
+      return <PlayerView key={player.userID} playerIndex={i} game={game} />
     });
     return (
       <div className="game-view">
@@ -432,6 +637,9 @@ var GamePage = React.createClass({
           <DraftingView
             session={this.props.session}
             game={this.state.game} />
+          <div className="player-views">
+            {player_views}
+          </div>
         </div>
         <div className="right-pane">
           <ChatLogView 
@@ -448,86 +656,6 @@ var GamePage = React.createClass({
     );
   }
 });
-
-/** TODO: come up with a more modular way of making unique tab views **/
-var PlayerTabs = React.createClass({
-  getInitialState: function() {
-    return {
-      /*tabs: [
-        {title: 'first', content: 'Content 1'},
-        {title: 'second', content: 'Content 2'}
-      ],*/
-      active: 0
-    };
-  },
-  render: function() {
-    return <div>
-      <PlayerTabsSwitcher items={this.props.tabs} active={this.state.active} onTabClick={this.handleTabClick}/>
-      <TabsContent items={this.props.tabs} active={this.state.active}/>
-    </div>;
-  },
-  handleTabClick: function(index) {
-    this.setState({active: index})
-  }
-});
-
-var PlayerTabsSwitcher = React.createClass({
-  render: function() {
-    var active = this.props.active;
-    var items = _.map(this.props.items,function(item, index) {
-      return <button href="#" className={'tab ' + (active === index ? 'tab_selected' : '')} onClick={this.onClick.bind(this, index)}>
-        {item.user.name} <span className="tab-god_name">{item.player.god.name}</span>
-      </button>;
-    }.bind(this));
-    return <div className="tabs-switcher">{items}</div>;
-  },
-  onClick: function(index) {
-    this.props.onTabClick(index);
-  }
-});
-
-var GodPowersTabs = React.createClass({
-  getInitialState: function() {
-    return {
-      active: 0
-    };
-  },
-  render: function() {
-    return <div>
-      <GodPowersTabsSwitcher items={this.props.tabs} active={this.state.active} onTabClick={this.handleTabClick}/>
-      <TabsContent items={this.props.tabs} active={this.state.active}/>
-    </div>;
-  },
-  handleTabClick: function(index) {
-    this.setState({active: index})
-  }
-});
-
-var GodPowersTabsSwitcher = React.createClass({
-  render: function() {
-    var active = this.props.active;
-    var items = _.map(this.props.items,function(item, index) {
-      return <button href="#" className={'tab ' + (active === index ? 'tab_selected' : '')} onClick={this.onClick.bind(this, index)}>
-        {item.title}
-      </button>;
-    }.bind(this));
-    return <div className="tabs-switcher">{items}</div>;
-  },
-  onClick: function(index) {
-    this.props.onTabClick(index);
-  }
-});
-
-var TabsContent = React.createClass({
-  render: function() {
-    var active = this.props.active;
-    var items = _.map(this.props.items, function(item, index) {
-      return <div className={'tabs-panel ' + (active === index ? 'tabs-panel_selected' : '')}>{item.content}</div>;
-    });
-    return <div>{items}</div>;
-  }
-});
-
 
 var LoginPage = React.createClass({
   getInitialState: function() {
@@ -585,7 +713,6 @@ var LobbyPage = React.createClass({
 
   onLobbyStoreUpdate: function(changed_lobby_by_id) {
     var lobby = changed_lobby_by_id[this.props.lobbyID];
-    console.log('lobby update', changed_lobby_by_id, this.props.lobbyID, lobby);
     if (lobby) {
       this.setState({lobby: lobby});
     }
