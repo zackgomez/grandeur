@@ -173,7 +173,7 @@ var createApi = function(cb) {
   });
 
   app.use(function(err, req, res, next) {
-    console.log('api error:', err);
+    console.log('api error:', err, err.stack);
     res.status(err.status || 400).send(err.message);
   });
 

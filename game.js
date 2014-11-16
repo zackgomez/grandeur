@@ -176,6 +176,10 @@ Game.prototype.setUpGame = function() {
 Game.prototype.nextTurn = function() {
   this.currentPlayerIndex_ = (this.currentPlayerIndex_ + 1) % this.players_.length;
 
+  // TODO check for chip overflow
+
+  // TODO check for noble visit
+
   if (this.currentPlayerIndex_ === 0) {
     this.turn_ += 1;
     // TODO check for win condition
@@ -212,7 +216,36 @@ var isValidChipSelection = function(color_counts, supply) {
   return _.all(color_counts, function(count, color) {
     return supply[color] >= count;
   });
-}
+};
+var discountForPlayer = function(player) {
+  // TODO
+  return {};
+};
+// returns the cost of a card given some supply of chips to pay with and some discount
+var costForCard = function(card, supply, discount) {
+  var cost = {};
+  _.each(card.cost, function(count, color) {
+    var discounted_count = Math.max(count - (discount[color] || 0), 0);
+    var supply_count = supply[color];
+    cost[color] = Math.min(discounted_count, supply_count);
+    if (supply_count < discounted_count) {
+      cost[Colors.JOKER] = (cost[Colors.JOKER] || 0) + (discounted_count - supply_count);
+    }
+  });
+  return cost;
+};
+var canPayCost = function(cost, supply) {
+  return _.all(cost, function(count, key) {
+    return supply[key] >= count;
+  });
+};
+var supplyAfterPayingCost = function(supply, cost) {
+  var new_supply = _.clone(supply);
+  _.each(cost, function(count, key) {
+    new_supply[key] -= count;
+  });
+  return new_supply;
+};
 
 Game.prototype.addAction = function(userID, action) {
   var player = this.getPlayerByID(userID);
@@ -242,7 +275,6 @@ Game.prototype.addAction = function(userID, action) {
         player.chips[color] += count;
         this.chipSupply_[color] -= count;
       }, this);
-      // TODO deal with chip overflow
       this.nextTurn();
       break;
     }
@@ -278,6 +310,52 @@ Game.prototype.addAction = function(userID, action) {
         player.chips[Colors.JOKER] += 1;
         this.chipSupply_[Colors.JOKER] -= 1;
       }
+      this.nextTurn();
+      break;
+    }
+    case ActionTypes.BUILD_TABLE_CARD: {
+      var board = this.boards_[action.payload.level - 1];
+      if (!board) {
+        throw new Error('bad level param');
+      }
+      var index = -1;
+      var card = _.find(board, function(card, i) {
+        index = i;
+        return card.id === action.payload.cardID;
+      });
+      if (!card) {
+        throw new Error('bad card id');
+      }
+      var cost = costForCard(card, player.chips, discountForPlayer(player));
+      if (!canPayCost(cost, player.chips)) {
+        throw new Error('cannot afford card');
+      }
+      player.chips = supplyAfterPayingCost(player.chips, cost);
+      player.board = player.board.concat(card);
+
+      var deck = this.decks_[action.payload.level - 1];
+      invariant(index < board.length, 'invalid card index');
+      board[index] = deck.drawOne();
+
+      this.nextTurn();
+      break;
+    }
+    case ActionTypes.BUILD_HAND_CARD: {
+      var card = _.find(player.hand, function(card, i) {
+        return card.id === action.payload.cardID;
+      });
+      if (!card) {
+        throw new Error('bad card id');
+      }
+      var cost = costForCard(card, player.chips, discountForPlayer(player));
+      if (!canPayCost(cost, player.chips)) {
+        throw new Error('cannot afford card');
+      }
+      player.chips = supplyAfterPayingCost(player.chips, cost);
+      player.board = player.board.concat(card);
+
+      player.hand = _.without(player.hand, card);
+
       this.nextTurn();
       break;
     }
