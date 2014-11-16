@@ -441,6 +441,7 @@ var PlayerView = React.createClass({
         <div className="player-chips">
           {chip_views}
         </div>
+        <PlayerBoardView player={player} />
       </div>
     );
   },
@@ -487,6 +488,29 @@ var PlayerHandView = React.createClass({
             Build Card
           </button>
         </div>
+      </div>
+    );
+  },
+});
+
+var PlayerBoardView = React.createClass({
+  render: function() {
+    var player = this.props.player;
+    var piles = _.map(Colors, function(color) {
+      var cards = _.filter(player.board, function(card) {
+        return card.color === color;
+      });
+      var rendered_cards = _.map(cards, function(card) {
+        return <Card
+          key={card.id}
+          card={card}
+        />;
+      });
+      return (<div className="card-stack">{rendered_cards}</div>);
+    });
+    return (
+      <div className="player-board-view">
+        {piles}
       </div>
     );
   },

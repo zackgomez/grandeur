@@ -306,6 +306,26 @@ span.gem {
   background-color: gold;
 }
 
+.player-hand-view {
+  display: flex;
+}
+.player-hand-cards {
+  display: inline-flex;
+}
+.player-hand-actions {
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: space-around;
+}
+
+.player-board-view {
+  display: flex;
+}
+.card-stack {
+  display: inline-flex;
+  flex-direction: column;
+}
+
 .game-log-view {
   outline: solid black 1px;
   padding: 2px;

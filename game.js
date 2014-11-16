@@ -246,6 +246,13 @@ var supplyAfterPayingCost = function(supply, cost) {
   });
   return new_supply;
 };
+var supplyAfterGainingCost = function(supply, cost) {
+  var new_supply = _.clone(supply);
+  _.each(cost, function(count, key) {
+    new_supply[key] += count;
+  });
+  return new_supply;
+};
 
 Game.prototype.addAction = function(userID, action) {
   var player = this.getPlayerByID(userID);
@@ -331,6 +338,7 @@ Game.prototype.addAction = function(userID, action) {
         throw new Error('cannot afford card');
       }
       player.chips = supplyAfterPayingCost(player.chips, cost);
+      this.chipSupply_ = supplyAfterGainingCost(this.chipSupply_, cost);
       player.board = player.board.concat(card);
 
       var deck = this.decks_[action.payload.level - 1];
@@ -352,6 +360,7 @@ Game.prototype.addAction = function(userID, action) {
         throw new Error('cannot afford card');
       }
       player.chips = supplyAfterPayingCost(player.chips, cost);
+      this.chipSupply_ = supplyAfterGainingCost(this.chipSupply_, cost);
       player.board = player.board.concat(card);
 
       player.hand = _.without(player.hand, card);
