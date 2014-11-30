@@ -209,6 +209,7 @@ var ChipSupplyView = React.createClass({
   },
   onDraftChips: function(chips) {
     GameMutator.draftChips(this.props.game.id, chips);
+    this.onClearSelection();
   },
   onClearSelection: function() {
     this.setState({selectedChips: []});
@@ -285,8 +286,8 @@ var NobleSupplyView = React.createClass({
 
 var DeckView = React.createClass({
   render: function() {
-    var dots = _.times(this.props.level, function() {
-      return <span className="level-dot" />;
+    var dots = _.times(this.props.level, function(n) {
+      return <span key={n} className="level-dot" />;
     });
     return (
       <div
@@ -506,7 +507,7 @@ var PlayerBoardView = React.createClass({
           card={card}
         />;
       });
-      return (<div className="card-stack">{rendered_cards}</div>);
+      return (<div key={color} className="card-stack">{rendered_cards}</div>);
     });
     return (
       <div className="player-board-view">
