@@ -218,8 +218,12 @@ var isValidChipSelection = function(color_counts, supply) {
   });
 };
 var discountForPlayer = function(player) {
-  // TODO
-  return {};
+  // map color --> discout
+  var val = _.countBy(player.board, function(card) {
+    return card.color;
+  });
+  console.log(val);
+  return val;
 };
 // returns the cost of a card given some supply of chips to pay with and some discount
 var costForCard = function(card, supply, discount) {
