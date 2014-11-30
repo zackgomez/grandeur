@@ -89,8 +89,8 @@ div span body p h1 h2 h3 h4 h5 h6 button input form {
   display: inline-block;
   padding: 6px;
   margin: 5px;
-  width: 80px;
-  height: 110px;
+  width: 90px;
+  height: 45px;
   box-shadow: 1px 1px 2px #333333;
   -webkit-user-select: none; /* Chrome/Safari */        
   -moz-user-select: none; /* Firefox */
@@ -174,7 +174,7 @@ span.gem {
 
 .card .card-cost {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
 }
 
 .card-cost .color-cost {
