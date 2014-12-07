@@ -97,6 +97,17 @@ div span body p h1 h2 h3 h4 h5 h6 button input form {
   -ms-user-select: none; /* IE10+ */
 }
 
+.action-panel {
+  background-color: #009933;
+  display: inline-block;
+}
+
+.ap-overview-element {
+  text-decoration: underline;
+}
+
+.ap-overview-element:hover { background: gold; }
+
 .deck {
   display: inline-flex;
   flex-direction: column;
@@ -122,6 +133,9 @@ div span body p h1 h2 h3 h4 h5 h6 button input form {
   background-color: white;
   border-radius: 50%;
   margin: 4px;
+}
+.drafting-view {
+  display: inline-block;
 }
 .drafting-cards {
   display: inline-flex;

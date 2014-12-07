@@ -11,6 +11,8 @@ var superagent = require('superagent');
 var WebSocket = require('ws');
 var _ = require('underscore');
 var LobbyMutator = require('./LobbyMutator');
+var AP = require('./ActionPanel');
+var ActionPanel = AP.ActionPanel;
 var LobbyStore = require('./LobbyStore');
 var BaseURL = require('./BaseURL');
 var UserFetcher = require('./UserFetcher');
@@ -95,6 +97,7 @@ var GameMutator = {
       });
   },
 };
+
 
 var Card = React.createClass({
   handleMouseEnter: function(e) {
@@ -667,9 +670,16 @@ var GamePage = React.createClass({
     return (
       <div className="game-view">
         <div className="left-pane">
-          <DraftingView
-            session={this.props.session}
-            game={this.state.game} />
+          <div className="global-view">
+            <DraftingView
+              session={this.props.session}
+              game={this.state.game} />
+            <ActionPanel
+              activePlayer={thisPlayer}
+              session={this.props.session}
+              game={game}
+             />
+          </div>
           <div className="player-views">
             {player_views}
           </div>
