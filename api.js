@@ -1,6 +1,7 @@
 "use strict";
 
 var Game = require('./game');
+var Player = require('./Player');
 var Lobby = require('./Lobby');
 var User = require('./User');
 var express = require('express');
@@ -155,9 +156,9 @@ var createApi = function(cb) {
       return;
     }
     var players = _.map(playerIDs, function(userID) {
-      return new Game.Player(userID);
+      return new Player(userID);
     });
-    var game = new Game.Game(players);
+    var game = new Game(players);
     game.setUpGame();
     gameByID[game.getID()] = game;
 

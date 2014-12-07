@@ -107,19 +107,28 @@ Game.prototype.nextTurn = function() {
 
   this.logItems_.push([EventType.START_TURN, [player.getID()]]);
   // check for chip overflow
-  var total_chips = 0;
-  _.each(player.chips, function(count, color) {
-    total_chips += count;
-  });
-  if (total_chips > MAX_CHIPS) {
-    // TODO reenable this when the UI is updated
-    console.log('would make discard chips');
-    //this.currentRequest_ = RequestTypes.DISCARD_CHIPS;
-    return;
+  var total_chips = player.getChipCount();
+  while (total_chips > MAX_CHIPS) {
+    console.log(Colors.Ordering)
+    var colorToDiscard = _.find(Colors.Ordering, function(color) {
+      console.log("checking if " + color + " is valid to discard");
+      _.each(player.chips, function(x, y) {
+        console.log(" "+x + " " + y)
+      })
+      var cost = {};
+      cost[color] = 1;
+      var canHePayIt = canPayCost(cost, player.chips);
+      console.log("payable " + canHePayIt);
+      console.log("cost was in " + color);
+      return canHePayIt;
+    });
+    player.chips = supplyAfterPayingCost(player.chips, {colorToDiscard : 1});
+    console.log('Player discarded 1 chip of color ' + colorToDiscard);
+    total_chips = player.getChipCount();
   }
 
   // check for noble visit
-  var current_discount = discountForPlayer(player);
+  var current_discount = player.getDiscountMap();
   var selectable_nobles = _.filter(this.nobles_, function(noble) {
     return _.every(noble.cost, function(count, color) {
       return current_discount[color] >= count;
@@ -188,12 +197,6 @@ var isValidChipSelection = function(color_counts, supply) {
     return supply[color] >= count;
   });
 };
-var discountForPlayer = function(player) {
-  // map color --> discout
-  return _.countBy(player.board, function(card) {
-    return card.color;
-  });
-};
 // returns the cost of a card given some supply of chips to pay with and some discount
 var costForCard = function(card, supply, discount) {
   var cost = {};
@@ -207,8 +210,14 @@ var costForCard = function(card, supply, discount) {
   });
   return cost;
 };
+/**
+@param cost
+@param supply
+*/
 var canPayCost = function(cost, supply) {
   return _.all(cost, function(count, key) {
+    console.log("key is " + key + " count is " + count);
+    console.log("supply has " + supply[key]);
     return supply[key] >= count;
   });
 };
@@ -226,13 +235,6 @@ var supplyAfterGainingCost = function(supply, cost) {
   });
   return new_supply;
 };
-var canSelectNoble = function(player, noble) {
-  var discount = discountForPlayer(player);
-  return _.every(noble.cost, function(count, color) {
-    return discount[color] >= count;
-  });
-};
-
 
 var RequestTypeByActionType = {};
 RequestTypeByActionType[ActionTypes.BUILD_HAND_CARD] = RequestTypes.ACTION;
@@ -338,7 +340,7 @@ Game.prototype.addAction = function(userID, action) {
       if (!card) {
         throw new Error('bad card id');
       }
-      var cost = costForCard(card, player.chips, discountForPlayer(player));
+      var cost = costForCard(card, player.chips, player.getDiscountMap());
       if (!canPayCost(cost, player.chips)) {
         throw new Error('cannot afford card');
       }
@@ -359,7 +361,7 @@ Game.prototype.addAction = function(userID, action) {
       if (!card) {
         throw new Error('bad card id');
       }
-      var cost = costForCard(card, player.chips, discountForPlayer(player));
+      var cost = costForCard(card, player.chips, player.getDiscountMap());
       if (!canPayCost(cost, player.chips)) {
         throw new Error('cannot afford card');
       }
@@ -377,7 +379,7 @@ Game.prototype.addAction = function(userID, action) {
         throw new Error('invalid noble index', noble_index);
       }
       var noble = this.nobles_[noble_index];
-      if (!canSelectNoble(player, noble)) {
+      if (!player.canSelectNoble(noble)) {
         throw new Error('cannot select noble');
       }
       player.nobles = player.nobles.concat(noble);
@@ -442,10 +444,4 @@ Game.prototype.toJSON = function() {
   };
 };
 
-module.exports = {
-  Game: Game,
-  Card: Card,
-  Deck: Deck,
-  Player: Player,
-  Colors: Colors,
-};
+module.exports = Game;

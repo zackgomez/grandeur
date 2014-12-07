@@ -35,4 +35,26 @@ Player.prototype.getScore = function() {
   return score;
 };
 
+// map: color name string --> discount for that color
+Player.prototype.getDiscountMap = function() {
+  return _.countBy(this.board, function(card) {
+    return card.color;
+  });
+};
+
+Player.prototype.canSelectNoble = function(noble) {
+  var discount = this.getDiscountMap();
+  return _.every(noble.cost, function(count, color) {
+    return discount[color] >= count;
+  });
+};
+
+Player.prototype.getChipCount = function() {
+  var total_chips = 0;
+  _.each(this.chips, function(count, color) {
+    total_chips += count;
+  });
+  return total_chips;
+}
+
 module.exports = Player;
