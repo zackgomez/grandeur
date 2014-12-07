@@ -674,8 +674,7 @@ var GamePage = React.createClass({
             messages={this.state.game.messages} 
             player={thisPlayer} />
           <GameLogView
-            actions={this.state.game.actions}
-            cardsByID={this.state.game.cardsByID}
+            game={this.state.game}
             session={this.props.session} />
         </div>
       </div>
