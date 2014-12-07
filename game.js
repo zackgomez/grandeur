@@ -109,20 +109,15 @@ Game.prototype.nextTurn = function() {
   // check for chip overflow
   var total_chips = player.getChipCount();
   while (total_chips > MAX_CHIPS) {
-    console.log(Colors.Ordering)
+    console.log("player has too many chips: " + total_chips);
+    var cost = {};
     var colorToDiscard = _.find(Colors.Ordering, function(color) {
-      console.log("checking if " + color + " is valid to discard");
-      _.each(player.chips, function(x, y) {
-        console.log(" "+x + " " + y)
-      })
-      var cost = {};
+      cost = {};
       cost[color] = 1;
       var canHePayIt = canPayCost(cost, player.chips);
-      console.log("payable " + canHePayIt);
-      console.log("cost was in " + color);
       return canHePayIt;
     });
-    player.chips = supplyAfterPayingCost(player.chips, {colorToDiscard : 1});
+    player.chips = supplyAfterPayingCost(player.chips, cost);
     console.log('Player discarded 1 chip of color ' + colorToDiscard);
     total_chips = player.getChipCount();
   }
@@ -141,13 +136,13 @@ Game.prototype.nextTurn = function() {
   } else if (selectable_nobles.length > 1) {
     // TODO use request code when UI is updated
     //this.currentRequest_ = RequestTypes.SELECT_NOBLE;
+    // return;
     var noble = selectable_nobles[0];
     player.nobles = player.nobles.concat(noble);
     this.nobles_ = _.without(this.nobles_, noble);
-    return;
   }
   
-  this.currentPlayerIndex_ = this.currentPlayerIndex_ % this.players_.length;
+  this.currentPlayerIndex_ = (this.currentPlayerIndex_ + 1) % this.players_.length;
   this.currentRequest_ = RequestTypes.ACTION;
 
   if (this.currentPlayerIndex_ === 0) {
