@@ -284,6 +284,12 @@ var supplyAfterGainingCost = function(supply, cost) {
   });
   return new_supply;
 };
+var canSelectNoble = function(player, noble) {
+  var discount = discountForPlayer(player);
+  return _.every(noble.cost, function(count, color) {
+    return discount[color] >= count;
+  });
+};
 
 var RequestTypeByActionType = {};
 RequestTypeByActionType[ActionTypes.BUILD_HAND_CARD] = RequestTypes.ACTION;
@@ -320,7 +326,6 @@ Game.prototype.addAction = function(userID, action) {
         player.chips[color] += count;
         this.chipSupply_[color] -= count;
       }, this);
-      this.nextTurn();
       break;
     }
     case ActionTypes.RESERVE_CARD: {
@@ -355,7 +360,6 @@ Game.prototype.addAction = function(userID, action) {
         player.chips[Colors.JOKER] += 1;
         this.chipSupply_[Colors.JOKER] -= 1;
       }
-      this.nextTurn();
       break;
     }
     case ActionTypes.BUILD_TABLE_CARD: {
@@ -383,7 +387,6 @@ Game.prototype.addAction = function(userID, action) {
       invariant(index < board.length, 'invalid card index');
       board[index] = deck.drawOne();
 
-      this.nextTurn();
       break;
     }
     case ActionTypes.BUILD_HAND_CARD: {
@@ -403,13 +406,50 @@ Game.prototype.addAction = function(userID, action) {
 
       player.hand = _.without(player.hand, card);
 
-      this.nextTurn();
+      break;
+    }
+    case ActionTypes.SELECT_NOBLE: {
+      var noble_index = action.payload.index || -1;
+      if (noble_index >= this.nobles_.length || noble_index < 0) {
+        throw new Error('invalid noble index', noble_index);
+      }
+      var noble = this.nobles_[noble_index];
+      if (!canSelectNoble(player, noble)) {
+        throw new Error('cannot select noble');
+      }
+      player.nobles = player.nobles.concat(noble);
+      this.nobles_ = _.without(this.nobles_, noble);
+      break;
+    }
+    case ActionTypes.DISCARD_CHIPS: {
+      var discarded_chips = action.payload.chips;
+      if (!_.isObject(discarded_chips)) {
+        throw new Error('invalid chips dictionary');
+      }
+      var has_chips = _.every(discarded_chips, function(count, color) {
+        return player.chips[color] >= count;
+      });
+      if (!has_chips) {
+        throw new Error('invalid chip selection');
+      }
+      var new_chips = {};
+      var new_chips_count = 0;
+      _.each(player.chips, function(count, color) {
+        var new_count = count - (discarded_chips[color] || 0);
+        new_chips[color] = new_count;
+        new_chips_count += new_count;
+      });
+      if (new_count > MAX_CHIPS) {
+        throw new Error('still too many chips');
+      }
+      player.chips = new_chips;
       break;
     }
     default:
-      console.log('unknown action: ', action);
-      return;
+      throw new Error('unknown action type ', action.type);
   }
+
+  this.nextTurn();
   this.bumpSequenceID();
 };
 
