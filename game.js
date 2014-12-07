@@ -1,6 +1,7 @@
 "use strict";
 
 var ActionTypes = require('./ActionTypes');
+var EventType = require('./EventType');
 var invariant_violation = require('./invariant_violation');
 var invariant = require('./invariant');
 var _ = require('underscore');
@@ -181,6 +182,7 @@ Game.prototype.setUpGame = function() {
 Game.prototype.nextTurn = function() {
   var player = this.players_[this.currentPlayerIndex_];
 
+  this.logItems_.push([EventType.START_TURN, [player.getID()]]);
   // check for chip overflow
   var total_chips = 0;
   _.each(player.chips, function(count, color) {
@@ -349,11 +351,20 @@ Game.prototype.addAction = function(userID, action) {
         throw new Error('invalid chip selection');
       }
 
+      var double_draft = false;
+
       _.each(chips, function(count, color) {
         player.chips[color] += count;
         this.chipSupply_[color] -= count;
+        if (count == 2) {
+            double_draft = true;
+        }
       }, this);
-      this.logItems_.push([userID, 'draft_chips', chips]);
+      if (double_draft) {
+          this.logItems_.push([EventType.DRAFT_TWO_CHIP, [userID, chips]]);
+      } else {
+          this.logItems_.push([EventType.DRAFT_MULTI_CHIP, [userID, chips]]);
+      }
       break;
     }
     case ActionTypes.RESERVE_CARD: {
@@ -367,11 +378,13 @@ Game.prototype.addAction = function(userID, action) {
       }
       var deck = this.decks_[level - 1];
       var drafted_card = null;
+      var draftedFromDeck = false;
       if (!cardID) {
         if (!deck.count()) {
           throw new Error('not enough cards to draft from deck');
         }
         drafted_card = deck.drawOne();
+        draftedFromDeck = true;
       } else {
         var card = _.find(this.boards_[level - 1], function(card, i) {
           return card.id === cardID;
@@ -389,9 +402,13 @@ Game.prototype.addAction = function(userID, action) {
         player.chips[Colors.JOKER] += 1;
         this.chipSupply_[Colors.JOKER] -= 1;
         gotJoker = true;
-
       }
-      this.logItems_.push([userID, "card reserved", [drafted_card.id, gotJoker]]);
+
+      if (draftedFromDeck) {
+          this.logItems_.push([EventType.RESERVE_CARD_DECK, [userID, level, gotJoker]]);
+      } else {
+          this.logItems_.push([EventType.RESERVE_CARD_TABLE, [userID, cardID, gotJoker]]);
+      }
       break;
     }
     case ActionTypes.BUILD_TABLE_CARD: {
@@ -418,7 +435,7 @@ Game.prototype.addAction = function(userID, action) {
       var deck = this.decks_[action.payload.level - 1];
       invariant(index < board.length, 'invalid card index');
       board[index] = deck.drawOne();
-      this.logItems_.push([userID, 'built table card', card.id]);
+      this.logItems_.push([EventType.BUILD_TABLE_CARD, [userID, cardID]]);
       break;
     }
     case ActionTypes.BUILD_HAND_CARD: {
@@ -437,7 +454,7 @@ Game.prototype.addAction = function(userID, action) {
       player.board = player.board.concat(card);
 
       player.hand = _.without(player.hand, card);
-      this.logItems_.push([userID, 'built hand card', card.id]);
+      this.logItems_.push([EventType.BUILD_HAND_CARD, [userID, cardID]]);
       break;
     }
     case ActionTypes.SELECT_NOBLE: {
@@ -451,7 +468,7 @@ Game.prototype.addAction = function(userID, action) {
       }
       player.nobles = player.nobles.concat(noble);
       this.nobles_ = _.without(this.nobles_, noble);
-      this.logItems_.push([userID, 'noble selected', noble]);
+      this.logItems_.push([EventType.RECEIVE_NOBLE, [userID, noble]]);
       break;
     }
     case ActionTypes.DISCARD_CHIPS: {
@@ -476,7 +493,7 @@ Game.prototype.addAction = function(userID, action) {
         throw new Error('still too many chips');
       }
       player.chips = new_chips;
-      this.logItems_.push([userID, 'chips discarded', discarded_chips]);
+      this.logItems_.push([EventType.DISCARD_CHIPS, [userID, discarded_chips]]);
       break;
     }
     default:
