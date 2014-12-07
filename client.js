@@ -519,6 +519,7 @@ var PlayerBoardView = React.createClass({
 
 var GameLogView = React.createClass({
   render: function() {
+    // TODO
     var log_items = [];
     return (
       <div className="game-log-view">

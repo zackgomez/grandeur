@@ -6,8 +6,10 @@ var invariant = require('./invariant');
 var _ = require('underscore');
 var Colors = require('./Colors');
 var GameData = require('./GameData');
+var RequestTypes = require('./RequestTypes');
 
 var CARDS_PER_LEVEL = 4;
+var MAX_CHIPS = 10;
 
 function Card(id, level, color, cost, points) {
   this.id = id;
@@ -170,26 +172,53 @@ Game.prototype.setUpGame = function() {
   }, this);
 
   this.currentPlayerIndex_ = this.players_.length - 1;
+  this.currentRequest_ = RequestTypes.ACTION;
   this.nextTurn();
 };
 
 Game.prototype.nextTurn = function() {
+  var player = this.players_[this.currentPlayerIndex_];
+
+  // check for chip overflow
+  var total_chips = 0;
+  _.each(player.chips, function(count, color) {
+    total_chips += count;
+  });
+  if (total_chips > MAX_CHIPS) {
+    // TODO reenable this when the UI is updated
+    console.log('would make discard chips');
+    //this.currentRequest_ = RequestTypes.DISCARD_CHIPS;
+    return;
+  }
+
+  // check for noble visit
+  var current_discount = discountForPlayer(player);
+  var selectable_nobles = _.filter(this.nobles_, function(noble) {
+    return _.every(noble.cost, function(count, color) {
+      return current_discount[color] >= count;
+    });
+  });
+  if (selectable_nobles.length == 1) {
+    var noble = selectable_nobles[0];
+    player.nobles = player.nobles.concat(noble);
+    this.nobles_ = _.without(this.nobles_, noble);
+  } else if (selectable_nobles.length > 1) {
+    // TODO use request code when UI is updated
+    //this.currentRequest_ = RequestTypes.SELECT_NOBLE;
+    var noble = selectable_nobles[0];
+    player.nobles = player.nobles.concat(noble);
+    this.nobles_ = _.without(this.nobles_, noble);
+    return;
+  }
+  
   this.currentPlayerIndex_ = (this.currentPlayerIndex_ + 1) % this.players_.length;
-
-  // TODO check for chip overflow
-
-  // TODO check for noble visit
-
+  this.currentRequest_ = RequestTypes.ACTION;
   if (this.currentPlayerIndex_ === 0) {
     this.turn_ += 1;
     // TODO check for win condition
   }
 
   var currentPlayer = this.players_[this.currentPlayerIndex_];
-  this.addActionHelper(currentPlayer.getID(), {
-    type: ActionTypes.START_TURN,
-    payload: {},
-  });
 };
 
 Game.prototype.addActionHelper = function(userID, action) {
@@ -219,11 +248,9 @@ var isValidChipSelection = function(color_counts, supply) {
 };
 var discountForPlayer = function(player) {
   // map color --> discout
-  var val = _.countBy(player.board, function(card) {
+  return _.countBy(player.board, function(card) {
     return card.color;
   });
-  console.log(val);
-  return val;
 };
 // returns the cost of a card given some supply of chips to pay with and some discount
 var costForCard = function(card, supply, discount) {
@@ -258,22 +285,29 @@ var supplyAfterGainingCost = function(supply, cost) {
   return new_supply;
 };
 
+var RequestTypeByActionType = {};
+RequestTypeByActionType[ActionTypes.BUILD_HAND_CARD] = RequestTypes.ACTION;
+RequestTypeByActionType[ActionTypes.BUILD_TABLE_CARD] = RequestTypes.ACTION;
+RequestTypeByActionType[ActionTypes.DRAFT_CHIPS] = RequestTypes.ACTION;
+RequestTypeByActionType[ActionTypes.RESERVE_CARD] = RequestTypes.ACTION;
+RequestTypeByActionType[ActionTypes.SELECT_NOBLE] = RequestTypes.SELECT_NOBLE;
+RequestTypeByActionType[ActionTypes.DISCARD_CHIPS] = RequestTypes.DISCARD_CHIPS;
+
 Game.prototype.addAction = function(userID, action) {
   var player = this.getPlayerByID(userID);
   if (!player) {
     console.log('could not find player', userID);
     return;
   }
+  var player_index = this.players_.indexOf(player);
+  if (player_index != this.currentPlayerIndex_) {
+    throw new Error('not your turn');
+  }
+  var request_type = RequestTypeByActionType[action.type];
+  if (request_type != this.currentRequest_) {
+    throw new Error('invalid action for request');
+  }
   switch (action.type) {
-    case ActionTypes.SEND_CHAT: {
-      this.messages_.push(
-        {
-          user: userID,
-          text: action.payload.text,
-        }
-      );
-      break;
-    }
     case ActionTypes.DRAFT_CHIPS: {
       var chips = action.payload.color_counts;
       var valid_draft = isValidChipSelection(chips, this.chipSupply_);
@@ -376,9 +410,6 @@ Game.prototype.addAction = function(userID, action) {
       console.log('unknown action: ', action);
       return;
   }
-  if (action.type !== ActionTypes.SEND_CHAT) {
-    this.addActionHelper(userID, action);
-  }
   this.bumpSequenceID();
 };
 
@@ -395,6 +426,7 @@ Game.prototype.toJSON = function() {
 
     players: _.invoke(this.players_, 'toJSON'),
     currentPlayerIndex: this.currentPlayerIndex_,
+    currentRequest: this.currentRequest_,
 
     lastCardID: this.lastCardID_,
     cardsByID: this.cardsByID_,
