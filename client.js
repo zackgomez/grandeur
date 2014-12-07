@@ -656,13 +656,13 @@ var GamePage = React.createClass({
     if (this.state.error) {
       return <div>{'error: ' + this.state.error}</div>;
     }
-    var sessionPlayer = this.props.session && this.props.session.getUser();
-    if (!sessionPlayer) {
+    var localUser = this.props.session && this.props.session.getUser();
+    if (!localUser) {
       return loadingView;
     }
     var game = this.state.game;
-    var thisPlayer = _.find(this.state.game.players, function(player) {
-      return player.userID === sessionPlayer.id;
+    var localPlayer = _.find(this.state.game.players, function(player) {
+      return player.userID === localUser.id;
     });
     var player_views = _.map(game.players, function(player, i) {
       return <PlayerView key={player.userID} playerIndex={i} game={game} />
@@ -675,9 +675,9 @@ var GamePage = React.createClass({
               session={this.props.session}
               game={this.state.game} />
             <ActionPanel
-              activePlayer={thisPlayer}
-              session={this.props.session}
-              game={game}
+              localPlayer = {localPlayer}
+              session = {this.props.session}
+              game = {game}
              />
           </div>
           <div className="player-views">
@@ -687,9 +687,9 @@ var GamePage = React.createClass({
         <div className="right-pane">
           <ChatLogView 
             gameID={this.state.game.id}
-            user={this.state.userByID[sessionPlayer.id]}
+            user={this.state.userByID[localPlayer.id]}
             messages={this.state.game.messages} 
-            player={thisPlayer} />
+            player={localPlayer} />
           <GameLogView
             users={this.state.userByID}
             game={this.state.game}

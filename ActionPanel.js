@@ -2,6 +2,8 @@
  * @jsx React.DOM
  */
 var React = require('react');
+var Session = require('./Session');
+var _ = require('underscore');
 
 var ActionPanelOverviewItem = React.createClass({
   render: function () {
@@ -25,9 +27,20 @@ var ActionPanelOverview = React.createClass({
 
 var ActionPanel = React.createClass({
   // activePlayer, session, and game are props
+  propTypes : {
+    localPlayer : React.PropTypes.any.isRequired,
+    session : React.PropTypes.instanceOf(Session).isRequired,
+    game : React.PropTypes.any.isRequired,
+  },
+
   render: function() {
     console.log(this.props);
-    if (!this.props.activePlayer) {
+
+    var game = this.props.game;
+    var localPlayer = this.props.localPlayer;
+    var localPlayerIndex = _.indexOf(game.players, localPlayer);
+    if (localPlayerIndex != game.currentPlayerIndex) {
+      console.log("not the current player's turn: not displaying");
       return <div />
     }
     return (<ActionPanelOverview 
