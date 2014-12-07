@@ -25,7 +25,6 @@ var ActionPanelOverview = React.createClass({
 });
 
 var ActionPanel = React.createClass({
-  // activePlayer, session, and game are props
   propTypes : {
     localPlayer : React.PropTypes.any.isRequired,
     session : React.PropTypes.instanceOf(Session).isRequired,

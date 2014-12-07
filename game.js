@@ -8,90 +8,13 @@ var _ = require('underscore');
 var Colors = require('./Colors');
 var GameData = require('./GameData');
 var RequestTypes = require('./RequestTypes');
+var Player = require('./Player')
+var Card = require('./Card')
+var Deck = require('./Deck')
 
 var CARDS_PER_LEVEL = 4;
 var MAX_CHIPS = 10;
 var GAME_ENDING_SCORE = 15;
-
-function Card(id, level, color, cost, points) {
-  this.id = id;
-  this.level = level;
-  this.color = color;
-  this.cost = cost;
-  this.points = points;
-
-  return this;
-}
-Card.prototype.toJSON = function() {
-  return {
-    id: this.id,
-    level: this.level,
-    color: this.color,
-    cost: this.cost,
-    points: this.points,
-  };
-};
-
-function Deck() {
-  this.cards_ = [];
-  return this;
-}
-Deck.prototype.addCardsToTop = function(cards) {
-  this.cards_ = this.cards_.concat(cards);
-};
-Deck.prototype.shuffle = function() {
-  this.cards_ = _.shuffle(this.cards_);
-};
-Deck.prototype.count = function() {
-  return this.cards_.length;
-};
-Deck.prototype.drawOne = function() {
-  if (this.cards_.length > 0) {
-    return this.cards_.pop();
-  }
-  return null;
-};
-Deck.prototype.drawN = function(n) {
-  var cards = [];
-  _.times(Math.min(n, this.count()), function(n) {
-    cards.push(this.cards_.pop());
-  }, this);
-  return cards;
-};
-Deck.prototype.drawAll = function() {
-  var ret = this.cards_;
-  this.cards_ = [];
-  ret.reverse();
-  return ret;
-};
-Deck.prototype.toJSON = function() {
-  return {
-    cards: _.invoke(this.cards_, 'toJSON'),
-  };
-};
-
-function Player(userID) {
-  this.userID_ = userID;
-
-  this.hand = [];
-  this.board = [];
-  this.nobles = [];
-  this.chips = {};
-
-  return this;
-}
-Player.prototype.getID = function () {
-  return this.userID_;
-};
-Player.prototype.toJSON = function () {
-  return {
-    userID: this.userID_,
-    hand: this.hand,
-    board: this.board,
-    nobles: this.nobles,
-    chips: this.chips,
-  };
-};
 
 function Game(players) {
   this.id_ = _.uniqueId('game_');
@@ -215,7 +138,7 @@ Game.prototype.nextTurn = function() {
     return;
   }
   
-  this.currentPlayerIndex_ = (this.currentPlayerIndex_ + 1) % this.players_.length;
+  this.currentPlayerIndex_ = this.currentPlayerIndex_ % this.players_.length;
   this.currentRequest_ = RequestTypes.ACTION;
 
   if (this.currentPlayerIndex_ === 0) {
@@ -223,7 +146,7 @@ Game.prototype.nextTurn = function() {
 
     // check for win condition
     var player_scores = _.map(this.players_, function(player) {
-      return scoreForPlayer(player);
+      return player.getScore();
     });
     var is_game_over = _.some(player_scores, function(score) {
       return score > GAME_ENDING_SCORE;
@@ -309,16 +232,7 @@ var canSelectNoble = function(player, noble) {
     return discount[color] >= count;
   });
 };
-var scoreForPlayer = function(player) {
-  var score = 0;
-  _.each(player.board, function(card) {
-    score += card.points;
-  });
-  _.each(player.nobles, function(noble) {
-    score += noble.points;
-  });
-  return score;
-};
+
 
 var RequestTypeByActionType = {};
 RequestTypeByActionType[ActionTypes.BUILD_HAND_CARD] = RequestTypes.ACTION;

@@ -29,7 +29,6 @@ GameStore.prototype.syncGameState = function(gameID, sequenceID, completion) {
     completion();
     return;
   }
-  console.log('fetching game state');
   superagent.get(BaseURL + '/api/game/' + gameID + '/state')
   .end(function(res) {
     if (!res.ok) {
