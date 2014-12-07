@@ -675,9 +675,9 @@ var GamePage = React.createClass({
               session={this.props.session}
               game={this.state.game} />
             <ActionPanel
-              localPlayer = {localPlayer}
-              session = {this.props.session}
-              game = {game}
+              localPlayer={localPlayer}
+              session={this.props.session}
+              game={game}
              />
           </div>
           <div className="player-views">

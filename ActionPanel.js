@@ -8,7 +8,6 @@ var _ = require('underscore');
 var ActionPanelOverviewItem = React.createClass({
   render: function () {
     var title = this.props.actionTitle;
-    console.log(this.props);
     return (<div className="ap-overview-element">
       {this.props.actionTitle} 
     </div>);
@@ -34,13 +33,10 @@ var ActionPanel = React.createClass({
   },
 
   render: function() {
-    console.log(this.props);
-
     var game = this.props.game;
     var localPlayer = this.props.localPlayer;
     var localPlayerIndex = _.indexOf(game.players, localPlayer);
     if (localPlayerIndex != game.currentPlayerIndex) {
-      console.log("not the current player's turn: not displaying");
       return <div />
     }
     return (<ActionPanelOverview 
