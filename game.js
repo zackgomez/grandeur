@@ -353,6 +353,7 @@ Game.prototype.addAction = function(userID, action) {
         player.chips[color] += count;
         this.chipSupply_[color] -= count;
       }, this);
+      this.logItems_.push([userID, 'draft_chips', chips]);
       break;
     }
     case ActionTypes.RESERVE_CARD: {
@@ -383,10 +384,14 @@ Game.prototype.addAction = function(userID, action) {
         this.boards_[level - 1][index] = deck.drawOne();
       }
       player.hand.push(drafted_card);
+      var gotJoker = false;
       if (this.chipSupply_[Colors.JOKER] > 0) {
         player.chips[Colors.JOKER] += 1;
         this.chipSupply_[Colors.JOKER] -= 1;
+        gotJoker = true;
+
       }
+      this.logItems_.push([userID, "card reserved", [drafted_card.id, gotJoker]]);
       break;
     }
     case ActionTypes.BUILD_TABLE_CARD: {
@@ -413,7 +418,7 @@ Game.prototype.addAction = function(userID, action) {
       var deck = this.decks_[action.payload.level - 1];
       invariant(index < board.length, 'invalid card index');
       board[index] = deck.drawOne();
-
+      this.logItems_.push([userID, 'built table card', card.id]);
       break;
     }
     case ActionTypes.BUILD_HAND_CARD: {
@@ -432,7 +437,7 @@ Game.prototype.addAction = function(userID, action) {
       player.board = player.board.concat(card);
 
       player.hand = _.without(player.hand, card);
-
+      this.logItems_.push([userID, 'built hand card', card.id]);
       break;
     }
     case ActionTypes.SELECT_NOBLE: {
@@ -446,6 +451,7 @@ Game.prototype.addAction = function(userID, action) {
       }
       player.nobles = player.nobles.concat(noble);
       this.nobles_ = _.without(this.nobles_, noble);
+      this.logItems_.push([userID, 'noble selected', noble]);
       break;
     }
     case ActionTypes.DISCARD_CHIPS: {
@@ -470,6 +476,7 @@ Game.prototype.addAction = function(userID, action) {
         throw new Error('still too many chips');
       }
       player.chips = new_chips;
+      this.logItems_.push([userID, 'chips discarded', discarded_chips]);
       break;
     }
     default:

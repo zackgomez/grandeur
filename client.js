@@ -518,9 +518,16 @@ var PlayerBoardView = React.createClass({
 });
 
 var GameLogView = React.createClass({
+  logItemToDisplay: function(item) {
+    item[0] = this.props.users[item[0]].name
+    return (
+      <div className="game-log-item">
+        {JSON.stringify(item)}
+      </div>
+    );
+  },
   render: function() {
-    // TODO
-    var log_items = [];
+    var log_items = _.map(this.props.game.logItems, this.logItemToDisplay);
     return (
       <div className="game-log-view">
         <div className="game-log-items">
@@ -674,6 +681,7 @@ var GamePage = React.createClass({
             messages={this.state.game.messages} 
             player={thisPlayer} />
           <GameLogView
+            users={this.state.userByID}
             game={this.state.game}
             session={this.props.session} />
         </div>
