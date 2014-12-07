@@ -110,7 +110,7 @@ function Game(players) {
 
   this.turn_ = 0;
 
-  this.actions_ = [];
+  this.logItems_ = [];
   this.messages_ = [];
   this.sequenceID_ = 0;
 
@@ -242,12 +242,6 @@ Game.prototype.nextTurn = function() {
       console.log('player index', this.winningPlayerIndex_, 'won');
     }
   }
-};
-
-Game.prototype.addActionHelper = function(userID, action) {
-  action.timestamp = Date.now();
-  action.userID = userID;
-  this.actions_.push(action);
 };
 
 var isValidChipSelection = function(color_counts, supply) {
@@ -505,7 +499,7 @@ Game.prototype.toJSON = function() {
     lastCardID: this.lastCardID_,
     cardsByID: this.cardsByID_,
 
-    actions: this.actions_,
+    logItems: this.logItems_,
     messages: this.messages_,
   };
 };
