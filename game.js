@@ -10,6 +10,7 @@ var RequestTypes = require('./RequestTypes');
 
 var CARDS_PER_LEVEL = 4;
 var MAX_CHIPS = 10;
+var GAME_ENDING_SCORE = 15;
 
 function Card(id, level, color, cost, points) {
   this.id = id;
@@ -173,6 +174,7 @@ Game.prototype.setUpGame = function() {
 
   this.currentPlayerIndex_ = this.players_.length - 1;
   this.currentRequest_ = RequestTypes.ACTION;
+  this.winningPlayerIndex_ = -1;
   this.nextTurn();
 };
 
@@ -213,12 +215,33 @@ Game.prototype.nextTurn = function() {
   
   this.currentPlayerIndex_ = (this.currentPlayerIndex_ + 1) % this.players_.length;
   this.currentRequest_ = RequestTypes.ACTION;
+
   if (this.currentPlayerIndex_ === 0) {
     this.turn_ += 1;
-    // TODO check for win condition
-  }
 
-  var currentPlayer = this.players_[this.currentPlayerIndex_];
+    // check for win condition
+    var player_scores = _.map(this.players_, function(player) {
+      return scoreForPlayer(player);
+    });
+    var is_game_over = _.some(player_scores, function(score) {
+      return score > GAME_ENDING_SCORE;
+    });
+    if (is_game_over) {
+      var winning_index = -1;
+      var winning_score = -1;
+      _.each(player_scores, function(score, index) {
+        if (score > winning_score) {
+          winning_score = score;
+          winning_index = index;
+        }
+      });
+
+      this.winningPlayerIndex_ = winning_index;
+      this.currentPlayerIndex_ = -1;
+      this.currentRequest_ = null;
+      console.log('player index', this.winningPlayerIndex_, 'won');
+    }
+  }
 };
 
 Game.prototype.addActionHelper = function(userID, action) {
@@ -289,6 +312,16 @@ var canSelectNoble = function(player, noble) {
   return _.every(noble.cost, function(count, color) {
     return discount[color] >= count;
   });
+};
+var scoreForPlayer = function(player) {
+  var score = 0;
+  _.each(player.board, function(card) {
+    score += card.points;
+  });
+  _.each(player.nobles, function(noble) {
+    score += noble.points;
+  });
+  return score;
 };
 
 var RequestTypeByActionType = {};
@@ -467,6 +500,7 @@ Game.prototype.toJSON = function() {
     players: _.invoke(this.players_, 'toJSON'),
     currentPlayerIndex: this.currentPlayerIndex_,
     currentRequest: this.currentRequest_,
+    winningPlayerIndex: this.winningPlayerIndex_,
 
     lastCardID: this.lastCardID_,
     cardsByID: this.cardsByID_,
