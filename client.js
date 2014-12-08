@@ -434,6 +434,9 @@ var PlayerView = React.createClass({
         count={player.chips[color] || 0}
       />;
     });
+    var noble_views = _.map(player.nobles, function (noble) {
+      return (<NobleView noble={noble}/>);
+    });
     return (
       <div className="player-view">
         <div className="player-name">{player.userID}</div>
@@ -446,6 +449,9 @@ var PlayerView = React.createClass({
           {chip_views}
         </div>
         <PlayerBoardView player={player} />
+        <div className="noble-views">
+          {noble_views}
+        </div>
       </div>
     );
   },

@@ -115,12 +115,12 @@ Game.prototype.nextTurn = function() {
   var player = this.players_[this.currentPlayerIndex_];
 
   this.logItems_.push([EventType.START_TURN, [player.getID()]]);
-  // check for chip overflow
   var total_chips = player.getChipCount();
   var DEBUG = false;
   if (DEBUG) {
     player.chips = FULL_HAND_OF_JOKERS;
   }
+  // check for chip overflow
   while (total_chips > MAX_CHIPS) {
     var cost = {};
     var colorToDiscard = _.find(Colors.Ordering, function(color) {
