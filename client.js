@@ -426,7 +426,10 @@ var DraftingView = React.createClass({
 
 var PlayerView = React.createClass({
   render: function() {
+    var game = this.props.game;
     var player = this.props.game.players[this.props.playerIndex];
+
+    var thisPlayerWon = game.winningPlayerIndex == this.props.playerIndex;
     var chip_views = _.map(Colors, function(color) {
       return <ChipPileView
         key={color}
@@ -437,9 +440,21 @@ var PlayerView = React.createClass({
     var noble_views = _.map(player.nobles, function (noble) {
       return (<NobleView noble={noble}/>);
     });
+
+    var playerNameString;
+    var playerClassNames;
+    if (thisPlayerWon) {
+      playerNameString = player.userID + " (winner)";
+      playerClassNames = "player-view winning-player";
+    }
+    else {
+      playerNameString = player.userByID;
+      playerClassNames = "player-view";
+    }
+
     return (
-      <div className="player-view">
-        <div className="player-name">{player.userID}</div>
+      <div className={playerClassNames}>
+        <div className="player-name">{playerNameString}</div>
         <PlayerHandView
           session={this.props.session}
           game={this.props.game}

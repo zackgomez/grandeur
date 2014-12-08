@@ -335,6 +335,9 @@ span.gem {
 .player-board-view {
   display: flex;
 }
+.winning-player {
+  background-color: forestgreen;
+}
 .card-stack {
   display: inline-flex;
   flex-direction: column;

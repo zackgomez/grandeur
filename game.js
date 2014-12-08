@@ -223,9 +223,7 @@ var costForCard = function(card, supply, discount) {
 */
 var canPayCost = function(cost, supply) {
   return _.all(cost, function(count, key) {
-    var canPay = supply[key] >= count;
-    console.log("canPayCost " + key + " : " + count +" ? " + canPay);
-    return canPay;
+    return supply[key] >= count;
   });
 };
 var supplyAfterPayingCost = function(supply, cost) {
