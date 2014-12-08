@@ -24,6 +24,15 @@ Player.prototype.toJSON = function () {
   };
 };
 
+Player.fromJSON = function(json) {
+  var player = new Player(json.userID);
+  player.hand = json.hand;
+  player.board = json.board;
+  player.nobles = json.nobles;
+  player.chips = json.chips;
+  return player;
+}
+
 Player.prototype.getScore = function() {
   var score = 0;
   _.each(this.board, function(card) {

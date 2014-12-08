@@ -3,6 +3,7 @@ var _ = require('underscore')
   , CloudListener = require('./CloudListener')
   , BaseURL = require('./BaseURL')
   , Session = require('./Session');
+var Player = require('./Player');
 
 var GameStore = function (session) {
   this.session_ = session;
@@ -46,6 +47,9 @@ GameStore.prototype.setGameState_ = function(game_state) {
   if (!game_state) {
     return;
   }
+  game_state.players = _.map(game_state.players, function(jsonPlayer) {
+    return Player.fromJSON(jsonPlayer);
+  });
   this.gameStateByID_[game_state.id] = game_state;
   _.each(this.listeners_, function(listener) {
     listener([game_state.id]);
