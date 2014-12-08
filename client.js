@@ -469,9 +469,6 @@ var GamePage = React.createClass({
       if (!game) {
         return cb(new Error('unable to fetch game', null));
       }
-      game.players = _.map(game.players, function(jsonPlayer) {
-        return Player.fromJSON(jsonPlayer);
-      });
       var userIDs = _.pluck(game.players, 'userID');
       UserFetcher.fetchUsers(userIDs, function (err, userByID) {
         if (err) {
