@@ -18,6 +18,7 @@ var LobbyStore = require('./LobbyStore');
 var BaseURL = require('./BaseURL');
 var UserFetcher = require('./UserFetcher');
 var Session = require('./Session');
+var Player = require('./Player');
 var Pages       = ReactRouter.Pages;
 var Page        = ReactRouter.Page;
 var NotFound    = ReactRouter.NotFound;
@@ -254,6 +255,8 @@ var PlayerView = React.createClass({
   render: function() {
     var game = this.props.game;
     var player = this.props.game.players[this.props.playerIndex];
+    var score = player.getScore();
+    console.log("the score is " + score);
 
     var chip_views = _.map(Colors, function(color) {
       return <ChipPileView
@@ -288,6 +291,9 @@ var PlayerView = React.createClass({
         <PlayerBoardView player={player} />
         <div className="noble-views">
           {noble_views}
+        </div>
+        <div>
+          Score: {player.getScore()}
         </div>
       </div>
     );
@@ -463,6 +469,9 @@ var GamePage = React.createClass({
       if (!game) {
         return cb(new Error('unable to fetch game', null));
       }
+      game.players = _.map(game.players, function(jsonPlayer) {
+        return Player.fromJSON(jsonPlayer);
+      });
       var userIDs = _.pluck(game.players, 'userID');
       UserFetcher.fetchUsers(userIDs, function (err, userByID) {
         if (err) {
