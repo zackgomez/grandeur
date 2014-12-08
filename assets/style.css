@@ -7,8 +7,8 @@ b, u, i, center,
 dl, dt, dd, ol, ul, li,
 fieldset, form, label, legend,
 table, caption, tbody, tfoot, thead, tr, th, td,
-article, aside, canvas, details, embed, 
-figure, figcaption, footer, header, hgroup, 
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
 menu, nav, output, ruby, section, summary,
 time, mark, audio, video {
   margin: 0;
@@ -21,7 +21,7 @@ time, mark, audio, video {
   vertical-align: baseline;
 }
 /* HTML5 display-role reset for older browsers */
-article, aside, details, figcaption, figure, 
+article, aside, details, figcaption, figure,
 footer, header, hgroup, menu, nav, section {
   display: block;
 }
@@ -78,6 +78,10 @@ div span body p h1 h2 h3 h4 h5 h6 button input form {
   margin-right:425px;
 }
 
+.global-view {
+  display: flex;
+}
+
 .drafting-level {
   display: flex;
   align-items: center;
@@ -92,18 +96,26 @@ div span body p h1 h2 h3 h4 h5 h6 button input form {
   width: 90px;
   height: 45px;
   box-shadow: 1px 1px 2px #333333;
-  -webkit-user-select: none; /* Chrome/Safari */        
+  -webkit-user-select: none; /* Chrome/Safari */
   -moz-user-select: none; /* Firefox */
   -ms-user-select: none; /* IE10+ */
 }
 
 .action-panel {
   background-color: #009933;
-  display: inline-block;
+  display: block;
+  height: 300px;
+  width: 200px;
+  padding: 10px;
+  margin: 10px;
+
+  display: flex;
+  flex-direction: column;
 }
 
 .ap-overview-element {
   text-decoration: underline;
+  flex-grow: 1;
 }
 
 .ap-overview-element:hover { background: gold; }
@@ -207,7 +219,7 @@ span.gem {
 }
 
 .noble-cost .color-cost {
-  border-radius: 3px; 
+  border-radius: 3px;
   padding-left: 5px;
   padding-right: 5px;
   outline:none;
@@ -247,7 +259,7 @@ span.gem {
   width: 60px;
   height: 60px;
   box-shadow: 1px 1px 3px #333333;
-  -webkit-user-select: none; /* Chrome/Safari */        
+  -webkit-user-select: none; /* Chrome/Safari */
   -moz-user-select: none; /* Firefox */
   -ms-user-select: none; /* IE10+ */
 }
@@ -347,7 +359,7 @@ span.gem {
   outline: solid black 1px;
   padding: 2px;
   flex-basis: 50%;
-  
+
   overflow-x: hidden;
   background-color: white;
   outline:none;
@@ -497,7 +509,7 @@ game-log-items {
  /* This ribbon is based on a 16px font side and a 24px vertical rhythm. I've used em's to position each element for scalability. If you want to use a different font size you may have to play with the position of the ribbon elements */
 
  width: 50%;
-    
+
  position: relative;
  text-align: center;
  background: rgba(90,110,170,1);
