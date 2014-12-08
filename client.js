@@ -30,57 +30,13 @@ var ActionStore = require('./ActionStore');
 var CardView = require('./CardView');
 var GemView = require('./GemView');
 var DeckView = require('./DeckView');
+var ChipView = require('./ChipView');
 
 var navigateToHref = function(href, cb) {
   cb = cb || function() {};
   ReactRouter.environment.defaultEnvironment.navigate(href, cb);
 };
 
-var ChipView = React.createClass({
-  render: function() {
-    return <span className={'chip ' + this.props.color + (this.props.highlighted ? ' highlighted' : '')} />;
-  },
-});
-
-var ChipSupplyActionsView = React.createClass({
-  onDraft: function() {
-    this.props.onDraftChips && this.props.onDraftChips(this.props.selectedChips);
-  },
-  onDoubleDraft: function() {
-    var selection = this.props.selectedChips;
-    invariant(selection.length === 1);
-    selection = selection.concat(selection[0]);
-    this.props.onDraftChips && this.props.onDraftChips(selection);
-  },
-  onClearSelection: function() {
-    this.props.onClearSelection && this.props.onClearSelection();
-  },
-  render: function() {
-    var game = this.props.game;
-    var selectedChips = this.props.selectedChips || [];
-    var draft_string = 'Draft ...';
-    var draft_two_string = 'Draft 2 ' + (selectedChips.length === 1 ? _.first(selectedChips) : '...');
-    return (
-      <div className="chip-supply-actions">
-        <button
-          disabled={selectedChips.length === 0 || selectedChips.length > 3}
-          onClick={this.onDraft} >
-          {draft_string}
-        </button>
-        <button
-          disabled={selectedChips.length !== 1}
-          onClick={this.onDoubleDraft} >
-          {draft_two_string}
-        </button>
-        <button
-          disabled={_.isEmpty(selectedChips)}
-          onClick={this.onClearSelection} >
-          Clear Selection
-        </button>
-      </div>
-    );
-  },
-});
 
 var ChipPileView = React.createClass({
   render: function() {
@@ -98,34 +54,26 @@ var ChipPileView = React.createClass({
 });
 
 var ChipSupplyView = React.createClass({
-  getInitialState: function() {
-    return {selectedChips: []};
-  },
-  onDraftChips: function(chips) {
-    GameMutator.draftChips(this.props.game.id, chips);
-    this.onClearSelection();
-  },
-  onClearSelection: function() {
-    this.setState({selectedChips: []});
+  propTypes: {
+    actionStore: React.PropTypes.instanceOf(ActionStore).isRequired,
+    game: React.PropTypes.object.isRequired,
+    onChipClick: React.PropTypes.func,
   },
   onChipClick: function(color) {
     if (color === Colors.JOKER) {
       return;
     }
-    if (_.contains(this.state.selectedChips, color)) {
-      this.setState({selectedChips: _.without(this.state.selectedChips, color)});
-    } else {
-      this.setState({selectedChips: this.state.selectedChips.concat(color)});
-    }
+    this.props.actionStore.didClickChip(color);
   },
   render: function() {
     var chips = _.map(Colors, function (color) {
       var onClickFunc = _.partial(this.onChipClick, color);
+      var highlight = false;
       return (
         <ChipPileView
           key={color}
           color={color}
-          highlighted={_.contains(this.state.selectedChips, color)}
+          highlighted={highlight}
           count={this.props.game.chipSupply[color]}
           onClick={onClickFunc}
           />
@@ -136,12 +84,6 @@ var ChipSupplyView = React.createClass({
         <div className="chip-piles">
           {chips}
         </div>
-        <ChipSupplyActionsView
-          session={this.props.session}
-          selectedChips={this.state.selectedChips}
-          onDraftChips={this.onDraftChips}
-          onClearSelection={this.onClearSelection}
-          />
       </div>
     );
   },
@@ -184,18 +126,6 @@ var DraftingView = React.createClass({
     game: React.PropTypes.object.isRequired,
     actionStore: React.PropTypes.instanceOf(ActionStore).isRequired,
   },
-  getInitialState: function() {
-    return {
-      selectedLevel:null,
-      selectedCardID:null,
-    };
-  },
-  setSelection: function(level, cardID) {
-    this.setState({
-      selectedLevel: level,
-      selectedCardID: cardID,
-    });
-  },
   onDeckClick: function(level) {
     this.props.actionStore.didClickDeck(level);
   },
@@ -210,6 +140,7 @@ var DraftingView = React.createClass({
       var level = i + 1;
       var cards = _.map(board, function(card) {
         var onCardClick = _.partial(this.onCardClick, card, level);
+        var highlighted = false;
         var card_props = {
           card:card,
           key:card.id,
@@ -217,11 +148,11 @@ var DraftingView = React.createClass({
           onDoubleClick:this.onCardDoubleClick,
           onCardEnter:this.onCardEnter,
           onCardLeave:this.onCardLeave,
-          highlighted:(this.state.selectedCardID === card.id),
+          highlighted:highlighted,
         };
         return CardView(card_props);
       }, this);
-      var is_deck_selected = this.state.selectedLevel === level && !this.state.selectedCardID;
+      var is_deck_selected = false;
       var onDeckClick = _.partial(this.onDeckClick, level);
       return (
         <div key={i} className="drafting-level">
@@ -244,7 +175,11 @@ var DraftingView = React.createClass({
             {levels}
           </div>
         </div>
-        <ChipSupplyView session={this.props.session} game={this.props.game} />
+        <ChipSupplyView
+          session={this.props.session}
+          game={this.props.game}
+          actionStore={this.props.actionStore}
+        />
       </div>
     );
   },
@@ -387,68 +322,6 @@ var GameLogView = React.createClass({
   },
 });
 
-var ChatLogItem = React.createClass({
-  mixins: [ReactAsync.Mixin],
-
-  getInitialStateAsync: function(cb) {
-    UserFetcher.fetchUser(this.props.message.user, function (err, user) {
-      cb(err, {user: user});
-    });
-  },
-
-  render: function() {
-    var message = this.props.message;
-    var classes = 'chat-log-item';
-    var content = null;
-    if (this.props.message && this.state.user) {
-      content = [
-        <span className='user-name'>{this.state.user.name}</span>,
-        ' ',
-        <span className='message-text'>{message.text}</span>
-      ];
-    }
-    return (
-      <div className={classes}>
-        {content}
-      </div>
-    );
-  },
-});
-
-var ChatLogView = React.createClass({
-  onChatSubmit: function() {
-    var text = this.refs.message.getDOMNode().value;
-    if (text == '') {
-      return false;
-    }
-    var userID = this.props.user.id;
-    var gameID = this.props.gameID;
-    //GameMutator.sendChatMessage(gameID, userID, text);
-    this.refs.message.getDOMNode().value = '';
-    return false;
-  },
-  render: function() {
-    var log_items;
-    var num_items = this.props.messages.length;
-    log_items = _.chain(this.props.messages.slice())
-      .reverse()
-      .map(function(message, num) {
-        return <ChatLogItem key={num_items - num} message={message} />;
-      })
-      .value();
-    return (
-      <div className="chat-log-view">
-        <form className="chat-form" onSubmit={this.onChatSubmit}>
-          Chat: <input type="text" ref="message" />
-        </form>
-        <div className="chat-log-items">
-          {log_items}
-        </div>
-      </div>
-    );
-  },
-});
-
 var GamePage = React.createClass({
   mixins: [ReactAsync.Mixin],
 
@@ -555,8 +428,8 @@ var GamePage = React.createClass({
               />
             <ActionPanel
               session={this.props.session}
-              actionStore={this.state.actionStore}
               game={game}
+              actionStore={this.state.actionStore}
              />
           </div>
           <div className="player-views">
@@ -564,11 +437,6 @@ var GamePage = React.createClass({
           </div>
         </div>
         <div className="right-pane">
-          <ChatLogView
-            gameID={this.state.game.id}
-            user={this.state.userByID[localPlayer.id]}
-            messages={this.state.game.messages}
-            player={localPlayer} />
           <GameLogView
             users={this.state.userByID}
             game={this.state.game}

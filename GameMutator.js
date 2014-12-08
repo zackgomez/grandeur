@@ -33,16 +33,12 @@ var GameMutator = {
       }
     );
   },
-  draftChips: function(gameID, colors) {
-    var color_counts = {};
-    _.each(colors, function(color) {
-      color_counts[color] = 1 + (color_counts[color] || 0);
-    });
+  draftChips: function(gameID, colorToCount) {
     this.sendAction(
       gameID,
       ActionTypes.DRAFT_CHIPS,
       {
-        color_counts: color_counts,
+        color_counts: colorToCount,
       }
     );
   },

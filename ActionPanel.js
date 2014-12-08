@@ -8,6 +8,7 @@ var ActionStore = require('./ActionStore');
 var CardView = require('./CardView');
 var DeckView = require('./DeckView');
 var GameMutator = require('./GameMutator');
+var ChipView = require('./ChipView');
 
 var ActionPanelOverviewItem = React.createClass({
   render: function () {
@@ -64,6 +65,32 @@ var ActionPanelDeckSelectionDetail = React.createClass({
   },
 });
 
+var ActionPanelChipSelectionDetail = React.createClass({
+  propTypes: {
+    chips: React.PropTypes.object.isRequired,
+    onDraftChips: React.PropTypes.func,
+  },
+  render: function() {
+    var chip_views = _.reduce(this.props.chips, function(memo, count, color) {
+      _.times(count, function(i) {
+        memo.push(<ChipView key={color + i} color={color} />);
+      });
+      return memo;
+    }, []);
+    return (
+      <div className="action-panel card-detail">
+        <div className="detail-title">Selected Chips</div>
+        <div className="chips">
+          {chip_views}
+        </div>
+        <button onClick={this.props.onDraftChips}>
+          Take Chips
+        </button>
+      </div>
+    );
+  },
+});
+
 var ActionPanel = React.createClass({
   propTypes: {
     session: React.PropTypes.instanceOf(Session).isRequired,
@@ -96,6 +123,13 @@ var ActionPanel = React.createClass({
       GameMutator.buildTableCard(this.props.game.id, selection.level, selection.cardID);
     }
   },
+  onDraftChips: function() {
+    var selection = this.props.actionStore.getSelection();
+    var selection_type = this.props.actionStore.getSelectionType();
+    if (selection_type === ActionStore.SelectionTypes.CHIPS) {
+      GameMutator.draftChips(this.props.game.id, selection.chips);
+    }
+  },
 
   render: function() {
     var game = this.props.game;
@@ -124,9 +158,15 @@ var ActionPanel = React.createClass({
         level={selection.level}
         onReserveCard={this.onReserveCard}
       />;
+    } else if (selection_type === ActionStore.SelectionTypes.CHIPS) {
+      return <ActionPanelChipSelectionDetail
+        chips={selection.chips}
+        onDraftChips={this.onDraftChips}
+      />;
     } else {
       return (
         <div className="action-panel">
+          TODO DETAIL VIEW
           SELECTION TYPE: {selection_type}
           SELECTION: {JSON.stringify(actionStore.getSelection())}
         </div>

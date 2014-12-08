@@ -9,6 +9,7 @@ var SelectionTypes = {
   HAND_CARD: 'hand_card',
   DECK: 'deck',
   CHIPS: 'draft_chips',
+  PLAYER_CHIPS: 'player_chips',
   NOBLE: 'noble',
 };
 
@@ -91,6 +92,43 @@ ActionStore.prototype.didClickDeck = function(level) {
   this.setSelection_({
     level: level,
   });
+};
+ActionStore.prototype.didClickChip = function(clicked_color) {
+  var supply_count = this.game_.chipSupply[clicked_color];
+  if (supply_count == 0) {
+    return;
+  }
+
+  if (this.getSelectionType() === SelectionTypes.CHIPS) {
+    var existing_chips = this.selection_.chips;
+    var new_chips = _.clone(existing_chips);
+    if (existing_chips[clicked_color] > 0) {
+      new_chips[clicked_color] = 0;
+    } else {
+      _.each(new_chips, function(count, color) {
+        if (count > 1) {
+          new_chips[color] = 1;
+        }
+      });
+      new_chips[clicked_color] = 1;
+    }
+    var new_chip_count = 0;
+    _.each(new_chips, function(count) {
+      new_chip_count += count;
+    });
+    if (new_chip_count > 3) {
+      return;
+    } else if (new_chip_count == 0) {
+      this.clearSelection();
+    } else {
+      this.setSelection_({ chips: new_chips });
+    }
+  } else {
+    var count = supply_count >= 4 ? 2 : 1;
+    var chips = {};
+    chips[clicked_color] = count;
+    this.setSelection_({ chips: chips });
+  }
 };
 
 module.exports = ActionStore;
