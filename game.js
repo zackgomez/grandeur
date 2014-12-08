@@ -102,14 +102,26 @@ Game.prototype.setUpGame = function() {
   this.nextTurn();
 };
 
+var FULL_HAND_OF_JOKERS = {
+  white: 0,
+  blue : 0,
+  red : 0,
+  green : 0,
+  black : 0,
+  joker : 10
+};
+
 Game.prototype.nextTurn = function() {
   var player = this.players_[this.currentPlayerIndex_];
 
   this.logItems_.push([EventType.START_TURN, [player.getID()]]);
   // check for chip overflow
   var total_chips = player.getChipCount();
+  var DEBUG = false;
+  if (DEBUG) {
+    player.chips = FULL_HAND_OF_JOKERS;
+  }
   while (total_chips > MAX_CHIPS) {
-    console.log("player has too many chips: " + total_chips);
     var cost = {};
     var colorToDiscard = _.find(Colors.Ordering, function(color) {
       cost = {};
@@ -211,9 +223,9 @@ var costForCard = function(card, supply, discount) {
 */
 var canPayCost = function(cost, supply) {
   return _.all(cost, function(count, key) {
-    console.log("key is " + key + " count is " + count);
-    console.log("supply has " + supply[key]);
-    return supply[key] >= count;
+    var canPay = supply[key] >= count;
+    console.log("canPayCost " + key + " : " + count +" ? " + canPay);
+    return canPay;
   });
 };
 var supplyAfterPayingCost = function(supply, cost) {
