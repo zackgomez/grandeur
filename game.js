@@ -108,7 +108,7 @@ var FULL_HAND_OF_JOKERS = {
   red : 0,
   green : 0,
   black : 0,
-  joker : 10
+  joker : 15
 };
 
 Game.prototype.nextTurn = function() {
@@ -116,22 +116,12 @@ Game.prototype.nextTurn = function() {
 
   this.logItems_.push([EventType.START_TURN, [player.getID()]]);
   var total_chips = player.getChipCount();
-  var DEBUG = false;
-  if (DEBUG) {
-    player.chips = FULL_HAND_OF_JOKERS;
-  }
+
+  //player.chips = FULL_HAND_OF_JOKERS; // uncomment to be able to buy pretty much anything
+
   // check for chip overflow
-  while (total_chips > MAX_CHIPS) {
-    var cost = {};
-    var colorToDiscard = _.find(Colors, function(color) {
-      cost = {};
-      cost[color] = 1;
-      var canHePayIt = canPayCost(cost, player.chips);
-      return canHePayIt;
-    });
-    player.chips = supplyAfterPayingCost(player.chips, cost);
-    console.log('Player discarded 1 chip of color ' + colorToDiscard);
-    total_chips = player.getChipCount();
+  if (total_chips > MAX_CHIPS) {
+    console.log("TODO discard some chips");
   }
 
   // check for noble visit
