@@ -8,7 +8,7 @@ var Colors = require('./Colors');
 
 var ChipView = React.createClass({
   propTypes: {
-    color: React.PropTypes.oneOf(_.keys(Colors)).isRequired,
+    color: React.PropTypes.oneOf(_.values(Colors)).isRequired,
     highlighted: React.PropTypes.bool,
   },
   render: function() {

@@ -47,6 +47,22 @@ var ActionPanelCardSelectionDetail = React.createClass({
   },
 });
 
+var ActionPanelHandCardSelectionDetail = React.createClass({
+  propTypes: {
+    card: React.PropTypes.object.isRequired,
+    onBuildCard: React.PropTypes.func,
+  },
+  render: function() {
+    return (
+      <div className="action-panel card-detail">
+        <div className="detail-title">Build Card from Hand</div>
+        <CardView card={this.props.card} />
+        <button onClick={this.props.onBuildCard}>Build</button>
+      </div>
+    );
+  },
+});
+
 var ActionPanelDeckSelectionDetail = React.createClass({
   propTypes: {
     level: React.PropTypes.number.isRequired,
@@ -123,6 +139,13 @@ var ActionPanel = React.createClass({
       GameMutator.buildTableCard(this.props.game.id, selection.level, selection.cardID);
     }
   },
+  onBuildHandCard: function() {
+    var selection = this.props.actionStore.getSelection();
+    var selection_type = this.props.actionStore.getSelectionType();
+    if (selection_type === ActionStore.SelectionTypes.HAND_CARD) {
+      GameMutator.buildHandCard(this.props.game.id, selection.cardID);
+    }
+  },
   onDraftChips: function() {
     var selection = this.props.actionStore.getSelection();
     var selection_type = this.props.actionStore.getSelectionType();
@@ -152,6 +175,12 @@ var ActionPanel = React.createClass({
         card={selected_card}
         onBuildCard={this.onBuildCard}
         onReserveCard={this.onReserveCard}
+      />;
+    } else if (selection_type === ActionStore.SelectionTypes.HAND_CARD) {
+      var selected_card = game.cardsByID[selection.cardID];
+      return <ActionPanelHandCardSelectionDetail
+        card={selected_card}
+        onBuildCard={this.onBuildHandCard}
       />;
     } else if (selection_type === ActionStore.SelectionTypes.DECK) {
       return <ActionPanelDeckSelectionDetail

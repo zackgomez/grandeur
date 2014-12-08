@@ -56,8 +56,10 @@ ActionStore.prototype.clearSelection = function() {
 
 ActionStore.prototype.getSelectionType = function() {
   var selection = this.getSelection() || {};
-  if (_.has(selection, 'cardID')) {
+  if (_.has(selection, 'cardID') && _.has(selection, 'level')) {
     return SelectionTypes.CARD;
+  } else if (_.has(selection, 'cardID')) {
+    return SelectionTypes.HAND_CARD;
   } else if (_.has(selection, 'level')) {
     return SelectionTypes.DECK;
   } else if (_.size(selection.chips) > 0) {
@@ -85,6 +87,11 @@ ActionStore.prototype.getPlayerIndex = function() {
 ActionStore.prototype.didClickDraftingCard = function(level, cardID) {
   this.setSelection_({
     level: level,
+    cardID: cardID,
+  });
+};
+ActionStore.prototype.didClickHandCard = function(cardID) {
+  this.setSelection_({
     cardID: cardID,
   });
 };

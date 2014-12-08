@@ -186,6 +186,12 @@ var DraftingView = React.createClass({
 });
 
 var PlayerView = React.createClass({
+  propTypes: {
+    game: React.PropTypes.object.isRequired,
+    playerIndex: React.PropTypes.number.isRequired,
+    actionStore: React.PropTypes.instanceOf(ActionStore).isRequired,
+    userByID: React.PropTypes.object.isRequired,
+  },
   render: function() {
     var game = this.props.game;
     var player = this.props.game.players[this.props.playerIndex];
@@ -213,9 +219,9 @@ var PlayerView = React.createClass({
       <div className={container_class_name}>
         <div className="player-name">{player_name}</div>
         <PlayerHandView
-          session={this.props.session}
           game={this.props.game}
           playerIndex={this.props.playerIndex}
+          actionStore={this.props.actionStore}
         />
         <div className="player-chips">
           {chip_views}
@@ -230,44 +236,29 @@ var PlayerView = React.createClass({
 });
 
 var PlayerHandView = React.createClass({
-  getInitialState: function() {
-    return {
-      selectedCardID: null,
-    };
+  propTypes: {
+    game: React.PropTypes.object.isRequired,
+    playerIndex: React.PropTypes.number.isRequired,
+    actionStore: React.PropTypes.instanceOf(ActionStore).isRequired,
   },
   onCardClick: function(card) {
-    if (this.state.selectedCardID === card.id) {
-      this.setState({selectedCardID: null});
-    } else {
-      this.setState({selectedCardID: card.id});
-    }
-  },
-  onBuildCard: function() {
-    GameMutator.buildHandCard(this.props.game.id, this.state.selectedCardID);
-    this.setState({selectedCardID: null});
+    this.props.actionStore.didClickHandCard(card.id);
   },
   render: function() {
     var player = this.props.game.players[this.props.playerIndex];
     var cards = _.map(player.hand, function(card) {
+      var highlighted = false;
       return <CardView
         key={card.id}
         card={card}
         onClick={this.onCardClick}
-        highlighted={card.id === this.state.selectedCardID}
+        highlighted={highlighted}
       />;
     }, this);
     return (
       <div className="player-hand-view">
         <div className="player-hand-cards">
           {cards}
-        </div>
-        <div className="player-hand-actions">
-          <button
-            onClick={this.onBuildCard}
-            disabled={!this.state.selectedCardID}
-          >
-            Build Card
-          </button>
         </div>
       </div>
     );
@@ -415,8 +406,14 @@ var GamePage = React.createClass({
       return player.userID === localUser.id;
     });
     var player_views = _.map(game.players, function(player, i) {
-      return <PlayerView key={player.userID} playerIndex={i} game={game} userByID={userByID} />;
-    });
+      return <PlayerView
+        key={player.userID}
+        playerIndex={i}
+        game={game}
+        userByID={userByID}
+        actionStore={this.state.actionStore}
+      />;
+    }, this);
     return (
       <div className="game-view">
         <div className="left-pane">
