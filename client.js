@@ -8,6 +8,7 @@ var ReactAsync = require('react-async');
 var ReactRouter = require('react-router-component');
 var CloudListener = require('./CloudListener');
 var superagent = require('superagent');
+var GameMutator = require('./GameMutator');
 var WebSocket = require('ws');
 var _ = require('underscore');
 var LobbyMutator = require('./LobbyMutator');
@@ -25,125 +26,15 @@ var GameStore = require('./GameStore');
 var Immutable = require('immutable');
 var Colors = require('./Colors');
 var invariant = require('./invariant');
-
+var ActionStore = require('./ActionStore');
+var CardView = require('./CardView');
+var GemView = require('./GemView');
+var DeckView = require('./DeckView');
 
 var navigateToHref = function(href, cb) {
   cb = cb || function() {};
   ReactRouter.environment.defaultEnvironment.navigate(href, cb);
 };
-
-var GameMutator = {
-  sendChatMessage: function(gameID, userID, text) {
-    this.sendAction(
-      gameID,
-      ActionTypes.SEND_CHAT,
-      {
-        text: text,
-      }
-    );
-  },
-  buildHandCard: function(gameID, cardID) {
-    this.sendAction(
-      gameID,
-      ActionTypes.BUILD_HAND_CARD,
-      {
-        cardID: cardID,
-      }
-    );
-  },
-  buildTableCard: function(gameID, level, cardID) {
-    this.sendAction(
-      gameID,
-      ActionTypes.BUILD_TABLE_CARD,
-      {
-        level: level,
-        cardID: cardID,
-      }
-    );
-  },
-  reserveCard: function(gameID, level, cardID) {
-    this.sendAction(
-      gameID,
-      ActionTypes.RESERVE_CARD,
-      {
-        level: level,
-        cardID: cardID,
-      }
-    );
-  },
-  draftChips: function(gameID, colors) {
-    var color_counts = {};
-    _.each(colors, function(color) {
-      color_counts[color] = 1 + (color_counts[color] || 0);
-    });
-    this.sendAction(
-      gameID,
-      ActionTypes.DRAFT_CHIPS,
-      {
-        color_counts: color_counts,
-      }
-    );
-  },
-  sendAction: function(gameID, action_type, payload) {
-    var action = { type: action_type, payload: payload };
-    superagent.post('/api/game/' + gameID + '/add_action')
-      .send({action: action})
-      .set('Accept', 'application/json')
-      .end(function(res) {
-        if (!res.ok) {
-          console.log('error sending action', res.text);
-          return;
-        }
-      });
-  },
-};
-
-
-var Card = React.createClass({
-  handleMouseEnter: function(e) {
-    this.props.onCardEnter && this.props.onCardEnter(this.props.card);
-  },
-  handleMouseLeave: function(e) {
-    this.props.onCardLeave && this.props.onCardLeave(this.props.card);
-  },
-  handleClick: function(e) {
-    if (this.props.onClick) {
-      this.props.onClick(this.props.card);
-    }
-  },
-  handleDoubleClick: function(e) {
-    this.props.onDoubleClick && this.props.onDoubleClick(this.props.card);
-  },
-  render: function() {
-    var card = this.props.card;
-    var costs = [];
-    _.each(Colors, function(color) {
-      var color_cost = card.cost[color];
-      if (!color_cost) { return; }
-      costs.push(<div key={color} className={'color-cost ' + color}>{color_cost}</div>);
-    });
-    return (
-      <div className={'card card-color-'+this.props.card.color + (this.props.highlighted ? ' highlighted' : '')}
-        onMouseEnter={this.handleMouseEnter} 
-        onMouseLeave={this.handleMouseLeave}
-        onClick={this.handleClick}
-        onDoubleClick={this.handleDoubleClick}
-        >
-        <div className="card-header">
-          <div className="card-points">{card.points || null}</div>
-          <GemView color={card.color} />
-        </div>
-        <div className="card-cost">{costs}</div>
-      </div>
-    );
-  },
-});
-
-var GemView = React.createClass({
-  render: function() {
-    return <span className={'gem gem-'+this.props.color}></span>;
-  },
-});
 
 var ChipView = React.createClass({
   render: function() {
@@ -287,54 +178,12 @@ var NobleSupplyView = React.createClass({
   },
 });
 
-var DeckView = React.createClass({
-  render: function() {
-    var dots = _.times(this.props.level, function(n) {
-      return <span key={n} className="level-dot" />;
-    });
-    return (
-      <div
-        className={'deck level-' + this.props.level + (this.props.highlighted ? ' highlighted' : '')}
-        onClick={this.props.onClick}
-      >
-        <div className="deck-size">{this.props.size}</div>
-        <div className="level-dots">{dots}</div>
-      </div>
-    );
-  },
-});
-
-var DraftingActionsView = React.createClass({
-  render: function() {
-    var game = this.game;
-    var has_selection = _.contains([1, 2, 3], this.props.selectedLevel);
-    var has_card_selection = has_selection && this.props.selectedCardID;
-    var selected_object_string = '...';
-    if (has_card_selection) {
-      selected_object_string = ' level ' + this.props.selectedLevel + ' card';
-    } else if (has_selection) {
-      selected_object_string = ' random level ' + this.props.selectedLevel + ' card';
-    }
-    return (
-      <div className="drafting-action-view">
-        <button
-          disabled={!has_card_selection}
-          onClick={this.props.onBuildCard}
-        >
-          Build {selected_object_string}
-        </button>
-        <button
-          disabled={!has_selection}
-          onClick={this.props.onReserveCard}
-        >
-          Reserve {selected_object_string}
-        </button>
-      </div>
-    );
-  },
-});
-
 var DraftingView = React.createClass({
+  propTypes: {
+    session: React.PropTypes.instanceOf(Session).isRequired,
+    game: React.PropTypes.object.isRequired,
+    actionStore: React.PropTypes.instanceOf(ActionStore).isRequired,
+  },
   getInitialState: function() {
     return {
       selectedLevel:null,
@@ -348,28 +197,12 @@ var DraftingView = React.createClass({
     });
   },
   onDeckClick: function(level) {
-    if (this.state.selectedLevel === level && this.state.selectedCardID === null) {
-      this.setSelection(null, null);
-    } else {
-      this.setSelection(level, null);
-    }
+    this.props.actionStore.didClickDeck(level);
   },
   onCardClick: function(card, level) {
-    if (this.state.selectedCardID === card.id) {
-      this.setSelection(null, null);
-    } else {
-      this.setSelection(level, card.id);
-    }
+    this.props.actionStore.didClickDraftingCard(level, card.id);
   },
   onCardDoubleClick: function(card) {
-  },
-  onBuildCard: function() {
-    GameMutator.buildTableCard(this.props.game.id, this.state.selectedLevel, this.state.selectedCardID);
-    this.setSelection(null, null);
-  },
-  onReserveCard: function() {
-    GameMutator.reserveCard(this.props.game.id, this.state.selectedLevel, this.state.selectedCardID);
-    this.setSelection(null, null);
   },
   render: function() {
     var game = this.props.game;
@@ -386,7 +219,7 @@ var DraftingView = React.createClass({
           onCardLeave:this.onCardLeave,
           highlighted:(this.state.selectedCardID === card.id),
         };
-        return Card(card_props);
+        return CardView(card_props);
       }, this);
       var is_deck_selected = this.state.selectedLevel === level && !this.state.selectedCardID;
       var onDeckClick = _.partial(this.onDeckClick, level);
@@ -410,13 +243,6 @@ var DraftingView = React.createClass({
           <div className="drafting-levels">
             {levels}
           </div>
-          <DraftingActionsView
-            game={this.props.game}
-            selectedLevel={this.state.selectedLevel}
-            selectedCardID={this.state.selectedCardID}
-            onBuildCard={this.onBuildCard}
-            onReserveCard={this.onReserveCard}
-          />
         </div>
         <ChipSupplyView session={this.props.session} game={this.props.game} />
       </div>
@@ -488,7 +314,7 @@ var PlayerHandView = React.createClass({
   render: function() {
     var player = this.props.game.players[this.props.playerIndex];
     var cards = _.map(player.hand, function(card) {
-      return <Card
+      return <CardView
         key={card.id}
         card={card}
         onClick={this.onCardClick}
@@ -521,7 +347,7 @@ var PlayerBoardView = React.createClass({
         return card.color === color;
       });
       var rendered_cards = _.map(cards, function(card) {
-        return <Card
+        return <CardView
           key={card.id}
           card={card}
         />;
@@ -597,7 +423,7 @@ var ChatLogView = React.createClass({
     }
     var userID = this.props.user.id;
     var gameID = this.props.gameID;
-    GameMutator.sendChatMessage(gameID, userID, text);
+    //GameMutator.sendChatMessage(gameID, userID, text);
     this.refs.message.getDOMNode().value = '';
     return false;
   },
@@ -627,21 +453,50 @@ var GamePage = React.createClass({
   mixins: [ReactAsync.Mixin],
 
   getInitialStateAsync: function(cb) {
-    if (!this.props.session) {
+    var session = this.props.session;
+    if (!session) {
         return cb(null);
     }
-    var gameStore = this.props.session.GameStore();
+    var gameStore = session.GameStore();
     gameStore.syncGameState(this.props.gameID, null, function() {
       var game = gameStore.getGameState(this.props.gameID);
       if (!game) {
-        cb(new Error('unable to fetch game', null));
-        return;
+        return cb(new Error('unable to fetch game', null));
       }
       var userIDs = _.pluck(game.players, 'userID');
       UserFetcher.fetchUsers(userIDs, function (err, userByID) {
-        cb(err, {game: game, userByID: userByID});
+        if (err) {
+          return cb(err, null);
+        }
+        var player_index = -1;
+        _.find(game.players, function(player, i) {
+          if (player.userID === session.getUser().id) {
+            player_index = i;
+            return true;
+          }
+        });
+        return cb(null, {
+          game: game,
+          userByID: userByID,
+          actionStore: new ActionStore(game, player_index),
+        });
       });
     }.bind(this));
+  },
+
+  stateToJSON: function(state) {
+    return {
+      game: state.game,
+      userByID: state.userByID,
+      playerIndex: state.actionStore.getPlayerIndex(),
+    };
+  },
+  stateFromJSON: function(state) {
+    return {
+      game: state.game,
+      userByID: state.userByID,
+      actionStore: new ActionStore(state.game, state.playerIndex),
+    };
   },
 
   onGameStateChange: function(changedGameIDs) {
@@ -653,7 +508,8 @@ var GamePage = React.createClass({
     }
     var game = this.props.session.GameStore().getGameState(this.props.gameID);
     if (game) {
-      this.setState({game:  game});
+      this.state.actionStore.setGame(game);
+      this.setState({game: game});
     }
   },
 
@@ -694,10 +550,12 @@ var GamePage = React.createClass({
           <div className="global-view">
             <DraftingView
               session={this.props.session}
-              game={this.state.game} />
+              game={this.state.game}
+              actionStore={this.state.actionStore}
+              />
             <ActionPanel
-              localPlayer={localPlayer}
               session={this.props.session}
+              actionStore={this.state.actionStore}
               game={game}
              />
           </div>
@@ -706,10 +564,10 @@ var GamePage = React.createClass({
           </div>
         </div>
         <div className="right-pane">
-          <ChatLogView 
+          <ChatLogView
             gameID={this.state.game.id}
             user={this.state.userByID[localPlayer.id]}
-            messages={this.state.game.messages} 
+            messages={this.state.game.messages}
             player={localPlayer} />
           <GameLogView
             users={this.state.userByID}
