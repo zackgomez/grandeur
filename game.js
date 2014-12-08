@@ -155,7 +155,7 @@ Game.prototype.nextTurn = function() {
       return player.getScore();
     });
     var is_game_over = _.some(player_scores, function(score) {
-      return score > GAME_ENDING_SCORE;
+      return score >= GAME_ENDING_SCORE;
     });
     if (is_game_over) {
       var winning_index = -1;

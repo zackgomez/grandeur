@@ -27,7 +27,7 @@ ActionStore.prototype.setSelection_ = function(selection, force) {
   if (!this.isPlayersTurn() && !force) {
     return;
   }
-  // TODO validate seleciton based on game request type
+  // TODO validate selection based on game request type
   this.selection_ = selection;
 
   _.each(this.listeners_, function(listener) {

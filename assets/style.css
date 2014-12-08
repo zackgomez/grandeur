@@ -256,7 +256,7 @@ span.gem {
   display: inline-block;
   padding: 6px;
   margin: 5px;
-  width: 60px;
+  width: 70px;
   height: 60px;
   box-shadow: 1px 1px 3px #333333;
   -webkit-user-select: none; /* Chrome/Safari */
@@ -358,7 +358,6 @@ span.gem {
 .game-log-view {
   outline: solid black 1px;
   padding: 2px;
-  flex-basis: 50%;
 
   overflow-x: hidden;
   background-color: white;
@@ -367,7 +366,7 @@ span.gem {
   padding-bottom:5px;
 }
 
-game-log-items {
+.game-log-items {
 }
 
 .game-log-item {
@@ -380,50 +379,9 @@ game-log-items {
   display:inline-block;
   font-weight: bold;
 }
-.game-log-item .card-name {
-  font-size: inherit;
-  display:inline-block;
-  font-weight: bold;
-  background-color: #BBBBBB;
-  border-radius: 1px;
-  padding-left:2px;
-  padding-right:2px;
-}
 
-.chat-log-view {
-  outline: solid black 1px;
-  padding: 2px;
-  min-height: 180px;
-  padding-top:4px;
-  background-color: white;
-  outline:none;
-  margin-bottom:4px;
-}
 
-.chat-form {
-  display:inline-block;
-  float:right;
-}
-.chat-form input {
-  width: 185px;
-}
-.chat-log-items {
-  overflow-x: hidden;
-  max-height:158px;
-  width:100%;
-  margin-bottom:5px;
-}
-
-.chat-log-item {
-  background-color: #E0E0E0;
-  padding: 5px;
-  margin: 5px;
-}
-.chat-log-item .user-name {
-  font-weight: bold;
-}
-
-.game-log-item, .chat-log-item {
+.game-log-item {
   font-size:15px;
 }
 
