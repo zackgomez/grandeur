@@ -289,20 +289,21 @@ var PlayerBoardView = React.createClass({
 });
 
 var GameLogView = React.createClass({
-  logItemToDisplay: function(item) {
+  logItemToDisplay: function(item, i) {
     var eventType = item[0];
     var payload = item[1];
     var userId = payload[0];
     var playerName = this.props.users[userId].name;
 
     return (
-      <div className="game-log-item">
+      <div key={i} className="game-log-item">
         {JSON.stringify(playerName) + ' ' + JSON.stringify(eventType)}
       </div>
     );
   },
   render: function() {
     var log_items = _.map(this.props.game.logItems, this.logItemToDisplay);
+    log_items.reverse();
     return (
       <div className="game-log-view">
         <div className="game-log-items">
