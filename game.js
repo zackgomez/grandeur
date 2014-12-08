@@ -123,7 +123,7 @@ Game.prototype.nextTurn = function() {
   // check for chip overflow
   while (total_chips > MAX_CHIPS) {
     var cost = {};
-    var colorToDiscard = _.find(Colors.Ordering, function(color) {
+    var colorToDiscard = _.find(Colors, function(color) {
       cost = {};
       cost[color] = 1;
       var canHePayIt = canPayCost(cost, player.chips);
@@ -153,7 +153,7 @@ Game.prototype.nextTurn = function() {
     player.nobles = player.nobles.concat(noble);
     this.nobles_ = _.without(this.nobles_, noble);
   }
-  
+
   this.currentPlayerIndex_ = (this.currentPlayerIndex_ + 1) % this.players_.length;
   this.currentRequest_ = RequestTypes.ACTION;
 
@@ -180,7 +180,6 @@ Game.prototype.nextTurn = function() {
       this.winningPlayerIndex_ = winning_index;
       this.currentPlayerIndex_ = -1;
       this.currentRequest_ = null;
-      console.log('player index', this.winningPlayerIndex_, 'won');
     }
   }
 };
@@ -217,6 +216,7 @@ var costForCard = function(card, supply, discount) {
   });
   return cost;
 };
+
 /**
 @param cost
 @param supply
@@ -268,7 +268,6 @@ Game.prototype.addAction = function(userID, action) {
       var chips = action.payload.color_counts;
       var valid_draft = isValidChipSelection(chips, this.chipSupply_);
       if (!valid_draft) {
-        console.log('invalid draft: ', chips);
         throw new Error('invalid chip selection');
       }
 
@@ -278,13 +277,13 @@ Game.prototype.addAction = function(userID, action) {
         player.chips[color] += count;
         this.chipSupply_[color] -= count;
         if (count == 2) {
-            double_draft = true;
+          double_draft = true;
         }
       }, this);
       if (double_draft) {
-          this.logItems_.push([EventType.DRAFT_TWO_CHIP, [userID, chips]]);
+        this.logItems_.push([EventType.DRAFT_TWO_CHIP, [userID, chips]]);
       } else {
-          this.logItems_.push([EventType.DRAFT_MULTI_CHIP, [userID, chips]]);
+        this.logItems_.push([EventType.DRAFT_MULTI_CHIP, [userID, chips]]);
       }
       break;
     }
@@ -326,9 +325,9 @@ Game.prototype.addAction = function(userID, action) {
       }
 
       if (draftedFromDeck) {
-          this.logItems_.push([EventType.RESERVE_CARD_DECK, [userID, level, gotJoker]]);
+        this.logItems_.push([EventType.RESERVE_CARD_DECK, [userID, level, gotJoker]]);
       } else {
-          this.logItems_.push([EventType.RESERVE_CARD_TABLE, [userID, cardID, gotJoker]]);
+        this.logItems_.push([EventType.RESERVE_CARD_TABLE, [userID, cardID, gotJoker]]);
       }
       break;
     }

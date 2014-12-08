@@ -429,7 +429,6 @@ var PlayerView = React.createClass({
     var game = this.props.game;
     var player = this.props.game.players[this.props.playerIndex];
 
-    var thisPlayerWon = game.winningPlayerIndex == this.props.playerIndex;
     var chip_views = _.map(Colors, function(color) {
       return <ChipPileView
         key={color}
@@ -437,24 +436,21 @@ var PlayerView = React.createClass({
         count={player.chips[color] || 0}
       />;
     });
-    var noble_views = _.map(player.nobles, function (noble) {
-      return (<NobleView noble={noble}/>);
+    var noble_views = _.map(player.nobles, function (noble, i) {
+      return (<NobleView key={i} noble={noble}/>);
     });
 
-    var playerNameString;
-    var playerClassNames;
-    if (thisPlayerWon) {
-      playerNameString = player.userID + " (winner)";
-      playerClassNames = "player-view winning-player";
-    }
-    else {
-      playerNameString = player.userByID;
-      playerClassNames = "player-view";
+    var user = this.props.userByID[player.userID];
+    var player_name = user ? user.name : player.userID;
+    var container_class_name = 'player-view';
+    if (game.winningPlayerIndex == this.props.playerIndex) {
+      player_name += ' (winner)';
+      container_class_name += ' winning-player';
     }
 
     return (
-      <div className={playerClassNames}>
-        <div className="player-name">{playerNameString}</div>
+      <div className={container_class_name}>
+        <div className="player-name">{player_name}</div>
         <PlayerHandView
           session={this.props.session}
           game={this.props.game}
@@ -479,7 +475,6 @@ var PlayerHandView = React.createClass({
     };
   },
   onCardClick: function(card) {
-                 console.log('player hand card click', card);
     if (this.state.selectedCardID === card.id) {
       this.setState({selectedCardID: null});
     } else {
@@ -686,11 +681,12 @@ var GamePage = React.createClass({
       return loadingView;
     }
     var game = this.state.game;
+    var userByID = this.state.userByID || {};
     var localPlayer = _.find(this.state.game.players, function(player) {
       return player.userID === localUser.id;
     });
     var player_views = _.map(game.players, function(player, i) {
-      return <PlayerView key={player.userID} playerIndex={i} game={game} />
+      return <PlayerView key={player.userID} playerIndex={i} game={game} userByID={userByID} />;
     });
     return (
       <div className="game-view">

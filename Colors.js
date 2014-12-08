@@ -8,15 +8,4 @@ var Colors = {
   JOKER: 'joker',
 };
 
-
-Colors.Ordering = [
-  Colors.WHITE,
-  Colors.BLUE,
-  Colors.GREEN,
-  Colors.RED,
-  Colors.BLACK,
-  Colors.JOKER,
-];
-
-
 module.exports = Colors;
