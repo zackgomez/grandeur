@@ -125,6 +125,7 @@ var ActionPanelDiscardChipsDetail = React.createClass({
     discard_chips: React.PropTypes.object,
     player_chip_count: React.PropTypes.number.isRequired,
     onDiscardChipsClicked: React.PropTypes.func.isRequired,
+    onClearDiscardSelectionClicked: React.PropTypes.func.isRequired,
   },
   render: function() {
     var chip_views = generateChipViews(this.props.discard_chips);
@@ -136,17 +137,20 @@ var ActionPanelDiscardChipsDetail = React.createClass({
     var num_chips_to_discard = chip_surplus - num_chips_to_discard;
 
     var text = this.props.player_chip_count + ' is too many chips.  Discard ' + num_chips_to_discard + ' chips to continue.';
-    var submit_button = <button onClick={this.props.onDiscardChipsClicked}>OK, take 'em </button>;
-
-    submit_button.enabled = num_chips_to_discard == 0;
+    var submit_button = (
+      <button
+        disabled={num_chips_to_discard != 0 ? "disabled" : false}
+        onClick={this.props.onDiscardChipsClicked}>OK, take 'em
+      </button>
+    );
     return (
       <div className="action-panel">
         {text}
         <div className="chips">
           {chip_views}
         </div>
-      {submit_button}
-
+        {submit_button}
+        <button onClick={this.props.onClearDiscardSelectionClicked}>Hold on, start over</button>
       </div>
     );
   },
@@ -200,11 +204,11 @@ var ActionPanel = React.createClass({
   },
   onDiscardChips: function() {
     var selection = this.props.actionStore.getSelection();
-    _.each(selection.discard_chips, function(value, key) {
-      console.log(key + " goes to " + value);
-    });
     GameMutator.discardChips(this.props.game.id, selection.discard_chips);
     // TODO  validate based on selection
+  },
+  onClearDiscardSelection: function() {
+    this.props.actionStore.clearSelection();
   },
   renderDiscard: function(playersExistingChipCount) {
     var selection_or_null = this.props.actionStore.getSelection();
@@ -214,8 +218,9 @@ var ActionPanel = React.createClass({
     return (
       <ActionPanelDiscardChipsDetail
         discard_chips={selection_or_null}
-        onDiscardChipsClicked={this.onDiscardChips}
         player_chip_count={playersExistingChipCount}
+        onDiscardChipsClicked={this.onDiscardChips}
+        onClearDiscardSelectionClicked={this.onClearDiscardSelection}
       />);
   },
 
