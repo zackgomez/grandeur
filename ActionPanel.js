@@ -193,7 +193,7 @@ var ActionPanel = React.createClass({
     var selection = this.props.actionStore.getSelection();
     var selection_type = this.props.actionStore.getSelectionType();
     if (selection_type === ActionStore.SelectionTypes.CHIPS) {
-      GameMutator.draftChips(this.props.game.id, selection.discard_chips);
+      GameMutator.draftChips(this.props.game.id, selection.chips);
     }
   },
   onDiscardChips: function() {

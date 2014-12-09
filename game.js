@@ -361,7 +361,7 @@ Game.prototype.addAction = function(userID, action) {
       if (!canPayCost(cost, player.chips)) {
         throw new Error('cannot afford card');
       }
-      player.discard_chips = supplyAfterPayingCost(player.chips, cost);
+      player.chips = supplyAfterPayingCost(player.chips, cost);
       this.chipSupply_ = supplyAfterGainingCost(this.chipSupply_, cost);
       player.board = player.board.concat(card);
 
