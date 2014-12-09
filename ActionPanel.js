@@ -200,6 +200,9 @@ var ActionPanel = React.createClass({
   },
   onDiscardChips: function() {
     var selection = this.props.actionStore.getSelection();
+    _.each(selection.discard_chips, function(value, key) {
+      console.log(key + " goes to " + value);
+    });
     GameMutator.discardChips(this.props.game.id, selection.discard_chips);
     // TODO  validate based on selection
   },

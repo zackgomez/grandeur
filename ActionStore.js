@@ -149,7 +149,7 @@ ActionStore.prototype.didClickSupplyChip = function(clicked_color) {
   }
 
   if (this.getSelectionType() === SelectionTypes.CHIPS) {
-    var existing_chips = this.selection_.discard_chips;
+    var existing_chips = this.selection_.chips;
     var new_chips = _.clone(existing_chips);
     if (existing_chips[clicked_color] > 0) {
       new_chips[clicked_color] = 0;

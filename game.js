@@ -118,7 +118,7 @@ Game.prototype.nextTurn = function() {
   this.logItems_.push({type: EventType.START_TURN, userId: player.getID(), payload: {}});
   var total_chips = player.getChipCount();
 
-  player.chips = FULL_HAND_OF_JOKERS; // uncomment to be able to buy pretty much anything
+  //player.chips = FULL_HAND_OF_JOKERS; // uncomment to be able to buy pretty much anything
 
   // check for chip overflow
   if (total_chips > MAX_CHIPS) {
@@ -384,7 +384,7 @@ Game.prototype.addAction = function(userID, action) {
       break;
     }
     case ActionTypes.DISCARD_CHIPS: {
-      var discarded_chips = action.payload.discard_chips;
+      var discarded_chips = action.payload.chips;
       if (!_.isObject(discarded_chips)) {
         throw new Error('invalid chips dictionary');
       }
@@ -400,6 +400,7 @@ Game.prototype.addAction = function(userID, action) {
         var new_count = count - (discarded_chips[color] || 0);
         new_chips[color] = new_count;
         new_chips_count += new_count;
+        console.log("game.js DISCARD_CHIPS: chips[" + color + "] = " + new_count);
       });
       if (new_chips_count > MAX_CHIPS) {
         throw new Error('still too many chips');
