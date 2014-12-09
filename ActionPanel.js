@@ -87,7 +87,7 @@ var ActionPanelDeckSelectionDetail = React.createClass({
   },
 });
 
-function generate_chip_views(list_of_chips) {
+function generateChipViews(list_of_chips) {
   return _.reduce(list_of_chips, function(memo, count, color) {
     _.times(count, function(i) {
       memo.push(<ChipView key={color + i} color={color} />);
@@ -102,7 +102,7 @@ var ActionPanelChipSelectionDetail = React.createClass({
     onDraftChips: React.PropTypes.func,
   },
   render: function() {
-    var chip_views = generate_chip_views(this.props.chips);
+    var chip_views = generateChipViews(this.props.chips);
     return (
       <div className="action-panel card-detail">
         <div className="detail-title">Selected Chips</div>
@@ -120,9 +120,10 @@ var ActionPanelChipSelectionDetail = React.createClass({
 var ActionPanelDiscardChipsDetail = React.createClass({
   propTypes: {
     chips: React.PropTypes.object.isRequired,
+    onDiscardChipsClicked: React.PropTypes.func.isRequired,
   },
   render: function() {
-    var chip_views = generate_chip_views(this.props.discard_chips);
+    var chip_views = generateChipViews(this.props.discard_chips);
     var num_chips_to_discard = _.reduce(this.props.chips, function(sum, count) {
         return sum + count;
       }, 0) - 10;
@@ -130,6 +131,9 @@ var ActionPanelDiscardChipsDetail = React.createClass({
     return (
       <div className="action-panel">
         {text}
+        <button onClick={this.props.onDiscardChipsClicked}>
+          OK, take 'em
+        </button>
       </div>
     );
   },
@@ -182,6 +186,16 @@ var ActionPanel = React.createClass({
     }
   },
 
+  renderDiscard: function() {
+    if (this.props.actionStore.getSelectionType() !== ActionStore.SelectionTypes.DISCARD_CHIPS) {
+      // Hmmmm. Can't do this inside a render call because it would call forceUpdate from a render call.
+      //this.props.actionStore.clearSelection();
+    }
+    var selection_or_null = this.props.actionStore.getSelection();
+    console.log("renderDiscard: selection is " + selection_or_null);
+    return <ActionPanelDiscardChipsDetail chips={selection_or_null} />;
+  },
+
   render: function() {
     var game = this.props.game;
     var player = this.props.game.players[this.props.actionStore.getPlayerIndex()];
@@ -191,14 +205,18 @@ var ActionPanel = React.createClass({
     }
     var selection = actionStore.getSelection();
     var selection_type = actionStore.getSelectionType();
+
+    var request_type = game.currentRequest;
+
+    if (request_type == RequestTypes.DISCARD_CHIPS) {
+      return this.renderDiscard();
+    }
+    if (request_type == RequestTypes.SELECT_NOBLE) {
+      return <div className="action-panel">SELECT NOBLE TODO</div>;
+    }
+
     if (selection_type === ActionStore.SelectionTypes.NONE) {
-      var request_type = game.currentRequest;
-      if (request_type === RequestTypes.DISCARD_CHIPS) {
-        var chips = actionStore.getSelection().discard_chips;
-        return <ActionPanelDiscardChipsDetail chips={chips} />;
-      } else if (request_type === RequestTypes.SELECT_NOBLE) {
-        return <div className="action-panel">SELECT NOBLE TODO</div>;
-      } else if (request_type === RequestTypes.ACTION) {
+      if (request_type === RequestTypes.ACTION) {
         return (
           <ActionPanelOverview
           session={this.props.session}
