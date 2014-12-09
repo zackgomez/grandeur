@@ -120,7 +120,7 @@ var ActionPanelDiscardChipsDetail = React.createClass({
     onDiscardChipsClicked: React.PropTypes.func.isRequired,
   },
   render: function() {
-    var chip_views = generateChipViews(this.props.discard_chips);
+    var chip_views = generateChipViews(this.props.chips);
     var num_chips_to_discard = _.reduce(this.props.chips, function(sum, count) {
         return sum + count;
       }, 0) - 10;
@@ -128,6 +128,7 @@ var ActionPanelDiscardChipsDetail = React.createClass({
     return (
       <div className="action-panel">
         {text}
+        {chip_views}
         <button onClick={this.props.onDiscardChipsClicked}>
           OK, take 'em
         </button>
@@ -188,13 +189,12 @@ var ActionPanel = React.createClass({
     // TODO  validate based on selection
   },
   renderDiscard: function() {
-    if (this.props.actionStore.getSelectionType() !== ActionStore.SelectionTypes.DISCARD_CHIPS) {
-      // Hmmmm. Can't do this inside a render call because it would call forceUpdate from a render call.
-      //this.props.actionStore.clearSelection();
-    }
     var selection_or_null = this.props.actionStore.getSelection();
-    console.log("renderDiscard: selection is " + selection_or_null);
-    return <ActionPanelDiscardChipsDetail chips={selection_or_null} onDiscardChipsClicked={this.onDiscardChips} />;
+    return (
+      <ActionPanelDiscardChipsDetail
+        chips={selection_or_null}
+        onDiscardChipsClicked={this.onDiscardChips}
+      />);
   },
 
   render: function() {

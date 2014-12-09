@@ -144,7 +144,7 @@ var PlayerView = React.createClass({
     actionStore: React.PropTypes.instanceOf(ActionStore).isRequired,
     userByID: React.PropTypes.object.isRequired,
   },
-  onChipClicked: function(color) {
+  chipClicked: function(color) {
     this.props.actionStore.didClickPlayerChip(color);
   },
   render: function() {
@@ -153,14 +153,14 @@ var PlayerView = React.createClass({
     var actionStore = this.props.actionStore;
 
     var chip_views = _.map(Colors, function(color) {
-      var chipClickHandler = _.partial(this.onChipClicked, color);
+      var chipClickHandler = _.partial(this.chipClicked, color);
       return <ChipPileView
         key={color}
         color={color}
         count={player.chips[color] || 0}
         onClick={chipClickHandler}
       />;
-    });
+    }, this); // Facepalm
     var noble_views = _.map(player.nobles, function (noble, i) {
       return (<NobleView key={i} noble={noble}/>);
     });
