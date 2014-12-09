@@ -157,7 +157,7 @@ var PlayerView = React.createClass({
       return <ChipPileView
         key={color}
         color={color}
-        count={player.discard_chips[color] || 0}
+        count={player.chips[color] || 0}
         onClick={chipClickHandler}
       />;
     }, this); // Facepalm
