@@ -389,14 +389,14 @@ Game.prototype.addAction = function(userID, action) {
         throw new Error('invalid chips dictionary');
       }
       var has_chips = _.every(discarded_chips, function(count, color) {
-        return player.discard_chips[color] >= count;
+        return player.chips[color] >= count;
       });
       if (!has_chips) {
         throw new Error('invalid chip selection');
       }
       var new_chips = {};
       var new_chips_count = 0;
-      _.each(player.discard_chips, function(count, color) {
+      _.each(player.chips, function(count, color) {
         var new_count = count - (discarded_chips[color] || 0);
         new_chips[color] = new_count;
         new_chips_count += new_count;
