@@ -23,11 +23,44 @@ var ActionStore = function(game, player_index) {
 
 ActionStore.SelectionTypes = SelectionTypes;
 
+var selection_type_from_selection = function(selection) {
+  if (_.has(selection, 'cardID') && _.has(selection, 'level')) {
+    return SelectionTypes.CARD;
+  } else if (_.has(selection, 'cardID')) {
+    return SelectionTypes.HAND_CARD;
+  } else if (_.has(selection, 'level')) {
+    return SelectionTypes.DECK;
+  } else if (_.has(selection, 'chips') > 0) {
+    return SelectionTypes.CHIPS;
+  } else if (_.has(selection, 'noble_index')) {
+    return SelectionTypes.NOBLE;
+  } else {
+    return SelectionTypes.NONE;
+  }
+};
+
 ActionStore.prototype.setSelection_ = function(selection, force) {
   if (!this.isPlayersTurn() && !force) {
     return;
   }
-  // TODO validate selection based on game request type
+  var request = this.game_.currentRequest;
+  var new_selection_type = selection_type_from_selection(selection);
+  if (new_selection_type === SelectionTypes.NONE) {
+    // nop
+  } else if (request === RequestTypes.DISCARD_CHIPS &&
+      new_selection_type !== SelectionTypes.PLAYER_CHIPS) {
+    return;
+  } else if (request === RequestTypes.SELECT_NOBLE &&
+             new_selection_type !== SelectionTypes.NOBLE) {
+    return;
+  } else if (request === RequestTypes.ACTION &&
+             new_selection_type !== SelectionTypes.CARD &&
+             new_selection_type !== SelectionTypes.HAND_CARD &&
+             new_selection_type !== SelectionTypes.DECK &&
+             new_selection_type !== SelectionTypes.CHIPS) {
+    return;
+  }
+
   this.selection_ = selection;
 
   _.each(this.listeners_, function(listener) {
@@ -59,19 +92,7 @@ ActionStore.prototype.clearSelection = function() {
 
 ActionStore.prototype.getSelectionType = function() {
   var selection = this.getSelection() || {};
-  if (_.has(selection, 'cardID') && _.has(selection, 'level')) {
-    return SelectionTypes.CARD;
-  } else if (_.has(selection, 'cardID')) {
-    return SelectionTypes.HAND_CARD;
-  } else if (_.has(selection, 'level')) {
-    return SelectionTypes.DECK;
-  } else if (_.size(selection.chips) > 0) {
-    return SelectionTypes.CHIPS;
-  } else if (_.has(selection, 'noble_index')) {
-    return SelectionTypes.NOBLE;
-  } else {
-    return SelectionTypes.NONE;
-  }
+  return selection_type_from_selection(selection);
 };
 ActionStore.prototype.getSelection = function() {
   if (!this.isPlayersTurn()) {

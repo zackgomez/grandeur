@@ -350,6 +350,9 @@ var GamePage = React.createClass({
   },
 
   stateToJSON: function(state) {
+    if (!state) {
+      return null;
+    }
     return {
       game: state.game,
       userByID: state.userByID,
@@ -357,6 +360,9 @@ var GamePage = React.createClass({
     };
   },
   stateFromJSON: function(state) {
+    if (!state) {
+      return null;
+    }
     return {
       game: state.game,
       userByID: state.userByID,
