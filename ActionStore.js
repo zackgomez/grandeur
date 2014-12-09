@@ -44,8 +44,11 @@ ActionStore.prototype.removeListener = function(callback) {
 
 ActionStore.prototype.setGame = function(game) {
   var old_turn = this.game_.turn;
+  var old_request = this.game_.currentRequest;
   this.game_ = game;
-  if (!this.isPlayersTurn() || old_turn != game.turn) {
+  if (!this.isPlayersTurn() ||
+      old_turn != game.turn ||
+      old_request != game.currentRequest) {
     this.clearSelection();
   }
 };

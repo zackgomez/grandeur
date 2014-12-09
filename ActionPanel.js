@@ -9,6 +9,7 @@ var CardView = require('./CardView');
 var DeckView = require('./DeckView');
 var GameMutator = require('./GameMutator');
 var ChipView = require('./ChipView');
+var RequestTypes = require('./RequestTypes');
 
 var ActionPanelOverviewItem = React.createClass({
   render: function () {
@@ -21,12 +22,31 @@ var ActionPanelOverviewItem = React.createClass({
 
 var ActionPanelOverview = React.createClass({
   render: function() {
-    return (<div className="action-panel">
-      <ActionPanelOverviewItem actionTitle="Build" />
-      <ActionPanelOverviewItem actionTitle="Draft" />
-      <ActionPanelOverviewItem actionTitle="Reserve" />
-    </div>);
+    return (
+      <div className="action-panel">
+        <ActionPanelOverviewItem actionTitle="Build" />
+        <ActionPanelOverviewItem actionTitle="Draft" />
+        <ActionPanelOverviewItem actionTitle="Reserve" />
+      </div>
+    );
   }
+});
+
+var ActionPanelDiscardChipsOverview = React.createClass({
+  propTypes: {
+    chips: React.PropTypes.object.isRequired,
+  },
+  render: function() {
+    var num_chips_to_discard = _.reduce(this.props.chips, function(sum, count) {
+      return sum + count;
+    }, 0) - 10;
+    var text = 'You have too many chips.  Discard ' + num_chips_to_discard + ' chips.';
+    return (
+      <div className="action-panel">
+        {text}
+      </div>
+    );
+  },
 });
 
 var ActionPanelCardSelectionDetail = React.createClass({
@@ -156,19 +176,27 @@ var ActionPanel = React.createClass({
 
   render: function() {
     var game = this.props.game;
+    var player = this.props.game.players[this.props.actionStore.getPlayerIndex()];
     var actionStore = this.props.actionStore;
     if (!actionStore.isPlayersTurn()) {
-      return <div />
+      return <script />;
     }
     var selection = actionStore.getSelection();
     var selection_type = actionStore.getSelectionType();
     if (selection_type === ActionStore.SelectionTypes.NONE) {
-      return (
-        <ActionPanelOverview
-        session={this.props.session}
-        game={this.props.session}
-        />
-      );
+      var request_type = game.currentRequest;
+      if (request_type === RequestTypes.DISCARD_CHIPS) {
+        return <ActionPanelDiscardChipsOverview chips={player.chips} />;
+      } else if (request_type === RequestTypes.SELECT_NOBLE) {
+        return <div className="action-panel">SELECT NOBLE TODO</div>;
+      } else if (request_type === RequestTypes.ACTION) {
+        return (
+          <ActionPanelOverview
+          session={this.props.session}
+          game={this.props.session}
+          />
+        );
+      }
     } else if (selection_type === ActionStore.SelectionTypes.CARD) {
       var selected_card = game.cardsByID[selection.cardID];
       return <ActionPanelCardSelectionDetail

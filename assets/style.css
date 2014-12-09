@@ -332,6 +332,10 @@ span.gem {
   background-color: gold;
 }
 
+.player-view {
+  border: solid black 1px;
+}
+
 .player-hand-view {
   display: flex;
 }

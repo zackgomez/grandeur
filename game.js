@@ -121,7 +121,8 @@ Game.prototype.nextTurn = function() {
 
   // check for chip overflow
   if (total_chips > MAX_CHIPS) {
-    console.log("TODO discard some chips");
+    this.currentRequest_ = RequestTypes.DISCARD_CHIPS;
+    return;
   }
 
   // check for noble visit
