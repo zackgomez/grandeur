@@ -129,13 +129,13 @@ var ActionPanelDiscardChipsDetail = React.createClass({
   render: function() {
     var chip_views = generateChipViews(this.props.discard_chips);
     var chip_surplus = this.props.player_chip_count - 10;
-    var num_chips_to_discard;
+    var num_chips_to_discard = 0;
     _.each(this.props.discard_chips, function(value) {
       num_chips_to_discard += value;
     });
     var num_chips_to_discard = chip_surplus - num_chips_to_discard;
 
-    var text = chip_surplus + 'is too many chips.  Discard ' + num_chips_to_discard + ' chips to continue.';
+    var text = this.props.player_chip_count + ' is too many chips.  Discard ' + num_chips_to_discard + ' chips to continue.';
     var submit_button = <button onClick={this.props.onDiscardChipsClicked}>OK, take 'em </button>;
 
     submit_button.enabled = num_chips_to_discard == 0;
@@ -145,6 +145,7 @@ var ActionPanelDiscardChipsDetail = React.createClass({
         <div className="chips">
           {chip_views}
         </div>
+      {submit_button}
 
       </div>
     );
