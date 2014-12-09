@@ -374,6 +374,7 @@ span.gem {
 }
 
 .game-log-item {
+  display: flex;
   background-color: #E0E0E0;
   padding: 5px;
   margin: 5px;
@@ -382,6 +383,7 @@ span.gem {
 .user-name {
   display:inline-block;
   font-weight: bold;
+  padding-right: 5px;
 }
 
 

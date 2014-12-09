@@ -31,6 +31,7 @@ var CardView = require('./CardView');
 var GemView = require('./GemView');
 var DeckView = require('./DeckView');
 var ChipViews = require('./ChipViews');
+var EventType = require('./EventType');
 var ChipView = ChipViews.ChipView;
 var ChipSupplyView = ChipViews.ChipSupplyView;
 var ChipPileView = ChipViews.ChipPileView;
@@ -256,10 +257,34 @@ var GameLogView = React.createClass({
     var userId = logEvent.userId;
     var payload = logEvent.payload;
     var playerName = this.props.users[userId].name;
-
+    var playerHTML = <div className="user-name">{playerName + " "}</div>;
+    var prettifiedEventDescription;
+    switch (eventType) {
+      case EventType.START_TURN:
+        prettifiedEventDescription = " starts their turn.";
+        break;
+      case EventType.BUILD_HAND_CARD:
+        prettifiedEventDescription = " builds a card from their hand.";
+        break;
+      case EventType.RESERVE_CARD_DECK:
+        prettifiedEventDescription = " YOLO drafts a level " + payload.card_level + " card.";
+        break;
+      case EventType.RESERVE_CARD_TABLE:
+        prettifiedEventDescription = " reserves a card at level " + payload.card_level + ".";
+        break;
+      case EventType.BUILD_TABLE_CARD:
+        prettifiedEventDescription = " builds from the table.";
+        break;
+      case EventType.DRAFT_MULTI_CHIP:
+      case EventType.DRAFT_TWO_CHIP:
+        prettifiedEventDescription = " drafts some chips.";
+        break;
+      default:
+        prettifiedEventDescription = JSON.stringify(payload);
+    }
     return (
-      <div key={i} className="game-log-item">
-        {JSON.stringify(playerName) + ' ' + JSON.stringify(eventType) + ' ' + JSON.stringify(payload)}
+      <div  key={i} className="game-log-item">
+        <p>{playerHTML} {prettifiedEventDescription}</p>
       </div>
     );
   },
