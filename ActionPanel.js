@@ -66,9 +66,6 @@ var ActionPanelHandCardSelectionDetail = React.createClass({
   },
 });
 
-/*
-Hook up clicking on the player supply to the action store.
- */
 var ActionPanelDeckSelectionDetail = React.createClass({
   propTypes: {
     level: React.PropTypes.number.isRequired,
@@ -119,7 +116,7 @@ var ActionPanelChipSelectionDetail = React.createClass({
 
 var ActionPanelDiscardChipsDetail = React.createClass({
   propTypes: {
-    chips: React.PropTypes.object.isRequired,
+    chips: React.PropTypes.object,
     onDiscardChipsClicked: React.PropTypes.func.isRequired,
   },
   render: function() {
@@ -185,7 +182,11 @@ var ActionPanel = React.createClass({
       GameMutator.draftChips(this.props.game.id, selection.chips);
     }
   },
-
+  onDiscardChips: function() {
+    var selection = this.props.actionStore.getSelection();
+    GameMutator.discardChips(this.props.game.id, selection.discard_chips);
+    // TODO  validate based on selection
+  },
   renderDiscard: function() {
     if (this.props.actionStore.getSelectionType() !== ActionStore.SelectionTypes.DISCARD_CHIPS) {
       // Hmmmm. Can't do this inside a render call because it would call forceUpdate from a render call.
@@ -193,7 +194,7 @@ var ActionPanel = React.createClass({
     }
     var selection_or_null = this.props.actionStore.getSelection();
     console.log("renderDiscard: selection is " + selection_or_null);
-    return <ActionPanelDiscardChipsDetail chips={selection_or_null} />;
+    return <ActionPanelDiscardChipsDetail chips={selection_or_null} onDiscardChipsClicked={this.onDiscardChips} />;
   },
 
   render: function() {

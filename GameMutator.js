@@ -42,6 +42,9 @@ var GameMutator = {
       }
     );
   },
+  discardChips: function(gameID, colorToCountMap) {
+    this.sendAction(gameID, ActionTypes.DISCARD_CHIPS, {chips: colorToCountMap});
+  },
   sendAction: function(gameID, action_type, payload) {
     var action = { type: action_type, payload: payload };
     superagent.post('/api/game/' + gameID + '/add_action')

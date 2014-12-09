@@ -144,17 +144,21 @@ var PlayerView = React.createClass({
     actionStore: React.PropTypes.instanceOf(ActionStore).isRequired,
     userByID: React.PropTypes.object.isRequired,
   },
+  onChipClicked: function(color) {
+    this.props.actionStore.didClickPlayerChip(color);
+  },
   render: function() {
     var game = this.props.game;
     var player = this.props.game.players[this.props.playerIndex];
     var actionStore = this.props.actionStore;
 
     var chip_views = _.map(Colors, function(color) {
+      var chipClickHandler = _.partial(this.onChipClicked, color);
       return <ChipPileView
         key={color}
         color={color}
         count={player.chips[color] || 0}
-        onClick={actionStore.didClickPlayerChip}
+        onClick={chipClickHandler}
       />;
     });
     var noble_views = _.map(player.nobles, function (noble, i) {
