@@ -3,7 +3,7 @@
  */
 "use strict";
 var ActionTypes = require('./ActionTypes');
-var React = require('react');
+var React = require('react/addons');
 var ReactAsync = require('react-async');
 var ReactRouter = require('react-router-component');
 var CloudListener = require('./CloudListener');
@@ -35,6 +35,7 @@ var EventType = require('./EventType');
 var ChipView = ChipViews.ChipView;
 var ChipSupplyView = ChipViews.ChipSupplyView;
 var ChipPileView = ChipViews.ChipPileView;
+var ReactCSSTransitionGroup = React.addons.CSSTransitionGroup;
 
 var navigateToHref = function(href, cb) {
   cb = cb || function() {};
@@ -294,7 +295,9 @@ var GameLogView = React.createClass({
     return (
       <div className="game-log-view">
         <div className="game-log-items">
-          {log_items}
+          <ReactCSSTransitionGroup transitionName="log">
+            {log_items}
+          </ReactCSSTransitionGroup>
         </div>
       </div>
     );

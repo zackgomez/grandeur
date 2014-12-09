@@ -386,6 +386,14 @@ span.gem {
   padding-right: 5px;
 }
 
+.log-enter {
+  opacity: 0.01;
+  transition: opacity .5s ease-in;
+}
+
+.log-enter.log-enter-active {
+  opacity: 1;
+}
 
 .game-log-item {
   font-size:15px;
