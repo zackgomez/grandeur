@@ -69,7 +69,7 @@ Game.prototype.setUpGame = function() {
   this.gameStartTimestamp_ = Date.now();
   _.each(this.players_, function(player) {
     _.each(Colors, function(color) {
-      player.chips[color] = 0;
+      player.discard_chips[color] = 0;
     });
   });
 
@@ -118,7 +118,7 @@ Game.prototype.nextTurn = function() {
   this.logItems_.push({type: EventType.START_TURN, userId: player.getID(), payload: {}});
   var total_chips = player.getChipCount();
 
-  player.chips = FULL_HAND_OF_JOKERS; // uncomment to be able to buy pretty much anything
+  player.discard_chips = FULL_HAND_OF_JOKERS; // uncomment to be able to buy pretty much anything
 
   // check for chip overflow
   if (total_chips > MAX_CHIPS) {
@@ -266,7 +266,7 @@ Game.prototype.addAction = function(userID, action) {
       var double_draft = false;
 
       _.each(chips, function(count, color) {
-        player.chips[color] += count;
+        player.discard_chips[color] += count;
         this.chipSupply_[color] -= count;
         if (count == 2) {
           double_draft = true;
@@ -311,7 +311,7 @@ Game.prototype.addAction = function(userID, action) {
       player.hand.push(drafted_card);
       var gotJoker = false;
       if (this.chipSupply_[Colors.JOKER] > 0) {
-        player.chips[Colors.JOKER] += 1;
+        player.discard_chips[Colors.JOKER] += 1;
         this.chipSupply_[Colors.JOKER] -= 1;
         gotJoker = true;
       }
@@ -336,11 +336,11 @@ Game.prototype.addAction = function(userID, action) {
       if (!card) {
         throw new Error('bad card id');
       }
-      var cost = costForCard(card, player.chips, player.getDiscountMap());
-      if (!canPayCost(cost, player.chips)) {
+      var cost = costForCard(card, player.discard_chips, player.getDiscountMap());
+      if (!canPayCost(cost, player.discard_chips)) {
         throw new Error('cannot afford card');
       }
-      player.chips = supplyAfterPayingCost(player.chips, cost);
+      player.discard_chips = supplyAfterPayingCost(player.discard_chips, cost);
       this.chipSupply_ = supplyAfterGainingCost(this.chipSupply_, cost);
       player.board = player.board.concat(card);
 
@@ -357,11 +357,11 @@ Game.prototype.addAction = function(userID, action) {
       if (!card) {
         throw new Error('bad card id');
       }
-      var cost = costForCard(card, player.chips, player.getDiscountMap());
-      if (!canPayCost(cost, player.chips)) {
+      var cost = costForCard(card, player.discard_chips, player.getDiscountMap());
+      if (!canPayCost(cost, player.discard_chips)) {
         throw new Error('cannot afford card');
       }
-      player.chips = supplyAfterPayingCost(player.chips, cost);
+      player.discard_chips = supplyAfterPayingCost(player.discard_chips, cost);
       this.chipSupply_ = supplyAfterGainingCost(this.chipSupply_, cost);
       player.board = player.board.concat(card);
 
@@ -384,24 +384,24 @@ Game.prototype.addAction = function(userID, action) {
       break;
     }
     case ActionTypes.DISCARD_CHIPS: {
-      var discarded_chips = action.payload.chips;
+      var discarded_chips = action.payload.discard_chips;
       if (!_.isObject(discarded_chips)) {
         throw new Error('invalid chips dictionary');
       }
       var has_chips = _.every(discarded_chips, function(count, color) {
-        return player.chips[color] >= count;
+        return player.discard_chips[color] >= count;
       });
       if (!has_chips) {
         throw new Error('invalid chip selection');
       }
       var new_chips = {};
       var new_chips_count = 0;
-      _.each(player.chips, function(count, color) {
+      _.each(player.discard_chips, function(count, color) {
         var new_count = count - (discarded_chips[color] || 0);
         new_chips[color] = new_count;
         new_chips_count += new_count;
       });
-      if (new_count > MAX_CHIPS) {
+      if (new_chips_count > MAX_CHIPS) {
         throw new Error('still too many chips');
       }
       player.chips = new_chips;

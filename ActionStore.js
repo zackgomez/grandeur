@@ -129,9 +129,17 @@ ActionStore.prototype.didClickDeck = function(level) {
 
 // Called while discarding chips.
 ActionStore.prototype.didClickPlayerChip = function(clicked_color) {
-  var chips = {};
-  chips[clicked_color] = 1;
-  this.setSelection_({discard_chips : chips});
+  var to_discard = {};
+  if (this.selection_) {
+    to_discard = this.selection_.discard_chips || {};
+  }
+  if (_.has(to_discard, clicked_color)) {
+    to_discard[clicked_color]++;
+  }
+  else {
+    to_discard[clicked_color] = 1;
+  }
+  this.setSelection_({discard_chips : to_discard});
 }
 
 ActionStore.prototype.didClickSupplyChip = function(clicked_color) {
@@ -141,7 +149,7 @@ ActionStore.prototype.didClickSupplyChip = function(clicked_color) {
   }
 
   if (this.getSelectionType() === SelectionTypes.CHIPS) {
-    var existing_chips = this.selection_.chips;
+    var existing_chips = this.selection_.discard_chips;
     var new_chips = _.clone(existing_chips);
     if (existing_chips[clicked_color] > 0) {
       new_chips[clicked_color] = 0;
