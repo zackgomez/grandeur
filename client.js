@@ -30,64 +30,15 @@ var ActionStore = require('./ActionStore');
 var CardView = require('./CardView');
 var GemView = require('./GemView');
 var DeckView = require('./DeckView');
-var ChipView = require('./ChipView');
+var ChipViews = require('./ChipViews');
+var ChipView = ChipViews.ChipView;
+var ChipSupplyView = ChipViews.ChipSupplyView;
+var ChipPileView = ChipViews.ChipPileView;
 
 var navigateToHref = function(href, cb) {
   cb = cb || function() {};
   ReactRouter.environment.defaultEnvironment.navigate(href, cb);
 };
-
-
-var ChipPileView = React.createClass({
-  render: function() {
-    var color = this.props.color;
-    return (
-      <div key={color}
-           className={'chip-pile ' + color}
-           onClick={this.props.onClick} >
-        <ChipView color={color}
-                  highlighted={this.props.highlighted} />
-        <span className="chip-count">{this.props.count}</span>
-      </div>
-    );
-  },
-});
-
-var ChipSupplyView = React.createClass({
-  propTypes: {
-    actionStore: React.PropTypes.instanceOf(ActionStore).isRequired,
-    game: React.PropTypes.object.isRequired,
-    onChipClick: React.PropTypes.func,
-  },
-  onChipClick: function(color) {
-    if (color === Colors.JOKER) {
-      return;
-    }
-    this.props.actionStore.didClickChip(color);
-  },
-  render: function() {
-    var chips = _.map(Colors, function (color) {
-      var onClickFunc = _.partial(this.onChipClick, color);
-      var highlight = false;
-      return (
-        <ChipPileView
-          key={color}
-          color={color}
-          highlighted={highlight}
-          count={this.props.game.chipSupply[color]}
-          onClick={onClickFunc}
-          />
-      );
-    }, this);
-    return (
-      <div className="chip-supply">
-        <div className="chip-piles">
-          {chips}
-        </div>
-      </div>
-    );
-  },
-});
 
 var NobleView = React.createClass({
   render: function() {
@@ -196,12 +147,14 @@ var PlayerView = React.createClass({
   render: function() {
     var game = this.props.game;
     var player = this.props.game.players[this.props.playerIndex];
+    var actionStore = this.props.actionStore;
 
     var chip_views = _.map(Colors, function(color) {
       return <ChipPileView
         key={color}
         color={color}
         count={player.chips[color] || 0}
+        onClick={actionStore.didClickPlayerChip}
       />;
     });
     var noble_views = _.map(player.nobles, function (noble, i) {

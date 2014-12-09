@@ -8,7 +8,7 @@ var ActionStore = require('./ActionStore');
 var CardView = require('./CardView');
 var DeckView = require('./DeckView');
 var GameMutator = require('./GameMutator');
-var ChipView = require('./ChipView');
+var ChipView = require('./ChipViews').ChipView;
 var RequestTypes = require('./RequestTypes');
 
 var ActionPanelOverviewItem = React.createClass({
@@ -32,7 +32,7 @@ var ActionPanelOverview = React.createClass({
   }
 });
 
-var ActionPanelDiscardChipsOverview = React.createClass({
+var ActionPanelDiscardChipsDetail = React.createClass({
   propTypes: {
     chips: React.PropTypes.object.isRequired,
   },
@@ -83,6 +83,9 @@ var ActionPanelHandCardSelectionDetail = React.createClass({
   },
 });
 
+/*
+Hook up clicking on the player supply to the action store.
+ */
 var ActionPanelDeckSelectionDetail = React.createClass({
   propTypes: {
     level: React.PropTypes.number.isRequired,
@@ -186,7 +189,7 @@ var ActionPanel = React.createClass({
     if (selection_type === ActionStore.SelectionTypes.NONE) {
       var request_type = game.currentRequest;
       if (request_type === RequestTypes.DISCARD_CHIPS) {
-        return <ActionPanelDiscardChipsOverview chips={player.chips} />;
+        return <ActionPanelDiscardChipsDetail chipsToDiscard={actionStore.getSelection()} />;
       } else if (request_type === RequestTypes.SELECT_NOBLE) {
         return <div className="action-panel">SELECT NOBLE TODO</div>;
       } else if (request_type === RequestTypes.ACTION) {

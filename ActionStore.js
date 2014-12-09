@@ -32,6 +32,8 @@ var selection_type_from_selection = function(selection) {
     return SelectionTypes.DECK;
   } else if (_.has(selection, 'chips') > 0) {
     return SelectionTypes.CHIPS;
+  } else if (_.has(selection, 'player_chips') > 0) {
+    return SelectionTypes.PLAYER_CHIPS; // Used while discarding.
   } else if (_.has(selection, 'noble_index')) {
     return SelectionTypes.NOBLE;
   } else {
@@ -124,7 +126,15 @@ ActionStore.prototype.didClickDeck = function(level) {
     level: level,
   });
 };
-ActionStore.prototype.didClickChip = function(clicked_color) {
+
+// Called while discarding chips.
+ActionStore.prototype.didClickPlayerChip = function(clicked_color) {
+  var chips = {};
+  chips[clicked_color] = 1;
+  this.setSelection_({player_chips : chips});
+}
+
+ActionStore.prototype.didClickSupplyChip = function(clicked_color) {
   var supply_count = this.game_.chipSupply[clicked_color];
   if (supply_count == 0) {
     return;

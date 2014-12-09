@@ -118,7 +118,7 @@ Game.prototype.nextTurn = function() {
   this.logItems_.push({type: EventType.START_TURN, userId: player.getID(), payload: {}});
   var total_chips = player.getChipCount();
 
-  //player.chips = FULL_HAND_OF_JOKERS; // uncomment to be able to buy pretty much anything
+  player.chips = FULL_HAND_OF_JOKERS; // uncomment to be able to buy pretty much anything
 
   // check for chip overflow
   if (total_chips > MAX_CHIPS) {
