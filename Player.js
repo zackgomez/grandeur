@@ -24,7 +24,7 @@ Player.prototype.toJSON = function () {
   };
 };
 
-Player.prototype.getScore = function() {
+Player.getPlayerScore = function(playerJSON) {
   var score = 0;
   _.each(this.board, function(card) {
     score += card.points;
@@ -33,6 +33,10 @@ Player.prototype.getScore = function() {
     score += noble.points;
   });
   return score;
+};
+
+Player.prototype.getScore = function() {
+  return Player.getPlayerScore(this);
 };
 
 // map: color name string --> discount for that color
@@ -49,12 +53,16 @@ Player.prototype.canSelectNoble = function(noble) {
   });
 };
 
-Player.prototype.getChipCount = function() {
+Player.chipCountForPlayer = function(playerJSON) {
   var total_chips = 0;
   _.each(this.chips, function(count, color) {
     total_chips += count;
   });
   return total_chips;
+}
+
+Player.prototype.getChipCount = function() {
+  return Player.chipCountForPlayer(this);
 }
 
 module.exports = Player;

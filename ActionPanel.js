@@ -10,6 +10,7 @@ var DeckView = require('./DeckView');
 var GameMutator = require('./GameMutator');
 var ChipView = require('./ChipViews').ChipView;
 var RequestTypes = require('./RequestTypes');
+var Player = require('./Player');
 
 var ActionPanelOverviewItem = React.createClass({
   render: function () {
@@ -201,7 +202,7 @@ var ActionPanel = React.createClass({
     GameMutator.discardChips(this.props.game.id, selection.discard_chips);
     // TODO  validate based on selection
   },
-  renderDiscard: function() {
+  renderDiscard: function(playersExistingChipCount) {
     var selection_or_null = this.props.actionStore.getSelection();
     if (selection_or_null != null) {
       selection_or_null = selection_or_null.discard_chips;
@@ -210,6 +211,7 @@ var ActionPanel = React.createClass({
       <ActionPanelDiscardChipsDetail
         discard_chips={selection_or_null}
         onDiscardChipsClicked={this.onDiscardChips}
+        player_chip_count={playersExistingChipCount}
       />);
   },
 
@@ -226,7 +228,8 @@ var ActionPanel = React.createClass({
     var request_type = game.currentRequest;
 
     if (request_type == RequestTypes.DISCARD_CHIPS) {
-      return this.renderDiscard();
+      var chipCount = Player.chipCountForPlayer(player);
+      return this.renderDiscard(chipCount);
     }
     if (request_type == RequestTypes.SELECT_NOBLE) {
       return <div className="action-panel">SELECT NOBLE TODO</div>;
