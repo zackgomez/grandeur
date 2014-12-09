@@ -11,6 +11,8 @@ var GameMutator = require('./GameMutator');
 var ChipView = require('./ChipViews').ChipView;
 var RequestTypes = require('./RequestTypes');
 var Player = require('./Player');
+var NobleView = require('./NobleView');
+var Game = require('./game');
 
 var ActionPanelOverviewItem = React.createClass({
   render: function () {
@@ -49,6 +51,25 @@ var ActionPanelCardSelectionDetail = React.createClass({
       </div>
     );
   },
+});
+
+var ActionPanelNobleSelectionDetail = React.createClass({
+  propTypes: {
+    noblesEarned: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
+    onNobleClicked: React.PropTypes.func.isRequired,
+  },
+  render: function() {
+    var nobleViews = _.map(this.props.noblesEarned, function(noble, i) {
+      var cb = _.partial(this.props.onNobleClicked, noble);
+      return <NobleView key={i} onClick={cb} noble={noble} />
+    }, this);
+    return (
+      <div className="action-panel card-detail">
+        <div className="detail-title">Choose a noble</div>
+        {nobleViews}
+      </div>
+    );
+  }
 });
 
 var ActionPanelHandCardSelectionDetail = React.createClass({
@@ -166,7 +187,7 @@ var ActionPanel = React.createClass({
   componentWillMount: function() {
     this.props.actionStore.addListener(this.onActionStoreChange);
   },
-  componentWillUmount: function() {
+  componentWillUnmount: function() {
     this.props.actionStore.removeListener(this.onActionStoreChange);
   },
 
@@ -207,6 +228,10 @@ var ActionPanel = React.createClass({
     GameMutator.discardChips(this.props.game.id, selection.discard_chips);
     // TODO  validate based on selection
   },
+  onNobleSelected: function(noble) {
+    var nobleIndex = _.indexOf(this.props.game.nobles, noble);
+    GameMutator.selectNoble(this.props.game.id, nobleIndex);
+  },
   onClearDiscardSelection: function() {
     this.props.actionStore.clearSelection();
   },
@@ -241,7 +266,15 @@ var ActionPanel = React.createClass({
       return this.renderDiscard(chipCount);
     }
     if (request_type == RequestTypes.SELECT_NOBLE) {
-      return <div className="action-panel">SELECT NOBLE TODO</div>;
+      var selectable_nobles = Game.noblesEarned(Player.getDiscountMap(player), game.nobles);
+      var cb = function(noble) {
+        this.onNobleSelected(noble);
+      }.bind(this);
+      return (
+        <ActionPanelNobleSelectionDetail
+          noblesEarned={selectable_nobles}
+          onNobleClicked={cb}
+        />);
     }
 
     if (selection_type === ActionStore.SelectionTypes.NONE) {

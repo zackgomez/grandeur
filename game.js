@@ -8,9 +8,9 @@ var _ = require('underscore');
 var Colors = require('./Colors');
 var GameData = require('./GameData');
 var RequestTypes = require('./RequestTypes');
-var Player = require('./Player')
-var Card = require('./Card')
-var Deck = require('./Deck')
+var Player = require('./Player');
+var Card = require('./Card');
+var Deck = require('./Deck');
 
 var CARDS_PER_LEVEL = 4;
 var MAX_CHIPS = 10;
@@ -90,7 +90,7 @@ Game.prototype.setUpGame = function() {
     2: 4,
     3: 5,
     4: 7,
-  }
+  };
   _.each(Colors, function(color) {
     this.chipSupply_[color] = color === Colors.JOKER ?
       5 : (playerCountToChipCount[this.players_.length] || 7);
@@ -128,22 +128,15 @@ Game.prototype.nextTurn = function() {
 
   // check for noble visit
   var current_discount = player.getDiscountMap();
-  var selectable_nobles = _.filter(this.nobles_, function(noble) {
-    return _.every(noble.cost, function(count, color) {
-      return current_discount[color] >= count;
-    });
-  });
-  if (selectable_nobles.length == 1) {
+  var selectable_nobles = Game.noblesEarned(current_discount, this.nobles_);
+
+  if (selectable_nobles.length == 1 && this.currentRequest_ != RequestTypes.SELECT_NOBLE) {
     var noble = selectable_nobles[0];
     player.nobles = player.nobles.concat(noble);
     this.nobles_ = _.without(this.nobles_, noble);
   } else if (selectable_nobles.length > 1) {
-    // TODO use request code when UI is updated
-    //this.currentRequest_ = RequestTypes.SELECT_NOBLE;
-    // return;
-    var noble = selectable_nobles[0];
-    player.nobles = player.nobles.concat(noble);
-    this.nobles_ = _.without(this.nobles_, noble);
+    this.currentRequest_ = RequestTypes.SELECT_NOBLE;
+    return;
   }
 
   this.currentPlayerIndex_ = (this.currentPlayerIndex_ + 1) % this.players_.length;
@@ -370,7 +363,7 @@ Game.prototype.addAction = function(userID, action) {
       break;
     }
     case ActionTypes.SELECT_NOBLE: {
-      var noble_index = action.payload.index || -1;
+      var noble_index = action.payload.index;
       if (noble_index >= this.nobles_.length || noble_index < 0) {
         throw new Error('invalid noble index', noble_index);
       }
@@ -414,6 +407,14 @@ Game.prototype.addAction = function(userID, action) {
 
   this.nextTurn();
   this.bumpSequenceID();
+};
+
+Game.noblesEarned = function(discountMap, noblesList) {
+  return  _.filter(noblesList, function(noble) {
+    return _.every(noble.cost, function(count, color) {
+      return discountMap[color] >= count;
+    });
+  });
 };
 
 Game.prototype.toJSON = function() {
