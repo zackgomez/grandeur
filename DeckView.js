@@ -15,9 +15,7 @@ var DeckView = React.createClass({
     var dots = _.times(this.props.level, function(n) {
       return <span key={n} className="level-dot" />;
     });
-    var size_view = _.has(this.props, 'size') ?
-        <div className="deck-size">{this.props.size}</div> :
-         null;
+    var size_view = <div className="deck-size">{this.props.size || ''}</div>;
     return (
       <div
         className={'deck level-' + this.props.level + (this.props.highlighted ? ' highlighted' : '')}

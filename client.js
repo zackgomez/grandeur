@@ -188,6 +188,7 @@ var DraftingView = React.createClass({
 var PlayerView = React.createClass({
   propTypes: {
     game: React.PropTypes.object.isRequired,
+    session: React.PropTypes.instanceOf(Session).isRequired,
     playerIndex: React.PropTypes.number.isRequired,
     actionStore: React.PropTypes.instanceOf(ActionStore).isRequired,
     userByID: React.PropTypes.object.isRequired,
@@ -220,6 +221,7 @@ var PlayerView = React.createClass({
         <div className="player-name">{player_name}</div>
         <PlayerHandView
           game={this.props.game}
+          session={this.props.session}
           playerIndex={this.props.playerIndex}
           actionStore={this.props.actionStore}
         />
@@ -238,6 +240,7 @@ var PlayerView = React.createClass({
 var PlayerHandView = React.createClass({
   propTypes: {
     game: React.PropTypes.object.isRequired,
+    session: React.PropTypes.instanceOf(Session).isRequired,
     playerIndex: React.PropTypes.number.isRequired,
     actionStore: React.PropTypes.instanceOf(ActionStore).isRequired,
   },
@@ -246,6 +249,7 @@ var PlayerHandView = React.createClass({
   },
   render: function() {
     var player = this.props.game.players[this.props.playerIndex];
+    var is_session_player = player.userID === this.props.session.getUser().id;
     var cards = _.map(player.hand, function(card) {
       var highlighted = false;
       return <CardView
@@ -253,6 +257,7 @@ var PlayerHandView = React.createClass({
         card={card}
         onClick={this.onCardClick}
         highlighted={highlighted}
+        faceDown={!is_session_player}
       />;
     }, this);
     return (
@@ -417,6 +422,7 @@ var GamePage = React.createClass({
         key={player.userID}
         playerIndex={i}
         game={game}
+        session={this.props.session}
         userByID={userByID}
         actionStore={this.state.actionStore}
       />;

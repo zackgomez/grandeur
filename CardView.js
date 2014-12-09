@@ -6,8 +6,18 @@ var _ = require('underscore');
 
 var Colors = require('./Colors');
 var GemView = require('./GemView');
+var DeckView = require('./DeckView');
 
 var CardView = React.createClass({
+  propTypes: {
+    card: React.PropTypes.object.isRequired,
+    faceDown: React.PropTypes.bool,
+    highlightd: React.PropTypes.bool,
+    onCardEnter: React.PropTypes.func,
+    onCardLeave: React.PropTypes.func,
+    onClick: React.PropTypes.func,
+    onDoubleClick: React.PropTypes.func,
+  },
   handleMouseEnter: function(e) {
     this.props.onCardEnter && this.props.onCardEnter(this.props.card);
   },
@@ -30,6 +40,9 @@ var CardView = React.createClass({
       if (!color_cost) { return; }
       costs.push(<div key={color} className={'color-cost ' + color}>{color_cost}</div>);
     });
+    if (this.props.faceDown) {
+      return <DeckView level={this.props.card.level} highlighted={this.props.highlighted} />;
+    }
     return (
       <div className={'card card-color-'+this.props.card.color + (this.props.highlighted ? ' highlighted' : '')}
         onMouseEnter={this.handleMouseEnter}
