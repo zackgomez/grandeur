@@ -36,29 +36,12 @@ var ChipView = ChipViews.ChipView;
 var ChipSupplyView = ChipViews.ChipSupplyView;
 var ChipPileView = ChipViews.ChipPileView;
 var ReactCSSTransitionGroup = React.addons.CSSTransitionGroup;
+var NobleView = require('./NobleView');
 
 var navigateToHref = function(href, cb) {
   cb = cb || function() {};
   ReactRouter.environment.defaultEnvironment.navigate(href, cb);
 };
-
-var NobleView = React.createClass({
-  render: function() {
-    var noble = this.props.noble;
-    var costs = [];
-    _.each(Colors, function(color) {
-      var color_cost = noble.cost[color];
-      if (!color_cost) { return; }
-      costs.push(<div key={color} className={'color-cost ' + color}>{color_cost}</div>);
-    });
-    return (
-      <div className="noble-tile">
-        <div className="noble-points-container"><div className="noble-points">{noble.points}</div></div>
-        <div className="noble-cost">{costs}</div>
-      </div>
-    );
-  },
-});
 
 var NobleSupplyView = React.createClass({
   render: function() {

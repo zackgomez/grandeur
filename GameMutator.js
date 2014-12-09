@@ -51,6 +51,16 @@ var GameMutator = {
       }
     );
   },
+  selectNoble: function(gameID, nobleIndex) {
+    console.log("requesting noble at index " + nobleIndex);
+    this.sendAction(
+      gameID,
+      ActionTypes.SELECT_NOBLE,
+      {
+        index: nobleIndex
+      }
+    );
+  },
   sendAction: function(gameID, action_type, payload) {
     var action = { type: action_type, payload: payload };
     superagent.post('/api/game/' + gameID + '/add_action')
