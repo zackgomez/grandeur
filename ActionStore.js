@@ -9,7 +9,7 @@ var SelectionTypes = {
   HAND_CARD: 'hand_card',
   DECK: 'deck',
   CHIPS: 'draft_chips',
-  PLAYER_CHIPS: 'player_chips',
+  DISCARD_CHIPS: 'discard_chips',
   NOBLE: 'noble',
 };
 
@@ -32,8 +32,8 @@ var selection_type_from_selection = function(selection) {
     return SelectionTypes.DECK;
   } else if (_.has(selection, 'chips') > 0) {
     return SelectionTypes.CHIPS;
-  } else if (_.has(selection, 'player_chips') > 0) {
-    return SelectionTypes.PLAYER_CHIPS; // Used while discarding.
+  } else if (_.has(selection, 'discard_chips') > 0) {
+    return SelectionTypes.DISCARD_CHIPS;
   } else if (_.has(selection, 'noble_index')) {
     return SelectionTypes.NOBLE;
   } else {
@@ -50,7 +50,7 @@ ActionStore.prototype.setSelection_ = function(selection, force) {
   if (new_selection_type === SelectionTypes.NONE) {
     // nop
   } else if (request === RequestTypes.DISCARD_CHIPS &&
-      new_selection_type !== SelectionTypes.PLAYER_CHIPS) {
+      new_selection_type !== SelectionTypes.DISCARD_CHIPS) {
     return;
   } else if (request === RequestTypes.SELECT_NOBLE &&
              new_selection_type !== SelectionTypes.NOBLE) {
@@ -131,7 +131,7 @@ ActionStore.prototype.didClickDeck = function(level) {
 ActionStore.prototype.didClickPlayerChip = function(clicked_color) {
   var chips = {};
   chips[clicked_color] = 1;
-  this.setSelection_({player_chips : chips});
+  this.setSelection_({discard_chips : chips});
 }
 
 ActionStore.prototype.didClickSupplyChip = function(clicked_color) {
