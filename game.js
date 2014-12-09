@@ -400,6 +400,7 @@ Game.prototype.addAction = function(userID, action) {
         var new_count = count - (discarded_chips[color] || 0);
         new_chips[color] = new_count;
         new_chips_count += new_count;
+        console.log("game.js DISCARD_CHIPS: chips[" + color + "] = ");
       });
       if (new_chips_count > MAX_CHIPS) {
         throw new Error('still too many chips');
