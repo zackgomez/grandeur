@@ -139,7 +139,7 @@ var ActionPanelDiscardChipsDetail = React.createClass({
     var text = this.props.player_chip_count + ' is too many chips.  Discard ' + num_chips_to_discard + ' chips to continue.';
     var submit_button = (
       <button
-        disabled={num_chips_to_discard != 0 ? "disabled" : false}
+        disabled={num_chips_to_discard != 0}
         onClick={this.props.onDiscardChipsClicked}>Discard
       </button>
     );

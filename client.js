@@ -258,7 +258,7 @@ var GameLogView = React.createClass({
     var userId = logEvent.userId;
     var payload = logEvent.payload;
     var playerName = this.props.users[userId].name;
-    var playerHTML = <div className="user-name">{playerName + " "}</div>;
+    var playerHTML = <div className="user-name">{playerName}</div>;
     var prettifiedEventDescription;
     switch (eventType) {
       case EventType.START_TURN:
@@ -284,8 +284,8 @@ var GameLogView = React.createClass({
         prettifiedEventDescription = JSON.stringify(payload);
     }
     return (
-      <div  key={i} className="game-log-item">
-        <p>{playerHTML} {prettifiedEventDescription}</p>
+      <div key={i} className="game-log-item">
+        {playerHTML} {prettifiedEventDescription}
       </div>
     );
   },
