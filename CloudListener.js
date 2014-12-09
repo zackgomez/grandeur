@@ -34,6 +34,7 @@ var CloudListener = {
     };
     ws.onmessage = function(evt) {
       var data = evt.data;
+      console.log('web socket data', data);
       var message = JSON.parse(data);
       notifySubscribers(message);
     };

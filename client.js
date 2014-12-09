@@ -162,7 +162,7 @@ var PlayerView = React.createClass({
         count={player.chips[color] || 0}
         onClick={chipClickHandler}
       />;
-    }, this); // Facepalm
+    }, this);
     var noble_views = _.map(player.nobles, function (noble, i) {
       return (<NobleView key={i} noble={noble}/>);
     });

@@ -140,7 +140,7 @@ var ActionPanelDiscardChipsDetail = React.createClass({
     var submit_button = (
       <button
         disabled={num_chips_to_discard != 0 ? "disabled" : false}
-        onClick={this.props.onDiscardChipsClicked}>OK, take 'em
+        onClick={this.props.onDiscardChipsClicked}>Discard
       </button>
     );
     return (
@@ -150,7 +150,7 @@ var ActionPanelDiscardChipsDetail = React.createClass({
           {chip_views}
         </div>
         {submit_button}
-        <button onClick={this.props.onClearDiscardSelectionClicked}>Hold on, start over</button>
+        <button onClick={this.props.onClearDiscardSelectionClicked}>Start over</button>
       </div>
     );
   },

@@ -139,7 +139,7 @@ ActionStore.prototype.didClickPlayerChip = function(clicked_color) {
   else {
     to_discard[clicked_color] = 1;
   }
-  this.setSelection_({discard_chips : to_discard});
+  this.setSelection_({discard_chips: to_discard});
 }
 
 ActionStore.prototype.didClickSupplyChip = function(clicked_color) {
