@@ -108,7 +108,7 @@ var FULL_HAND_OF_JOKERS = {
   red : 0,
   green : 0,
   black : 0,
-  joker : 15
+  joker : 9
 };
 
 Game.prototype.nextTurn = function() {
@@ -401,7 +401,7 @@ Game.prototype.addAction = function(userID, action) {
         new_chips[color] = new_count;
         new_chips_count += new_count;
       });
-      if (new_count > MAX_CHIPS) {
+      if (new_chips_count > MAX_CHIPS) {
         throw new Error('still too many chips');
       }
       player.chips = new_chips;

@@ -8,8 +8,9 @@ var ActionStore = require('./ActionStore');
 var CardView = require('./CardView');
 var DeckView = require('./DeckView');
 var GameMutator = require('./GameMutator');
-var ChipView = require('./ChipView');
+var ChipView = require('./ChipViews').ChipView;
 var RequestTypes = require('./RequestTypes');
+var Player = require('./Player');
 
 var ActionPanelOverviewItem = React.createClass({
   render: function () {
@@ -30,23 +31,6 @@ var ActionPanelOverview = React.createClass({
       </div>
     );
   }
-});
-
-var ActionPanelDiscardChipsOverview = React.createClass({
-  propTypes: {
-    chips: React.PropTypes.object.isRequired,
-  },
-  render: function() {
-    var num_chips_to_discard = _.reduce(this.props.chips, function(sum, count) {
-      return sum + count;
-    }, 0) - 10;
-    var text = 'You have too many chips.  Discard ' + num_chips_to_discard + ' chips.';
-    return (
-      <div className="action-panel">
-        {text}
-      </div>
-    );
-  },
 });
 
 var ActionPanelCardSelectionDetail = React.createClass({
@@ -101,18 +85,27 @@ var ActionPanelDeckSelectionDetail = React.createClass({
   },
 });
 
+function generateChipViews(list_of_chips) {
+  if (list_of_chips == null) {
+    return (
+      <script />
+    );
+  }
+  return _.reduce(list_of_chips, function(memo, count, color) {
+    _.times(count, function(i) {
+      memo.push(<ChipView key={color + i} color={color} />);
+    });
+    return memo;
+  }, []);
+}
+
 var ActionPanelChipSelectionDetail = React.createClass({
   propTypes: {
     chips: React.PropTypes.object.isRequired,
     onDraftChips: React.PropTypes.func,
   },
   render: function() {
-    var chip_views = _.reduce(this.props.chips, function(memo, count, color) {
-      _.times(count, function(i) {
-        memo.push(<ChipView key={color + i} color={color} />);
-      });
-      return memo;
-    }, []);
+    var chip_views = generateChipViews(this.props.chips);
     return (
       <div className="action-panel card-detail">
         <div className="detail-title">Selected Chips</div>
@@ -122,6 +115,42 @@ var ActionPanelChipSelectionDetail = React.createClass({
         <button onClick={this.props.onDraftChips}>
           Take Chips
         </button>
+      </div>
+    );
+  },
+});
+
+var ActionPanelDiscardChipsDetail = React.createClass({
+  propTypes: {
+    discard_chips: React.PropTypes.object,
+    player_chip_count: React.PropTypes.number.isRequired,
+    onDiscardChipsClicked: React.PropTypes.func.isRequired,
+    onClearDiscardSelectionClicked: React.PropTypes.func.isRequired,
+  },
+  render: function() {
+    var chip_views = generateChipViews(this.props.discard_chips);
+    var chip_surplus = this.props.player_chip_count - 10;
+    var num_chips_to_discard = 0;
+    _.each(this.props.discard_chips, function(value) {
+      num_chips_to_discard += value;
+    });
+    var num_chips_to_discard = chip_surplus - num_chips_to_discard;
+
+    var text = this.props.player_chip_count + ' is too many chips.  Discard ' + num_chips_to_discard + ' chips to continue.';
+    var submit_button = (
+      <button
+        disabled={num_chips_to_discard != 0 ? "disabled" : false}
+        onClick={this.props.onDiscardChipsClicked}>OK, take 'em
+      </button>
+    );
+    return (
+      <div className="action-panel">
+        {text}
+        <div className="chips">
+          {chip_views}
+        </div>
+        {submit_button}
+        <button onClick={this.props.onClearDiscardSelectionClicked}>Hold on, start over</button>
       </div>
     );
   },
@@ -173,6 +202,27 @@ var ActionPanel = React.createClass({
       GameMutator.draftChips(this.props.game.id, selection.chips);
     }
   },
+  onDiscardChips: function() {
+    var selection = this.props.actionStore.getSelection();
+    GameMutator.discardChips(this.props.game.id, selection.discard_chips);
+    // TODO  validate based on selection
+  },
+  onClearDiscardSelection: function() {
+    this.props.actionStore.clearSelection();
+  },
+  renderDiscard: function(playersExistingChipCount) {
+    var selection_or_null = this.props.actionStore.getSelection();
+    if (selection_or_null != null) {
+      selection_or_null = selection_or_null.discard_chips;
+    }
+    return (
+      <ActionPanelDiscardChipsDetail
+        discard_chips={selection_or_null}
+        player_chip_count={playersExistingChipCount}
+        onDiscardChipsClicked={this.onDiscardChips}
+        onClearDiscardSelectionClicked={this.onClearDiscardSelection}
+      />);
+  },
 
   render: function() {
     var game = this.props.game;
@@ -183,13 +233,19 @@ var ActionPanel = React.createClass({
     }
     var selection = actionStore.getSelection();
     var selection_type = actionStore.getSelectionType();
+
+    var request_type = game.currentRequest;
+
+    if (request_type == RequestTypes.DISCARD_CHIPS) {
+      var chipCount = Player.chipCountForPlayer(player);
+      return this.renderDiscard(chipCount);
+    }
+    if (request_type == RequestTypes.SELECT_NOBLE) {
+      return <div className="action-panel">SELECT NOBLE TODO</div>;
+    }
+
     if (selection_type === ActionStore.SelectionTypes.NONE) {
-      var request_type = game.currentRequest;
-      if (request_type === RequestTypes.DISCARD_CHIPS) {
-        return <ActionPanelDiscardChipsOverview chips={player.chips} />;
-      } else if (request_type === RequestTypes.SELECT_NOBLE) {
-        return <div className="action-panel">SELECT NOBLE TODO</div>;
-      } else if (request_type === RequestTypes.ACTION) {
+      if (request_type === RequestTypes.ACTION) {
         return (
           <ActionPanelOverview
           session={this.props.session}

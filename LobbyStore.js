@@ -47,7 +47,6 @@ LobbyStore.prototype.syncLobby = function(lobbyID, sequenceID, completion) {
     completion(null);
     return;
   }
-  console.log('sync lobby', lobbyID, 'target sequence', sequenceID);
   superagent.get(BaseURL + '/api/lobby/' + lobbyID)
   .end(function(res) {
     if (!res.ok) {
