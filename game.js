@@ -128,7 +128,7 @@ Game.prototype.nextTurn = function() {
 
   // check for noble visit
   var current_discount = player.getDiscountMap();
-  var selectable_nobles = Game.noblesEarned(current_discount, this.nobles_);
+  var selectable_nobles = Game.selectableNobles(current_discount, this.nobles_);
 
   if (this.currentRequest_ != RequestTypes.SELECT_NOBLE) {
     if (selectable_nobles.length == 1) {
@@ -411,7 +411,7 @@ Game.prototype.addAction = function(userID, action) {
   this.bumpSequenceID();
 };
 
-Game.noblesEarned = function(discountMap, noblesList) {
+Game.selectableNobles = function(discountMap, noblesList) {
   return  _.filter(noblesList, function(noble) {
     return _.every(noble.cost, function(count, color) {
       return discountMap[color] >= count;

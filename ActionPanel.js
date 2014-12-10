@@ -266,7 +266,7 @@ var ActionPanel = React.createClass({
       return this.renderDiscard(chipCount);
     }
     if (request_type == RequestTypes.SELECT_NOBLE) {
-      var selectable_nobles = Game.noblesEarned(Player.getDiscountMap(player), game.nobles);
+      var selectable_nobles = Game.selectableNobles(Player.getDiscountMap(player), game.nobles);
       var cb = function(noble) {
         this.onNobleSelected(noble);
       }.bind(this);
