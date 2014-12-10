@@ -2,6 +2,7 @@ var Immutable = require('immutable');
 var ActionTypes = require('./ActionTypes');
 var _ = require('underscore');
 var RequestTypes = require('./RequestTypes');
+var Colors = require('./Colors');
 
 var SelectionTypes = {
   NONE: 'none',
@@ -143,6 +144,9 @@ ActionStore.prototype.didClickPlayerChip = function(clicked_color) {
 }
 
 ActionStore.prototype.didClickSupplyChip = function(clicked_color) {
+  if (clicked_color === Colors.JOKER) {
+    return;
+  }
   var supply_count = this.game_.chipSupply[clicked_color];
   if (supply_count == 0) {
     return;

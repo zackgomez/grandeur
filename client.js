@@ -244,12 +244,22 @@ var GameLogView = React.createClass({
   logExtraForEvent: function(logEvent) {
     switch (logEvent.type) {
       case EventType.BUILD_TABLE_CARD:
-      case EventType.RESERVE_CARD_TABLE:
       case EventType.BUILD_HAND_CARD:
-        console.log(logEvent);
         return <CardView card={this.props.game.cardsByID[logEvent.payload.cardID]} />;
+      case EventType.RESERVE_CARD_TABLE:
+        var context = [];
+        context.push(<CardView card={this.props.game.cardsByID[logEvent.payload.cardID]} />);
+        if (logEvent.payload.recieved_joker) {
+          context.push(<ChipView color={Colors.JOKER} />);
+        }
+        return context;
       case EventType.RESERVE_CARD_DECK:
-        return <DeckView level={logEvent.payload.card_level} />;
+        var context = [];
+        context.push(<DeckView key="deck" level={logEvent.payload.card_level} />);
+        if (logEvent.payload.recieved_joker) {
+          context.push(<ChipView color={Colors.JOKER} />);
+        }
+        return context;
       case EventType.DRAFT_MULTI_CHIP:
       case EventType.DRAFT_TWO_CHIP:
       case EventType.DISCARD_CHIPS:

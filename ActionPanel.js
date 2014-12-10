@@ -27,9 +27,11 @@ var ActionPanelOverview = React.createClass({
   render: function() {
     return (
       <div className="action-panel">
-        <ActionPanelOverviewItem actionTitle="Build" />
-        <ActionPanelOverviewItem actionTitle="Draft" />
-        <ActionPanelOverviewItem actionTitle="Reserve" />
+        <p>You can take 3 chips of different colors or 2 chips of the same color from the chip supply</p>
+        <br />
+        <p>You can build a card from your hand or the table.</p>
+        <br />
+        <p>You can reserve a card from the table or a random card from the top of a deck</p>
       </div>
     );
   }
