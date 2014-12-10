@@ -35,6 +35,7 @@ var EventType = require('./EventType');
 var ChipView = ChipViews.ChipView;
 var ChipSupplyView = ChipViews.ChipSupplyView;
 var ChipPileView = ChipViews.ChipPileView;
+var ChipListView = ChipViews.ChipListView;
 var ReactCSSTransitionGroup = React.addons.CSSTransitionGroup;
 var NobleView = require('./NobleView');
 
@@ -236,6 +237,27 @@ var PlayerBoardView = React.createClass({
 });
 
 var GameLogView = React.createClass({
+  propTypes: {
+    game: React.PropTypes.object.isRequired,
+    users: React.PropTypes.object.isRequired,
+  },
+  logExtraForEvent: function(logEvent) {
+    switch (logEvent.type) {
+      case EventType.BUILD_TABLE_CARD:
+      case EventType.RESERVE_CARD_TABLE:
+      case EventType.BUILD_HAND_CARD:
+        console.log(logEvent);
+        return <CardView card={this.props.game.cardsByID[logEvent.payload.cardID]} />;
+      case EventType.RESERVE_CARD_DECK:
+        return <DeckView level={logEvent.payload.card_level} />;
+      case EventType.DRAFT_MULTI_CHIP:
+      case EventType.DRAFT_TWO_CHIP:
+      case EventType.DISCARD_CHIPS:
+        return <ChipListView chips={logEvent.payload.chips} />;
+      default:
+        return null;
+    }
+  },
   logItemToDisplay: function(logEvent, i) {
     var eventType = logEvent.type;
     var userId = logEvent.userId;
@@ -251,24 +273,26 @@ var GameLogView = React.createClass({
         prettifiedEventDescription = " builds a card from their hand.";
         break;
       case EventType.RESERVE_CARD_DECK:
-        prettifiedEventDescription = " YOLO drafts a level " + payload.card_level + " card.";
+        prettifiedEventDescription = " reserves a random level " + payload.card_level + " card.";
         break;
       case EventType.RESERVE_CARD_TABLE:
-        prettifiedEventDescription = " reserves a card at level " + payload.card_level + ".";
+        prettifiedEventDescription = " reserves a level " + payload.card_level + " card.";
         break;
       case EventType.BUILD_TABLE_CARD:
-        prettifiedEventDescription = " builds from the table.";
+        prettifiedEventDescription = " builds a card from the table.";
         break;
       case EventType.DRAFT_MULTI_CHIP:
       case EventType.DRAFT_TWO_CHIP:
-        prettifiedEventDescription = " drafts some chips.";
+        prettifiedEventDescription = " took chips";
         break;
       default:
         prettifiedEventDescription = JSON.stringify(payload);
     }
+    var extraContext = this.logExtraForEvent(logEvent);
     return (
       <div key={i} className="game-log-item">
-        {playerHTML} {prettifiedEventDescription}
+        <div className="log-item-description">{playerHTML} {prettifiedEventDescription}</div>
+        <div className="log-item-context">{extraContext}</div>
       </div>
     );
   },

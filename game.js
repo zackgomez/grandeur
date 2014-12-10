@@ -102,6 +102,14 @@ Game.prototype.setUpGame = function() {
   this.nextTurn();
 };
 
+Game.prototype.addEventHelper_ = function(userID, type, payload) {
+  this.logItems_.push({
+    userId: userID,
+    type: type,
+    payload: payload,
+  });
+};
+
 var FULL_HAND_OF_JOKERS = {
   white: 0,
   blue : 0,
@@ -113,9 +121,8 @@ var FULL_HAND_OF_JOKERS = {
 
 Game.prototype.nextTurn = function() {
   var player = this.players_[this.currentPlayerIndex_];
-  
-  // TODO(brock) this should include what turn it is. Consider best way to implement this
-  this.logItems_.push({type: EventType.START_TURN, userId: player.getID(), payload: {}});
+
+  this.addEventHelper_(player.getID(), EventType.START_TURN, {turn: this.turn_});
   var total_chips = player.getChipCount();
 
   //player.chips = FULL_HAND_OF_JOKERS; // uncomment to be able to buy pretty much anything
@@ -264,9 +271,9 @@ Game.prototype.addAction = function(userID, action) {
         }
       }, this);
       if (double_draft) {
-        this.logItems_.push({type: EventType.DRAFT_TWO_CHIP, userId: userID, payload: {chips_: chips}});
+        this.logItems_.push({type: EventType.DRAFT_TWO_CHIP, userId: userID, payload: {chips: chips}});
       } else {
-        this.logItems_.push({type: EventType.DRAFT_MULTI_CHIP, userId: userID, payload: {chips_: chips}});
+        this.logItems_.push({type: EventType.DRAFT_MULTI_CHIP, userId: userID, payload: {chips: chips}});
       }
       break;
     }
@@ -310,7 +317,7 @@ Game.prototype.addAction = function(userID, action) {
       if (draftedFromDeck) {
         this.logItems_.push({type: EventType.RESERVE_CARD_DECK, userId: userID, payload: {card_level: level, recieved_joker: gotJoker}});
       } else {
-        this.logItems_.push({type: EventType.RESERVE_CARD_TABLE, userId: userID, payload: {card_level: level, recieved_joker: gotJoker}});
+        this.logItems_.push({type: EventType.RESERVE_CARD_TABLE, userId: userID, payload: {cardID: cardID, card_level: level, recieved_joker: gotJoker}});
       }
       break;
     }
@@ -338,7 +345,7 @@ Game.prototype.addAction = function(userID, action) {
       var deck = this.decks_[action.payload.level - 1];
       invariant(index < board.length, 'invalid card index');
       board[index] = deck.drawOne();
-      this.logItems_.push({type: EventType.BUILD_TABLE_CARD, userId: userID, payload: {cardId: cardID}});
+      this.logItems_.push({type: EventType.BUILD_TABLE_CARD, userId: userID, payload: {cardID: card.id}});
       break;
     }
     case ActionTypes.BUILD_HAND_CARD: {
@@ -357,7 +364,7 @@ Game.prototype.addAction = function(userID, action) {
       player.board = player.board.concat(card);
 
       player.hand = _.without(player.hand, card);
-      this.logItems_.push({type: EventType.BUILD_HAND_CARD, userId: userID, payload: {cardId: cardID}});
+      this.logItems_.push({type: EventType.BUILD_HAND_CARD, userId: userID, payload: {cardID: card.id}});
       break;
     }
     case ActionTypes.SELECT_NOBLE: {
@@ -396,7 +403,7 @@ Game.prototype.addAction = function(userID, action) {
         throw new Error('still too many chips');
       }
       player.chips = new_chips;
-      this.logItems_.push({type: EventType.DISCARD_CHIPS, userId: userID, payload:{chips: discarded_chips}});
+      this.logItems_.push({type: EventType.DISCARD_CHIPS, userId: userID, payload: {chips: discarded_chips}});
       break;
     }
     default:
