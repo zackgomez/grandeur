@@ -168,10 +168,10 @@ var PlayerView = React.createClass({
 
     var user = this.props.userByID[player.userID];
     var player_name = user ? user.name : player.userID;
-    var container_class_name = "player-view";
+    var container_class_name = 'player-view';
     if (is_session_player) {
-      container_class_name += " current";
-      player_name += " (me)";
+      container_class_name += ' current';
+      player_name += ' (me)';
     }
     player_name += this.getPointCountStringForPlayer(player);
     if (game.winningPlayerIndex == this.props.playerIndex) {
