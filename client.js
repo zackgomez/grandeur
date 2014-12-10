@@ -38,6 +38,7 @@ var ChipPileView = ChipViews.ChipPileView;
 var ChipListView = ChipViews.ChipListView;
 var ReactCSSTransitionGroup = React.addons.CSSTransitionGroup;
 var NobleView = require('./NobleView');
+var Player = require('./Player');
 
 var navigateToHref = function(href, cb) {
   cb = cb || function() {};
@@ -137,6 +138,16 @@ var PlayerView = React.createClass({
   chipClicked: function(color) {
     this.props.actionStore.didClickPlayerChip(color);
   },
+  getPointCountStringForPlayer: function(player) {
+    var pointCount = Player.getPlayerScore(player);
+    if (pointCount == 0) {
+      return "";
+    }
+    if (pointCount == 1) {
+      return " - 1 point";
+    }
+    return " - " + pointCount + " points";
+  },
   render: function() {
     var game = this.props.game;
     var player = this.props.game.players[this.props.playerIndex];
@@ -162,6 +173,7 @@ var PlayerView = React.createClass({
       container_class_name += " current";
       player_name += " (me)";
     }
+    player_name += this.getPointCountStringForPlayer(player);
     if (game.winningPlayerIndex == this.props.playerIndex) {
       player_name += ' (winner)';
       container_class_name += ' winning-player';
