@@ -14,7 +14,13 @@ var NobleView = require('./NobleView');
 var Game = require('./game');
 var ChipListView = require('./ChipViews').ChipListView;
 
+var CARD_TOO_EXPENSIVE_BUTTON_SUFFIX = " (can't afford this card)";
+var NO_SPACE_IN_HAND_BUTTON_SUFFIX = " (no space in hand)";
+
 var ActionPanelOverviewItem = React.createClass({
+  propTypes: {
+    actionTitle: React.PropTypes.string.isRequired,
+  },
   render: function () {
     var title = this.props.actionTitle;
     return (<div className="ap-overview-element">
@@ -37,6 +43,12 @@ var ActionPanelOverview = React.createClass({
   }
 });
 
+function playerCanBuyCard(player, card) {
+  var cost = Game.costForCard(card, player.chips, Player.getDiscountMap(player));
+  var canPayIt = Game.canPayCost(cost, player.chips);
+  return canPayIt;
+}
+
 var ActionPanelCardSelectionDetail = React.createClass({
   propTypes: {
     card: React.PropTypes.object.isRequired,
@@ -46,14 +58,23 @@ var ActionPanelCardSelectionDetail = React.createClass({
   },
   render: function() {
     var player = this.props.player;
-    var cost = Game.costForCard(this.props.card, player.chips, Player.getDiscountMap(player));
-    var canPayIt = Game.canPayCost(cost, player.chips);
+    var buildButtonText = "Build";
+    var handIsFull = player.hand.length >= 3;
+    var canPayIt = playerCanBuyCard(player, this.props.card);
+
+    if (!canPayIt) {
+      buildButtonText += CARD_TOO_EXPENSIVE_BUTTON_SUFFIX;
+    }
+    var reserveButtonText = "Reserve";
+    if (handIsFull) {
+      reserveButtonText += NO_SPACE_IN_HAND_BUTTON_SUFFIX;
+    }
     return (
       <div className="action-panel card-detail">
         <div className="detail-title">Selected Card</div>
         <CardView card={this.props.card} />
-        <button disabled={!canPayIt} onClick={this.props.onBuildCard}>Build</button>
-        <button disabled={player.hand.length >= 3} onClick={this.props.onReserveCard}>Reserve</button>
+        <button disabled={!canPayIt} onClick={this.props.onBuildCard}>{buildButtonText}</button>
+        <button disabled={handIsFull} onClick={this.props.onReserveCard}>{reserveButtonText}</button>
       </div>
     );
   },
@@ -82,13 +103,21 @@ var ActionPanelHandCardSelectionDetail = React.createClass({
   propTypes: {
     card: React.PropTypes.object.isRequired,
     onBuildCard: React.PropTypes.func,
+    player: React.PropTypes.object.isRequired,
   },
   render: function() {
+    var player = this.props.player;
+    var canPayIt = playerCanBuyCard(this.props.player, this.props.card);
+    var buildFromHandButtonText = "Build";
+    if (!canPayIt) {
+      buildFromHandButtonText += CARD_TOO_EXPENSIVE_BUTTON_SUFFIX;
+    }
+
     return (
       <div className="action-panel card-detail">
         <div className="detail-title">Build Card from Hand</div>
         <CardView card={this.props.card} />
-        <button onClick={this.props.onBuildCard}>Build</button>
+        <button disabled={!canPayIt} onClick={this.props.onBuildCard}>{buildFromHandButtonText}</button>
       </div>
     );
   },
@@ -98,14 +127,22 @@ var ActionPanelDeckSelectionDetail = React.createClass({
   propTypes: {
     level: React.PropTypes.number.isRequired,
     onReserveCard: React.PropTypes.func,
+    player: React.PropTypes.object.isRequired,
   },
   render: function() {
+    var tooManyCards = this.props.player.hand.length >= 3;
+    var buttonText = "Reserve random level " + this.props.level + " card";
+    if (tooManyCards) {
+      buttonText += NO_SPACE_IN_HAND_BUTTON_SUFFIX;
+    }
     return (
       <div className="action-panel card-detail">
         <div className="detail-title">Selected Deck</div>
         <DeckView level={this.props.level} />
-        <button onClick={this.props.onReserveCard}>
-          Reserve random level {this.props.level} card
+        <button
+          disabled={tooManyCards}
+          onClick={this.props.onReserveCard}>
+        {buttonText}
         </button>
       </div>
     );
@@ -155,7 +192,7 @@ var ActionPanelDiscardChipsDetail = React.createClass({
     return (
       <div className="action-panel">
         {text}
-        <ChipListView chips={this.props.chips} />
+        <ChipListView chips={this.props.discard_chips} />
         {submit_button}
         <button onClick={this.props.onClearDiscardSelectionClicked}>Start over</button>
       </div>
@@ -285,11 +322,13 @@ var ActionPanel = React.createClass({
       return <ActionPanelHandCardSelectionDetail
         card={selected_card}
         onBuildCard={this.onBuildHandCard}
+        player={player}
       />;
     } else if (selection_type === ActionStore.SelectionTypes.DECK) {
       return <ActionPanelDeckSelectionDetail
         level={selection.level}
         onReserveCard={this.onReserveCard}
+        player={player}
       />;
     } else if (selection_type === ActionStore.SelectionTypes.CHIPS) {
       return <ActionPanelChipSelectionDetail
