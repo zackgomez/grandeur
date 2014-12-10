@@ -271,9 +271,9 @@ Game.prototype.addAction = function(userID, action) {
         }
       }, this);
       if (double_draft) {
-        this.logItems_.push({type: EventType.DRAFT_TWO_CHIP, userId: userID, payload: {chips: chips}});
+        this.addEventHelper_(userID, EventType.DRAFT_TWO_CHIP, {chips: chips});
       } else {
-        this.logItems_.push({type: EventType.DRAFT_MULTI_CHIP, userId: userID, payload: {chips: chips}});
+        this.addEventHelper_(userID, EventType.DRAFT_MULTI_CHIP, {chips: chips});
       }
       break;
     }
@@ -315,9 +315,9 @@ Game.prototype.addAction = function(userID, action) {
       }
 
       if (draftedFromDeck) {
-        this.logItems_.push({type: EventType.RESERVE_CARD_DECK, userId: userID, payload: {card_level: level, recieved_joker: gotJoker}});
+        this.addEventHelper_(userID, EventType.RESERVE_CARD_DECK, {card_level: level, recieved_joker: gotJoker});
       } else {
-        this.logItems_.push({type: EventType.RESERVE_CARD_TABLE, userId: userID, payload: {cardID: cardID, card_level: level, recieved_joker: gotJoker}});
+        this.addEventHelper_(userID, EventType.RESERVE_CARD_TABLE, {cardID: cardID, card_level: level, recieved_joker: gotJoker});
       }
       break;
     }
@@ -345,7 +345,7 @@ Game.prototype.addAction = function(userID, action) {
       var deck = this.decks_[action.payload.level - 1];
       invariant(index < board.length, 'invalid card index');
       board[index] = deck.drawOne();
-      this.logItems_.push({type: EventType.BUILD_TABLE_CARD, userId: userID, payload: {cardID: card.id}});
+      this.addEventHelper_(userID, EventType.BUILD_TABLE_CARD, {cardID: card.id});
       break;
     }
     case ActionTypes.BUILD_HAND_CARD: {
@@ -364,7 +364,7 @@ Game.prototype.addAction = function(userID, action) {
       player.board = player.board.concat(card);
 
       player.hand = _.without(player.hand, card);
-      this.logItems_.push({type: EventType.BUILD_HAND_CARD, userId: userID, payload: {cardID: card.id}});
+      this.addEventHelper_(userID, EventType.BUILD_HAND_CARD, {cardID: card.id});
       break;
     }
     case ActionTypes.SELECT_NOBLE: {
@@ -378,7 +378,7 @@ Game.prototype.addAction = function(userID, action) {
       }
       player.nobles = player.nobles.concat(noble);
       this.nobles_ = _.without(this.nobles_, noble);
-      this.logItems_.push({type: EventType.RECEIVE_NOBLE, userId: userID, payload: {noble_: noble}});
+      this.addEventHelper_(userID, EventType.RECEIVE_NOBLE, {noble: noble});
       break;
     }
     case ActionTypes.DISCARD_CHIPS: {
@@ -403,7 +403,7 @@ Game.prototype.addAction = function(userID, action) {
         throw new Error('still too many chips');
       }
       player.chips = new_chips;
-      this.logItems_.push({type: EventType.DISCARD_CHIPS, userId: userID, payload: {chips: discarded_chips}});
+      this.addEventHelper_(userID, EventType.DISCARD_CHIPS, {chips: discarded_chips});
       break;
     }
     default:
