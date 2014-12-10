@@ -44,6 +44,10 @@ var navigateToHref = function(href, cb) {
   ReactRouter.environment.defaultEnvironment.navigate(href, cb);
 };
 
+function playerIsLocalPlayer(session, playerJSON) {
+  return session.getUser().id === playerJSON.userID;
+}
+
 var NobleSupplyView = React.createClass({
   render: function() {
     var nobles = _.map(this.props.game.nobles, function(noble, i) {
@@ -136,7 +140,7 @@ var PlayerView = React.createClass({
   render: function() {
     var game = this.props.game;
     var player = this.props.game.players[this.props.playerIndex];
-    var actionStore = this.props.actionStore;
+    var is_session_player = playerIsLocalPlayer(this.props.session, player);
 
     var chip_views = _.map(Colors, function(color) {
       var chipClickHandler = _.partial(this.chipClicked, color);
@@ -153,7 +157,11 @@ var PlayerView = React.createClass({
 
     var user = this.props.userByID[player.userID];
     var player_name = user ? user.name : player.userID;
-    var container_class_name = 'player-view';
+    var container_class_name = "player-view";
+    if (is_session_player) {
+      container_class_name += " current";
+      player_name += " (me)";
+    }
     if (game.winningPlayerIndex == this.props.playerIndex) {
       player_name += ' (winner)';
       container_class_name += ' winning-player';
@@ -192,7 +200,7 @@ var PlayerHandView = React.createClass({
   },
   render: function() {
     var player = this.props.game.players[this.props.playerIndex];
-    var is_session_player = player.userID === this.props.session.getUser().id;
+    var is_session_player = playerIsLocalPlayer(this.props.session, player);
     var cards = _.map(player.hand, function(card) {
       var highlighted = false;
       return <CardView
