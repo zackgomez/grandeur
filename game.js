@@ -191,7 +191,7 @@ var isValidChipSelection = function(color_counts, supply) {
   });
 };
 // returns the cost of a card given some supply of chips to pay with and some discount
-var costForCard = function(card, supply, discount) {
+Game.costForCard = function(card, supply, discount) {
   var cost = {};
   _.each(card.cost, function(count, color) {
     var discounted_count = Math.max(count - (discount[color] || 0), 0);
@@ -204,11 +204,7 @@ var costForCard = function(card, supply, discount) {
   return cost;
 };
 
-/**
-@param cost
-@param supply
-*/
-var canPayCost = function(cost, supply) {
+Game.canPayCost = function(cost, supply) {
   return _.all(cost, function(count, key) {
     return supply[key] >= count;
   });
@@ -331,8 +327,8 @@ Game.prototype.addAction = function(userID, action) {
       if (!card) {
         throw new Error('bad card id');
       }
-      var cost = costForCard(card, player.chips, player.getDiscountMap());
-      if (!canPayCost(cost, player.chips)) {
+      var cost = Game.costForCard(card, player.chips, player.getDiscountMap());
+      if (!Game.canPayCost(cost, player.chips)) {
         throw new Error('cannot afford card');
       }
       player.chips = supplyAfterPayingCost(player.chips, cost);
@@ -352,8 +348,8 @@ Game.prototype.addAction = function(userID, action) {
       if (!card) {
         throw new Error('bad card id');
       }
-      var cost = costForCard(card, player.chips, player.getDiscountMap());
-      if (!canPayCost(cost, player.chips)) {
+      var cost = Game.costForCard(card, player.chips, player.getDiscountMap());
+      if (!Game.canPayCost(cost, player.chips)) {
         throw new Error('cannot afford card');
       }
       player.chips = supplyAfterPayingCost(player.chips, cost);

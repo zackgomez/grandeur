@@ -40,14 +40,18 @@ var ActionPanelCardSelectionDetail = React.createClass({
     card: React.PropTypes.object.isRequired,
     onBuildCard: React.PropTypes.func,
     onReserveCard: React.PropTypes.func,
+    player: React.PropTypes.object.isRequired,
   },
   render: function() {
+    var player = this.props.player;
+    var cost = Game.costForCard(this.props.card, player.chips, Player.getDiscountMap(player));
+    var canPayIt = Game.canPayCost(cost, player.chips);
     return (
       <div className="action-panel card-detail">
         <div className="detail-title">Selected Card</div>
         <CardView card={this.props.card} />
-        <button onClick={this.props.onBuildCard}>Build</button>
-        <button onClick={this.props.onReserveCard}>Reserve</button>
+        <button disabled={!canPayIt} onClick={this.props.onBuildCard}>Build</button>
+        <button disabled={player.hand.length >= 3} onClick={this.props.onReserveCard}>Reserve</button>
       </div>
     );
   },
@@ -292,6 +296,7 @@ var ActionPanel = React.createClass({
         card={selected_card}
         onBuildCard={this.onBuildCard}
         onReserveCard={this.onReserveCard}
+        player={player}
       />;
     } else if (selection_type === ActionStore.SelectionTypes.HAND_CARD) {
       var selected_card = game.cardsByID[selection.cardID];
