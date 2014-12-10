@@ -8,11 +8,11 @@ var ActionStore = require('./ActionStore');
 var CardView = require('./CardView');
 var DeckView = require('./DeckView');
 var GameMutator = require('./GameMutator');
-var ChipView = require('./ChipViews').ChipView;
 var RequestTypes = require('./RequestTypes');
 var Player = require('./Player');
 var NobleView = require('./NobleView');
 var Game = require('./game');
+var ChipListView = require('./ChipViews').ChipListView;
 
 var ActionPanelOverviewItem = React.createClass({
   render: function () {
@@ -110,33 +110,16 @@ var ActionPanelDeckSelectionDetail = React.createClass({
   },
 });
 
-function generateChipViews(list_of_chips) {
-  if (list_of_chips == null) {
-    return (
-      <script />
-    );
-  }
-  return _.reduce(list_of_chips, function(memo, count, color) {
-    _.times(count, function(i) {
-      memo.push(<ChipView key={color + i} color={color} />);
-    });
-    return memo;
-  }, []);
-}
-
 var ActionPanelChipSelectionDetail = React.createClass({
   propTypes: {
     chips: React.PropTypes.object.isRequired,
     onDraftChips: React.PropTypes.func,
   },
   render: function() {
-    var chip_views = generateChipViews(this.props.chips);
     return (
       <div className="action-panel card-detail">
         <div className="detail-title">Selected Chips</div>
-        <div className="chips">
-          {chip_views}
-        </div>
+        <ChipListView chips={this.props.chips} />
         <button onClick={this.props.onDraftChips}>
           Take Chips
         </button>
@@ -153,7 +136,6 @@ var ActionPanelDiscardChipsDetail = React.createClass({
     onClearDiscardSelectionClicked: React.PropTypes.func.isRequired,
   },
   render: function() {
-    var chip_views = generateChipViews(this.props.discard_chips);
     var chip_surplus = this.props.player_chip_count - 10;
     var num_chips_to_discard = 0;
     _.each(this.props.discard_chips, function(value) {
@@ -171,9 +153,7 @@ var ActionPanelDiscardChipsDetail = React.createClass({
     return (
       <div className="action-panel">
         {text}
-        <div className="chips">
-          {chip_views}
-        </div>
+        <ChipListView chips={this.props.chips} />
         {submit_button}
         <button onClick={this.props.onClearDiscardSelectionClicked}>Start over</button>
       </div>

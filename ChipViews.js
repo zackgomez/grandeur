@@ -17,6 +17,28 @@ var ChipView = React.createClass({
   },
 });
 
+function generate_list_of_chips(chips_by_color) {
+  return _.reduce(chips_by_color, function(memo, count, color) {
+    _.times(count, function(i) {
+      memo.push(<ChipView key={color + i} color={color} />);
+    });
+    return memo;
+  }, []);
+}
+
+var ChipListView = React.createClass({
+  propTypes: {
+    chips: React.PropTypes.object.isRequired,
+  },
+  render: function() {
+    var chips = generate_list_of_chips(this.props.chips);
+    return (
+      <div className="chip-list">
+        {chips}
+      </div>
+    );
+  },
+});
 
 var ChipPileView = React.createClass({
   propTypes: {
@@ -71,6 +93,7 @@ var ChipSupplyView = React.createClass({
 
 module.exports = {
   ChipView: ChipView,
+  ChipListView: ChipListView,
   ChipSupplyView: ChipSupplyView,
   ChipPileView: ChipPileView,
 };
