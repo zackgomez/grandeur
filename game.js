@@ -130,13 +130,15 @@ Game.prototype.nextTurn = function() {
   var current_discount = player.getDiscountMap();
   var selectable_nobles = Game.noblesEarned(current_discount, this.nobles_);
 
-  if (selectable_nobles.length == 1 && this.currentRequest_ != RequestTypes.SELECT_NOBLE) {
-    var noble = selectable_nobles[0];
-    player.nobles = player.nobles.concat(noble);
-    this.nobles_ = _.without(this.nobles_, noble);
-  } else if (selectable_nobles.length > 1) {
-    this.currentRequest_ = RequestTypes.SELECT_NOBLE;
-    return;
+  if (this.currentRequest_ != RequestTypes.SELECT_NOBLE) {
+    if (selectable_nobles.length == 1) {
+      var noble = selectable_nobles[0];
+      player.nobles = player.nobles.concat(noble);
+      this.nobles_ = _.without(this.nobles_, noble);
+    } else if (selectable_nobles.length > 1) {
+      this.currentRequest_ = RequestTypes.SELECT_NOBLE;
+      return;
+    }
   }
 
   this.currentPlayerIndex_ = (this.currentPlayerIndex_ + 1) % this.players_.length;
