@@ -63,11 +63,11 @@ div span body p h1 h2 h3 h4 h5 h6 button input form {
 }
 
 .right-pane {
-  width: 420px;
+  width: 300px;
   display: flex;
   flex-direction: column;
   margin-right:5px;
-  min-width:420px;
+  min-width:300px;
   position:fixed;
   right:0;
   height:100%;
