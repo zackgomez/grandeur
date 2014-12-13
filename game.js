@@ -149,7 +149,8 @@ Game.prototype.nextTurn = function() {
 
   this.currentPlayerIndex_ = (this.currentPlayerIndex_ + 1) % this.players_.length;
   this.currentRequest_ = RequestTypes.ACTION;
-  this.addEventHelper_(player.getID(), EventType.START_TURN, {turn: this.turn_});
+  var next_player = this.players_[this.currentPlayerIndex_]
+  this.addEventHelper_(next_player.getID(), EventType.START_TURN, {turn: this.turn_});
 
   if (this.currentPlayerIndex_ === 0) {
     this.turn_ += 1;

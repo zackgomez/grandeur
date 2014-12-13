@@ -436,13 +436,17 @@ var GamePage = React.createClass({
     }
     var game = this.state.game;
     var userByID = this.state.userByID || {};
-    var localPlayer = _.find(this.state.game.players, function(player) {
+    var localPlayerIndex = -1;
+    var localPlayer = _.find(this.state.game.players, function(player, i) {
+      localPlayerIndex = i;
       return player.userID === localUser.id;
     });
+    console.log('local player index', localPlayerIndex);
     var player_views = _.map(game.players, function(player, i) {
+      var index = (i + localPlayerIndex) % game.players.length;
       return <PlayerView
         key={player.userID}
-        playerIndex={i}
+        playerIndex={index}
         game={game}
         session={this.props.session}
         userByID={userByID}
