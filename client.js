@@ -71,6 +71,21 @@ var DraftingView = React.createClass({
     game: React.PropTypes.object.isRequired,
     actionStore: React.PropTypes.instanceOf(ActionStore).isRequired,
   },
+  getInitialState: function() {
+    return {
+      hoveredCardID: null,
+      hoveredDeckLevel: null,
+    };
+  },
+  componentWillMount: function() {
+    this.props.actionStore.addListener(this.onActionStoreChange);
+  },
+  componentWillUnmount: function() {
+    this.props.actionStore.removeListener(this.onActionStoreChange);
+  },
+  onActionStoreChange: function() {
+    this.forceUpdate();
+  },
   onDeckClick: function(level) {
     this.props.actionStore.didClickDeck(level);
   },
@@ -79,13 +94,30 @@ var DraftingView = React.createClass({
   },
   onCardDoubleClick: function(card) {
   },
+  onCardEnter: function(card) {
+    this.setState({hoveredCardID: card.id});
+  },
+  onCardLeave: function(card) {
+    this.setState({hoveredCardID: null});
+  },
+  onDeckEnter: function(level) {
+    this.setState({hoveredDeckLevel: level});
+  },
+  onDeckLeave: function(level) {
+    this.setState({hoveredDeckLevel: null});
+  },
   render: function() {
     var game = this.props.game;
+    var actionStore = this.props.actionStore;
+    var is_players_turn = actionStore.isPlayersTurn();
+    var selection = actionStore.getSelection();
     var levels = _.map(game.boards, function(board, i) {
       var level = i + 1;
       var cards = _.map(board, function(card) {
         var onCardClick = _.partial(this.onCardClick, card, level);
-        var highlighted = false;
+        var relevant_card = this.state.hoveredCardID === card.id ||
+          (selection && selection.cardID === card.id);
+        var highlighted = is_players_turn && relevant_card;
         var card_props = {
           card:card,
           key:card.id,
@@ -97,7 +129,9 @@ var DraftingView = React.createClass({
         };
         return CardView(card_props);
       }, this);
-      var is_deck_selected = false;
+      var is_deck_selected = is_players_turn &&
+        ((selection && selection.level === level && !selection.cardID)
+         || this.state.hoveredDeckLevel === level);
       var onDeckClick = _.partial(this.onDeckClick, level);
       return (
         <div key={i} className="drafting-level">
@@ -106,6 +140,8 @@ var DraftingView = React.createClass({
             size={game.decks[i].cards.length}
             highlighted={is_deck_selected}
             onClick={onDeckClick}
+            onMouseEnter={this.onDeckEnter}
+            onMouseLeave={this.onDeckLeave}
           />
           <div className="drafting-cards">{cards}</div>
         </div>

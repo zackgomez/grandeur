@@ -11,9 +11,25 @@ var ChipView = React.createClass({
   propTypes: {
     color: React.PropTypes.oneOf(_.values(Colors)).isRequired,
     highlighted: React.PropTypes.bool,
+    onChipEnter: React.PropTypes.func,
+    onChipLeave: React.PropTypes.func,
+  },
+  handleMouseEnter: function() {
+    this.props.onChipEnter && this.props.onChipEnter(this.props.color);
+  },
+  handleMouseLeave: function() {
+    this.props.onChipLeave && this.props.onChipLeave(this.props.color);
   },
   render: function() {
-    return <span className={'chip ' + this.props.color + (this.props.highlighted ? ' highlighted' : '')} />;
+    var class_string = 'chip ' + this.props.color;
+    if (this.props.highlighted) {
+      class_string += ' highlighted';
+    }
+    return (<span
+      className={class_string}
+      onMouseEnter={this.handleMouseEnter}
+      onMouseLeave={this.handleMouseLeave}
+    />);
   },
 });
 
@@ -44,6 +60,8 @@ var ChipPileView = React.createClass({
   propTypes: {
     color: React.PropTypes.oneOf(_.values(Colors)).isRequired,
     count: React.PropTypes.number.isRequired,
+    onChipEnter: React.PropTypes.func,
+    onChipLeave: React.PropTypes.func,
   },
   render: function() {
     var color = this.props.color;
@@ -52,7 +70,10 @@ var ChipPileView = React.createClass({
         className={'chip-pile ' + color}
         onClick={this.props.onClick} >
         <ChipView color={color}
-          highlighted={this.props.highlighted} />
+          highlighted={this.props.highlighted}
+          onChipEnter={this.props.onChipEnter}
+          onChipLeave={this.props.onChipLeave}
+          />
         <span className="chip-count">{this.props.count}</span>
       </div>
     );
@@ -64,13 +85,26 @@ var ChipSupplyView = React.createClass({
     actionStore: React.PropTypes.instanceOf(ActionStore).isRequired,
     game: React.PropTypes.object.isRequired,
   },
+  getInitialState: function() {
+    return {hoveredColor: null};
+  },
   onChipClick: function(color) {
     this.props.actionStore.didClickSupplyChip(color);
   },
+  onChipEnter: function(color) {
+    this.setState({hoveredColor: color});
+  },
+  onChipLeave: function(color) {
+    this.setState({hoveredColor: null});
+  },
   render: function() {
+    var actionStore = this.props.actionStore;
+    var selection = actionStore.getSelection();
     var chips = _.map(Colors, function (color) {
       var onClickFunc = _.partial(this.onChipClick, color);
-      var highlight = false;
+      var highlight = actionStore.isPlayersTurn() &&
+        (this.state.hoveredColor === color ||
+         (selection && selection.chips && selection.chips[color] > 0));
       return (
         <ChipPileView
           key={color}
@@ -78,6 +112,8 @@ var ChipSupplyView = React.createClass({
           highlighted={highlight}
           count={this.props.game.chipSupply[color]}
           onClick={onClickFunc}
+          onChipEnter={this.onChipEnter}
+          onChipLeave={this.onChipLeave}
         />
       );
     }, this);
