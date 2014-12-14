@@ -288,6 +288,8 @@ span.gem {
 
 
 .noble-supply {
+}
+.noble-list {
   display: flex;
   flex-wrap: none;
   align-items: center;
@@ -295,13 +297,13 @@ span.gem {
 .chip-supply {
 }
 .chip-supply-title, .noble-supply-title {
-  display: inline-block;
   margin-left: 5px;
   padding: 2px;
   font-size: 18px;
 }
 .chip-piles {
   display: flex;
+  padding-top padding-bottom: 2px;
 }
 .chip-pile {
   display: inline-flex;
@@ -374,6 +376,10 @@ span.gem {
 
 .player-hand-view {
   display: flex;
+  align-items: center;
+}
+.player-hand-title {
+  display: inline-block;
 }
 .player-hand-cards {
   display: inline-flex;
@@ -390,7 +396,19 @@ span.gem {
 .winning-player {
   background-color: forestgreen;
 }
+.player-chips {
+  display: flex;
+  align-items: center;
+}
+.player-board-card-stacks {
+  padding: 2px;
+  display: inline-block;
+}
 .card-stack {
+  display: inline-flex;
+  flex-direction: column;
+}
+.noble-views {
   display: inline-flex;
   flex-direction: column;
 }

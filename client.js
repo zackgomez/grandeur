@@ -57,7 +57,9 @@ var NobleSupplyView = React.createClass({
     return (
       <div className="noble-supply">
         <div className="noble-supply-title">Nobles</div>
-        {nobles}
+        <div className="noble-list">
+          {nobles}
+        </div>
       </div>
     );
   },
@@ -163,9 +165,6 @@ var PlayerView = React.createClass({
         onClick={chipClickHandler}
       />;
     }, this);
-    var noble_views = _.map(player.nobles, function (noble, i) {
-      return (<NobleView key={i} noble={noble}/>);
-    });
 
     var user = this.props.userByID[player.userID];
     var player_name = user ? user.name : player.userID;
@@ -196,12 +195,10 @@ var PlayerView = React.createClass({
           actionStore={this.props.actionStore}
         />
         <div className="player-chips">
+          <span className="player-chips-title">Chips</span>
           {chip_views}
         </div>
         <PlayerBoardView player={player} />
-        <div className="noble-views">
-          {noble_views}
-        </div>
       </div>
     );
   },
@@ -230,8 +227,10 @@ var PlayerHandView = React.createClass({
         faceDown={!is_session_player}
       />;
     }, this);
+    var title_view = cards.length > 0 ? <div className="player-hand-title">Hand</div> : null;
     return (
       <div className="player-hand-view">
+      {title_view}
         <div className="player-hand-cards">
           {cards}
         </div>
@@ -255,9 +254,17 @@ var PlayerBoardView = React.createClass({
       });
       return (<div key={color} className="card-stack">{rendered_cards}</div>);
     });
+    var noble_views = _.map(player.nobles, function (noble, i) {
+      return (<NobleView key={i} noble={noble}/>);
+    });
     return (
       <div className="player-board-view">
-        {piles}
+        <div className="player-board-card-stacks">
+          {piles}
+        </div>
+        <div className="noble-views">
+          {noble_views}
+        </div>
       </div>
     );
   },
