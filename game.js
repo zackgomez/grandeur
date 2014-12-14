@@ -397,10 +397,12 @@ Game.prototype.addAction = function(userID, action) {
       var new_chips = {};
       var new_chips_count = 0;
       _.each(player.chips, function(count, color) {
-        var new_count = count - (discarded_chips[color] || 0);
+        var discarded_count = (discarded_chips[color] || 0);
+        var new_count = count - discarded_count;
         new_chips[color] = new_count;
         new_chips_count += new_count;
-      });
+        this.chipSupply_[color] += discarded_count;
+      }, this);
       if (new_chips_count > MAX_CHIPS) {
         throw new Error('still too many chips');
       }
