@@ -56,6 +56,7 @@ var NobleSupplyView = React.createClass({
     });
     return (
       <div className="noble-supply">
+        <div className="noble-supply-title">Nobles</div>
         {nobles}
       </div>
     );
@@ -111,17 +112,17 @@ var DraftingView = React.createClass({
     levels.reverse();
     return (
       <div className="drafting-view">
-        <NobleSupplyView session={this.props.session} game={this.props.game} />
-        <div className="card-area">
-          <div className="drafting-levels">
-            {levels}
-          </div>
-        </div>
         <ChipSupplyView
           session={this.props.session}
           game={this.props.game}
           actionStore={this.props.actionStore}
         />
+        <div className="card-area">
+          <div className="drafting-levels">
+            {levels}
+          </div>
+        </div>
+        <NobleSupplyView session={this.props.session} game={this.props.game} />
       </div>
     );
   },
@@ -168,10 +169,16 @@ var PlayerView = React.createClass({
 
     var user = this.props.userByID[player.userID];
     var player_name = user ? user.name : player.userID;
+    if (this.props.playerIndex === 0) {
+      player_name = '\u2605 ' + player_name;
+    }
     var container_class_name = 'player-view';
     if (is_session_player) {
-      container_class_name += ' current';
+      container_class_name += ' my-view';
       player_name += ' (me)';
+    }
+    if (game.currentPlayerIndex === this.props.playerIndex) {
+      container_class_name += ' active-player';
     }
     player_name += this.getPointCountStringForPlayer(player);
     if (game.winningPlayerIndex == this.props.playerIndex) {
@@ -441,7 +448,6 @@ var GamePage = React.createClass({
       localPlayerIndex = i;
       return player.userID === localUser.id;
     });
-    console.log('local player index', localPlayerIndex);
     var player_views = _.map(game.players, function(player, i) {
       var index = (i + localPlayerIndex) % game.players.length;
       return <PlayerView

@@ -83,6 +83,7 @@ var ChipSupplyView = React.createClass({
     }, this);
     return (
       <div className="chip-supply">
+        <span className="chip-supply-title">Chip Supply</span>
         <div className="chip-piles">
           {chips}
         </div>
