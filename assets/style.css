@@ -414,6 +414,12 @@ span.gem {
   padding: 5px;
   margin: 5px;
 }
+.log-item-description {
+}
+.log-item-context {
+  display: flex;
+  align-items: center;
+}
 
 .user-name {
   display:inline-block;
