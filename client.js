@@ -298,6 +298,8 @@ var GameLogView = React.createClass({
       case EventType.DRAFT_TWO_CHIP:
       case EventType.DISCARD_CHIPS:
         return <ChipListView chips={logEvent.payload.chips} />;
+      case EventType.RECEIVE_NOBLE:
+        return <NobleView noble={logEvent.payload.noble} />;
       default:
         return null;
     }
@@ -328,6 +330,12 @@ var GameLogView = React.createClass({
       case EventType.DRAFT_MULTI_CHIP:
       case EventType.DRAFT_TWO_CHIP:
         prettifiedEventDescription = " took chips";
+        break;
+      case EventType.DISCARD_CHIPS:
+        prettifiedEventDescription = " discarded chips";
+        break;
+      case EventType.RECEIVE_NOBLE:
+        prettifiedEventDescription = " received a noble";
         break;
       default:
         prettifiedEventDescription = JSON.stringify(payload);

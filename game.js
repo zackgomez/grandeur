@@ -141,6 +141,7 @@ Game.prototype.nextTurn = function() {
       var noble = selectable_nobles[0];
       player.nobles = player.nobles.concat(noble);
       this.nobles_ = _.without(this.nobles_, noble);
+      this.addEventHelper_(player.getID(), EventType.RECEIVE_NOBLE, {noble: noble});
     } else if (selectable_nobles.length > 1) {
       this.currentRequest_ = RequestTypes.SELECT_NOBLE;
       return;
