@@ -109,7 +109,7 @@ var DraftingView = React.createClass({
   render: function() {
     var game = this.props.game;
     var actionStore = this.props.actionStore;
-    var is_players_turn = actionStore.isPlayersTurn();
+    var has_requested_action = actionStore.isActionRequest();
     var selection = actionStore.getSelection();
     var levels = _.map(game.boards, function(board, i) {
       var level = i + 1;
@@ -117,7 +117,7 @@ var DraftingView = React.createClass({
         var onCardClick = _.partial(this.onCardClick, card, level);
         var relevant_card = this.state.hoveredCardID === card.id ||
           (selection && selection.cardID === card.id);
-        var highlighted = is_players_turn && relevant_card;
+        var highlighted = has_requested_action && relevant_card;
         var card_props = {
           card:card,
           key:card.id,
@@ -129,7 +129,7 @@ var DraftingView = React.createClass({
         };
         return CardView(card_props);
       }, this);
-      var is_deck_selected = is_players_turn &&
+      var is_deck_selected = has_requested_action &&
         ((selection && selection.level === level && !selection.cardID)
          || this.state.hoveredDeckLevel === level);
       var onDeckClick = _.partial(this.onDeckClick, level);
@@ -180,12 +180,12 @@ var PlayerView = React.createClass({
   getPointCountStringForPlayer: function(player) {
     var pointCount = Player.getPlayerScore(player);
     if (pointCount == 0) {
-      return "";
+      return ''
     }
     if (pointCount == 1) {
-      return " - 1 point";
+      return ' - 1 point';
     }
-    return " - " + pointCount + " points";
+    return ' - ' + pointCount + ' points';
   },
   render: function() {
     var game = this.props.game;

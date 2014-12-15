@@ -14,6 +14,20 @@ var SelectionTypes = {
   NOBLE: 'noble',
 };
 
+var RequestTypeToValidSelectionType = {};
+RequestTypeToValidSelectionType[RequestTypes.ACTION] = [
+  SelectionTypes.CARD,
+  SelectionTypes.HAND_CARD,
+  SelectionTypes.DECK,
+  SelectionTypes.CHIPS
+];
+RequestTypeToValidSelectionType[RequestTypes.DISCARD_CHIPS] = [
+  SelectionTypes.DISCARD_CHIPS
+];
+RequestTypeToValidSelectionType[RequestTypes.SELECT_NOBLE] = [
+  SelectionTypes.NOBLE
+];
+
 var ActionStore = function(game, player_index) {
   this.playerIndex_ = player_index;
   this.game_ = game;
@@ -50,17 +64,8 @@ ActionStore.prototype.setSelection_ = function(selection, force) {
   var new_selection_type = selection_type_from_selection(selection);
   if (new_selection_type === SelectionTypes.NONE) {
     // nop
-  } else if (request === RequestTypes.DISCARD_CHIPS &&
-      new_selection_type !== SelectionTypes.DISCARD_CHIPS) {
-    return;
-  } else if (request === RequestTypes.SELECT_NOBLE &&
-             new_selection_type !== SelectionTypes.NOBLE) {
-    return;
-  } else if (request === RequestTypes.ACTION &&
-             new_selection_type !== SelectionTypes.CARD &&
-             new_selection_type !== SelectionTypes.HAND_CARD &&
-             new_selection_type !== SelectionTypes.DECK &&
-             new_selection_type !== SelectionTypes.CHIPS) {
+  } else if (!_.contains(RequestTypeToValidSelectionType[request],
+                         new_selection_type)) {
     return;
   }
 
@@ -108,6 +113,18 @@ ActionStore.prototype.isPlayersTurn = function() {
 };
 ActionStore.prototype.getPlayerIndex = function() {
   return this.playerIndex_;
+};
+ActionStore.prototype.isActionRequest = function() {
+  return this.isPlayersTurn()
+  && this.game_.currentRequest === RequestTypes.ACTION;
+};
+ActionStore.prototype.isDiscardChipsRequest = function() {
+  return this.isPlayersTurn()
+  && this.game_.currentRequest === RequestTypes.DISCARD_CHIPS;
+};
+ActionStore.prototype.isSelectNoblesRequest = function() {
+  return this.isPlayersTurn()
+  && this.game_.currentRequest === RequestTypes.SELECT_NOBLE;
 };
 
 

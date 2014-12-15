@@ -102,7 +102,7 @@ var ChipSupplyView = React.createClass({
     var selection = actionStore.getSelection();
     var chips = _.map(Colors, function (color) {
       var onClickFunc = _.partial(this.onChipClick, color);
-      var highlight = actionStore.isPlayersTurn() &&
+      var highlight = actionStore.isActionRequest() &&
         (this.state.hoveredColor === color ||
          (selection && selection.chips && selection.chips[color] > 0));
       return (
