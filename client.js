@@ -266,9 +266,11 @@ var PlayerHandView = React.createClass({
     var title_view = cards.length > 0 ? <div className="player-hand-title">Hand</div> : null;
     return (
       <div className="player-hand-view">
-      {title_view}
+        {title_view}
         <div className="player-hand-cards">
-          {cards}
+          <ReactCSSTransitionGroup transitionName="card">
+            {cards}
+          </ReactCSSTransitionGroup>
         </div>
       </div>
     );

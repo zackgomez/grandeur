@@ -308,7 +308,7 @@ span.gem {
 .chip-pile {
   display: inline-flex;
   margin-left: 10px;
-  flex-wrap: none;
+  flex-wrap: nowrap;
   align-items: center;
 }
 .chip-count {
@@ -445,14 +445,34 @@ span.gem {
   padding-right: 5px;
 }
 
+/* Animations used with ReactCSSTransitionGroup */
 .log-enter {
   opacity: 0.01;
   transition: opacity .5s ease-in;
 }
 
-.log-enter.log-enter-active {
+.log-enter.log-enter-active{
   opacity: 1;
 }
+
+.card-enter {
+  opacity: 0.01;
+  transition: opacity .5s ease-in;
+}
+
+.card-enter.card-enter-active {
+  opacity: 1;
+}
+
+.card-leave {
+  opacity: 1;
+  transition: opacity .5s ease-in;
+}
+
+.card-leave.card-leave-active {
+  opacity: 0.01;
+}
+
 
 .game-log-item {
   font-size:15px;

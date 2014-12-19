@@ -12,7 +12,7 @@ var CardView = React.createClass({
   propTypes: {
     card: React.PropTypes.object.isRequired,
     faceDown: React.PropTypes.bool,
-    highlightd: React.PropTypes.bool,
+    highlighted: React.PropTypes.bool,
     onCardEnter: React.PropTypes.func,
     onCardLeave: React.PropTypes.func,
     onClick: React.PropTypes.func,
