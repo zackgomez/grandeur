@@ -280,10 +280,7 @@ span.gem {
 }
 .noble-tile .noble-points {
   background-color: rgba(0, 0, 0, 0.1);
-  padding-left: 3px;
-  padding-right: 3px;
-  padding-top: 1px;
-  padding-bottom: 1px;
+  padding: 1px 3px;
 }
 
 
@@ -291,7 +288,7 @@ span.gem {
 }
 .noble-list {
   display: flex;
-  flex-wrap: none;
+  flex-wrap: nowrap;
   align-items: center;
 }
 .chip-supply {
@@ -303,7 +300,7 @@ span.gem {
 }
 .chip-piles {
   display: flex;
-  padding-top padding-bottom: 2px;
+  padding: 2px 0px;
 }
 .chip-pile {
   display: inline-flex;
