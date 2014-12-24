@@ -5,7 +5,8 @@
 var ActionTypes = require('./ActionTypes');
 var React = require('react/addons');
 var ReactAsync = require('react-async');
-var ReactRouter = require('react-router-component');
+var Router = require('react-router');
+var { Route, DefaultRoute, RouteHandler, Link, NotFoundRoute } = Router;
 var CloudListener = require('./CloudListener');
 var superagent = require('superagent');
 var GameMutator = require('./GameMutator');
@@ -18,10 +19,6 @@ var LobbyStore = require('./LobbyStore');
 var BaseURL = require('./BaseURL');
 var UserFetcher = require('./UserFetcher');
 var Session = require('./Session');
-var Pages       = ReactRouter.Pages;
-var Page        = ReactRouter.Page;
-var NotFound    = ReactRouter.NotFound;
-var Link        = ReactRouter.Link;
 var GameStore = require('./GameStore');
 var Immutable = require('immutable');
 var Colors = require('./Colors');
@@ -39,11 +36,6 @@ var ChipListView = ChipViews.ChipListView;
 var ReactCSSTransitionGroup = React.addons.CSSTransitionGroup;
 var NobleView = require('./NobleView');
 var Player = require('./Player');
-
-var navigateToHref = function(href, cb) {
-  cb = cb || function() {};
-  ReactRouter.environment.defaultEnvironment.navigate(href, cb);
-};
 
 function playerIsLocalPlayer(session, playerJSON) {
   return session.getUser().id === playerJSON.userID;
@@ -399,16 +391,18 @@ var GameLogView = React.createClass({
 });
 
 var GamePage = React.createClass({
-  mixins: [ReactAsync.Mixin],
+  mixins: [ReactAsync.Mixin, Router.State],
 
   getInitialStateAsync: function(cb) {
     var session = this.props.session;
     if (!session) {
         return cb(null);
     }
+    console.log('params', this.getParams());
+    var gameID = this.getParams().gameID;
     var gameStore = session.GameStore();
-    gameStore.syncGameState(this.props.gameID, null, function() {
-      var game = gameStore.getGameState(this.props.gameID);
+    gameStore.syncGameState(gameID, null, function() {
+      var game = gameStore.getGameState(gameID);
       if (!game) {
         return cb(new Error('unable to fetch game', null));
       }
@@ -437,10 +431,10 @@ var GamePage = React.createClass({
     if (!this.state.game) {
       return;
     }
-    if (!_.contains(changedGameIDs, this.props.gameID)) {
+    if (!_.contains(changedGameIDs, this.getParams().gameID)) {
       return;
     }
-    var game = this.props.session.GameStore().getGameState(this.props.gameID);
+    var game = this.props.session.GameStore().getGameState(this.getParams().gameID);
     if (game) {
       ActionStore.setGame(game);
       this.setState({game: game});
@@ -516,6 +510,8 @@ var GamePage = React.createClass({
 });
 
 var LoginPage = React.createClass({
+  mixins: [ Router.Navigation ],
+
   getInitialState: function() {
     return { requestInProgess: false };
   },
@@ -536,7 +532,7 @@ var LoginPage = React.createClass({
       var user = res.body.user;
       var session = new Session(user);
       console.log('redirect to', res.body.redirect);
-      navigateToHref(res.body.redirect);
+      this.transitionTo(res.body.redirect);
       renderApp(session);
     }.bind(this));
     return false;
@@ -555,47 +551,46 @@ var LoginPage = React.createClass({
 });
 
 var LobbyPage = React.createClass({
-  mixins: [ReactAsync.Mixin],
+  mixins: [ReactAsync.Mixin, Router.Navigation, Router.State],
 
   getInitialStateAsync: function(cb) {
     var lobbyStore = this.props.session.LobbyStore();
-    lobbyStore.syncLobby(this.props.lobbyID, null, function(err) {
+    lobbyStore.syncLobby(this.getParams().lobbyID, null, function(err) {
       if (err) {
         cb(null, {error: err});
         return;
       }
-      var lobby = lobbyStore.getLobby(this.props.lobbyID);
+      var lobby = lobbyStore.getLobby(this.getParams().lobbyID);
       cb(null, {lobby: lobby});
     }.bind(this));
   },
 
   onLobbyStoreUpdate: function(changed_lobby_by_id) {
-    var lobby = changed_lobby_by_id[this.props.lobbyID];
+    var lobby = changed_lobby_by_id[this.getParams().lobbyID];
     if (lobby) {
       this.setState({lobby: lobby});
+      if (lobby.gameID) {
+        this.transitionTo('/game/' + lobby.gameID);
+      }
     }
   },
 
   componentWillMount: function() {
-    if (typeof window !== 'undefined') {
-      this.props.session.LobbyStore().addListener(this.onLobbyStoreUpdate);
-    }
+    this.props.session.LobbyStore().addListener(this.onLobbyStoreUpdate);
   },
   componentWillUnmount: function() {
-    if (typeof window !== 'undefined') {
-      this.props.session.LobbyStore().removeListener(this.onLobbyStoreUpdate);
-    }
+    this.props.session.LobbyStore().removeListener(this.onLobbyStoreUpdate);
   },
 
   onAddBot: function() {
-    var mutator = new LobbyMutator(this.props.session, this.props.lobbyID);
+    var mutator = new LobbyMutator(this.props.session, this.getParams().lobbyID);
     mutator.addBot();
   },
   onStartGame: function() {
-    var mutator = new LobbyMutator(this.props.session, this.props.lobbyID);
-    mutator.startGame(function(err, gameID) {
+    var mutator = new LobbyMutator(this.props.session, this.getParams().lobbyID);
+    mutator.startGame((err, gameID) => {
       if (!err) {
-        navigateToHref('/game/' + gameID);
+        this.transitionTo('/game/' + gameID);
       }
     });
   },
@@ -606,9 +601,6 @@ var LobbyPage = React.createClass({
     }
     if (!this.state.lobby) {
       return <div className="lobby-loading">Loading lobby...</div>;
-    }
-    if (this.state.lobby.gameID) {
-      return <GamePage gameID={this.state.lobby.gameID} session={this.props.session} />;
     }
     var user_entries = _.map(this.state.lobby.players, function(user) {
       return <li className="lobby-player-entry" key={user.id}>{user.name}</li>;
@@ -637,13 +629,15 @@ var LobbyListEntry = React.createClass({
   render: function() {
     return (
       <button className="lobby-button lobby-list-entry" onClick={this.onClick}>{this.props.lobby.name}</button>
-      );
+    );
   },
 });
 
 
 /* Lobby content */
 var LobbyListView = React.createClass({
+  mixins: [Router.Navigation],
+
   getInitialState: function() {
     return {};
   },
@@ -661,14 +655,14 @@ var LobbyListView = React.createClass({
           return;
         }
         var lobby = res.body;
-        navigateToHref('/lobby/' + lobby.id);
+        this.transitionTo('/lobby/' + lobby.id);
       }.bind(this));
   },
 
   onLobbyClick: function(lobby) {
     var mutator = new LobbyMutator(this.props.session, lobby.id);
     mutator.joinGame(function(err) {
-      navigateToHref('/lobby/' + lobby.id);
+      this.transitionTo('/lobby/' + lobby.id);
     });
   },
 
@@ -751,23 +745,27 @@ var NotFoundHandler = React.createClass({
 var App = React.createClass({
   render: function() {
     var session = this.props.session;
-    return (
-      <Pages className="App" path={this.props.path}>
-        <Page path="/" handler={MainPage} session={session} />
-        <Page path="/login" handler={LoginPage} />
-        <Page path="/game/:gameID" handler={GamePage} session={session} />
-        <Page path="/lobby/:lobbyID" handler={LobbyPage} session={session}/>
-        <Page path="/lobby-list" handler={LobbyListPage} session={session}/>
-        <NotFound handler={NotFoundHandler} />
-      </Pages>
-    );
+    return (<RouteHandler {...this.props} />);
   }
 });
+
+var routes = (
+  <Route name="app" path="/" handler={App}>
+    <DefaultRoute handler={MainPage} />
+    <Route name="login" path="/login" handler={LoginPage}/>
+    <Route name="game" path="/game/:gameID" handler={GamePage} />
+    <Route name="lobby" path="/lobby/:lobbyID" handler={LobbyPage} />
+    <Route name="lobby-index" path="/lobby-list" handler={LobbyListPage} />
+    <NotFoundRoute handler={NotFoundHandler} />
+  </Route>
+);
 
 module.exports = App;
 
 var renderApp = function(session) {
-  React.renderComponent(<App session={session} />, document.getElementById('content'));
+  Router.run(routes, Router.HistoryLocation, function (Handler) {
+    React.render(<Handler session={session} />, document.body);
+  });
 };
 
 var ws;

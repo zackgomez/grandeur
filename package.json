@@ -10,11 +10,10 @@
     ]
   },
   "dependencies": {
-    "react": "~0.10.0",
-    "react-async": "~0.9.1",
-    "react-router-component": "~0.18.2",
+    "react": "~0.12.0",
+    "react-async": "~2",
+    "react-router": "*",
     "express": "~4.1.1",
-    "node-jsx": "~0.10.0",
     "superagent": "~0.18.0",
     "fibers": "~1.0.1",
     "underscore": "*",
@@ -29,7 +28,7 @@
     "immutable": "3.0"
   },
   "devDependencies": {
-    "reactify": "~0.13.1",
+    "reactify": "0.17.x",
     "envify": "~1.2.0",
     "browserify": "~3.44.2",
     "connect-browserify": "~2.0.1",
