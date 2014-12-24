@@ -69,7 +69,6 @@ var DraftingView = React.createClass({
   propTypes: {
     session: React.PropTypes.instanceOf(Session).isRequired,
     game: React.PropTypes.object.isRequired,
-    actionStore: React.PropTypes.instanceOf(ActionStore).isRequired,
   },
   getInitialState: function() {
     return {
@@ -78,19 +77,19 @@ var DraftingView = React.createClass({
     };
   },
   componentWillMount: function() {
-    this.props.actionStore.addListener(this.onActionStoreChange);
+    ActionStore.addListener(this.onActionStoreChange);
   },
   componentWillUnmount: function() {
-    this.props.actionStore.removeListener(this.onActionStoreChange);
+    ActionStore.removeListener(this.onActionStoreChange);
   },
   onActionStoreChange: function() {
     this.forceUpdate();
   },
   onDeckClick: function(level) {
-    this.props.actionStore.didClickDeck(level);
+    ActionStore.didClickDeck(level);
   },
   onCardClick: function(card, level) {
-    this.props.actionStore.didClickDraftingCard(level, card.id);
+    ActionStore.didClickDraftingCard(level, card.id);
   },
   onCardDoubleClick: function(card) {
   },
@@ -108,9 +107,8 @@ var DraftingView = React.createClass({
   },
   render: function() {
     var game = this.props.game;
-    var actionStore = this.props.actionStore;
-    var has_requested_action = actionStore.isActionRequest();
-    var selection = actionStore.getSelection();
+    var has_requested_action = ActionStore.isActionRequest();
+    var selection = ActionStore.getSelection();
     var levels = _.map(game.boards, function(board, i) {
       var level = i + 1;
       var cards = _.map(board, function(card) {
@@ -153,7 +151,6 @@ var DraftingView = React.createClass({
         <ChipSupplyView
           session={this.props.session}
           game={this.props.game}
-          actionStore={this.props.actionStore}
         />
         <div className="card-area">
           <div className="drafting-levels">
@@ -171,11 +168,10 @@ var PlayerView = React.createClass({
     game: React.PropTypes.object.isRequired,
     session: React.PropTypes.instanceOf(Session).isRequired,
     playerIndex: React.PropTypes.number.isRequired,
-    actionStore: React.PropTypes.instanceOf(ActionStore).isRequired,
     userByID: React.PropTypes.object.isRequired,
   },
   chipClicked: function(color) {
-    this.props.actionStore.didClickPlayerChip(color);
+    ActionStore.didClickPlayerChip(color);
   },
   getPointCountStringForPlayer: function(player) {
     var pointCount = Player.getPlayerScore(player);
@@ -231,7 +227,6 @@ var PlayerView = React.createClass({
           game={this.props.game}
           session={this.props.session}
           playerIndex={this.props.playerIndex}
-          actionStore={this.props.actionStore}
         />
         <div className="player-chips">
           <span className="player-chips-title">Chips ({chip_count} / 10)</span>
@@ -248,10 +243,9 @@ var PlayerHandView = React.createClass({
     game: React.PropTypes.object.isRequired,
     session: React.PropTypes.instanceOf(Session).isRequired,
     playerIndex: React.PropTypes.number.isRequired,
-    actionStore: React.PropTypes.instanceOf(ActionStore).isRequired,
   },
   onCardClick: function(card) {
-    this.props.actionStore.didClickHandCard(card.id);
+    ActionStore.didClickHandCard(card.id);
   },
   render: function() {
     var player = this.props.game.players[this.props.playerIndex];
@@ -430,34 +424,13 @@ var GamePage = React.createClass({
             return true;
           }
         });
+        ActionStore.init(game, player_index);
         return cb(null, {
           game: game,
           userByID: userByID,
-          actionStore: new ActionStore(game, player_index),
         });
       });
     }.bind(this));
-  },
-
-  stateToJSON: function(state) {
-    if (!state) {
-      return null;
-    }
-    return {
-      game: state.game,
-      userByID: state.userByID,
-      playerIndex: state.actionStore.getPlayerIndex(),
-    };
-  },
-  stateFromJSON: function(state) {
-    if (!state) {
-      return null;
-    }
-    return {
-      game: state.game,
-      userByID: state.userByID,
-      actionStore: new ActionStore(state.game, state.playerIndex),
-    };
   },
 
   onGameStateChange: function(changedGameIDs) {
@@ -469,7 +442,7 @@ var GamePage = React.createClass({
     }
     var game = this.props.session.GameStore().getGameState(this.props.gameID);
     if (game) {
-      this.state.actionStore.setGame(game);
+      ActionStore.setGame(game);
       this.setState({game: game});
     }
   },
@@ -512,7 +485,6 @@ var GamePage = React.createClass({
         game={game}
         session={this.props.session}
         userByID={userByID}
-        actionStore={this.state.actionStore}
       />;
     }, this);
     return (
@@ -522,12 +494,10 @@ var GamePage = React.createClass({
             <DraftingView
               session={this.props.session}
               game={this.state.game}
-              actionStore={this.state.actionStore}
               />
             <ActionPanel
               session={this.props.session}
               game={game}
-              actionStore={this.state.actionStore}
              />
           </div>
           <div className="player-views">

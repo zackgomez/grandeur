@@ -204,50 +204,49 @@ var ActionPanel = React.createClass({
   propTypes: {
     session: React.PropTypes.instanceOf(Session).isRequired,
     game: React.PropTypes.any.isRequired,
-    actionStore: React.PropTypes.instanceOf(ActionStore).isRequired,
   },
 
   componentWillMount: function() {
-    this.props.actionStore.addListener(this.onActionStoreChange);
+    ActionStore.addListener(this.onActionStoreChange);
   },
   componentWillUnmount: function() {
-    this.props.actionStore.removeListener(this.onActionStoreChange);
+    ActionStore.removeListener(this.onActionStoreChange);
   },
 
   onActionStoreChange: function() {
     this.forceUpdate();
   },
   onReserveCard: function() {
-    var selection = this.props.actionStore.getSelection();
-    var selection_type = this.props.actionStore.getSelectionType();
+    var selection = ActionStore.getSelection();
+    var selection_type = ActionStore.getSelectionType();
     if (selection_type === ActionStore.SelectionTypes.CARD ||
         selection_type === ActionStore.SelectionTypes.DECK) {
       GameMutator.reserveCard(this.props.game.id, selection.level, selection.cardID);
     }
   },
   onBuildCard: function() {
-    var selection = this.props.actionStore.getSelection();
-    var selection_type = this.props.actionStore.getSelectionType();
+    var selection = ActionStore.getSelection();
+    var selection_type = ActionStore.getSelectionType();
     if (selection_type === ActionStore.SelectionTypes.CARD) {
       GameMutator.buildTableCard(this.props.game.id, selection.level, selection.cardID);
     }
   },
   onBuildHandCard: function() {
-    var selection = this.props.actionStore.getSelection();
-    var selection_type = this.props.actionStore.getSelectionType();
+    var selection = ActionStore.getSelection();
+    var selection_type = ActionStore.getSelectionType();
     if (selection_type === ActionStore.SelectionTypes.HAND_CARD) {
       GameMutator.buildHandCard(this.props.game.id, selection.cardID);
     }
   },
   onDraftChips: function() {
-    var selection = this.props.actionStore.getSelection();
-    var selection_type = this.props.actionStore.getSelectionType();
+    var selection = ActionStore.getSelection();
+    var selection_type = ActionStore.getSelectionType();
     if (selection_type === ActionStore.SelectionTypes.CHIPS) {
       GameMutator.draftChips(this.props.game.id, selection.chips);
     }
   },
   onDiscardChips: function() {
-    var selection = this.props.actionStore.getSelection();
+    var selection = ActionStore.getSelection();
     GameMutator.discardChips(this.props.game.id, selection.discard_chips);
     // TODO  validate based on selection
   },
@@ -256,10 +255,10 @@ var ActionPanel = React.createClass({
     GameMutator.selectNoble(this.props.game.id, nobleIndex);
   },
   onClearDiscardSelection: function() {
-    this.props.actionStore.clearSelection();
+    ActionStore.clearSelection();
   },
   renderDiscard: function(playersExistingChipCount) {
-    var selection_or_null = this.props.actionStore.getSelection();
+    var selection_or_null = ActionStore.getSelection();
     if (selection_or_null != null) {
       selection_or_null = selection_or_null.discard_chips;
     }
@@ -274,13 +273,12 @@ var ActionPanel = React.createClass({
 
   render: function() {
     var game = this.props.game;
-    var player = this.props.game.players[this.props.actionStore.getPlayerIndex()];
-    var actionStore = this.props.actionStore;
-    if (!actionStore.isPlayersTurn()) {
+    var player = this.props.game.players[ActionStore.getPlayerIndex()];
+    if (!ActionStore.isPlayersTurn()) {
       return <script />;
     }
-    var selection = actionStore.getSelection();
-    var selection_type = actionStore.getSelectionType();
+    var selection = ActionStore.getSelection();
+    var selection_type = ActionStore.getSelectionType();
 
     var request_type = game.currentRequest;
 
@@ -340,7 +338,7 @@ var ActionPanel = React.createClass({
         <div className="action-panel">
           TODO DETAIL VIEW
           SELECTION TYPE: {selection_type}
-          SELECTION: {JSON.stringify(actionStore.getSelection())}
+          SELECTION: {JSON.stringify(ActionStore.getSelection())}
         </div>
       );
     }

@@ -90,14 +90,13 @@ var ChipPileView = React.createClass({
 
 var ChipSupplyView = React.createClass({
   propTypes: {
-    actionStore: React.PropTypes.instanceOf(ActionStore).isRequired,
     game: React.PropTypes.object.isRequired,
   },
   getInitialState: function() {
     return {hoveredColor: null};
   },
   onChipClick: function(color) {
-    this.props.actionStore.didClickSupplyChip(color);
+    ActionStore.didClickSupplyChip(color);
   },
   onChipEnter: function(color) {
     this.setState({hoveredColor: color});
@@ -106,11 +105,10 @@ var ChipSupplyView = React.createClass({
     this.setState({hoveredColor: null});
   },
   render: function() {
-    var actionStore = this.props.actionStore;
-    var selection = actionStore.getSelection();
+    var selection = ActionStore.getSelection();
     var chips = _.map(Colors, function (color) {
       var onClickFunc = _.partial(this.onChipClick, color);
-      var highlight = actionStore.isActionRequest() &&
+      var highlight = ActionStore.isActionRequest() &&
         (this.state.hoveredColor === color ||
          (selection && selection.chips && selection.chips[color] > 0));
       return (

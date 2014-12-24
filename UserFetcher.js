@@ -1,3 +1,4 @@
+/* @flow */
 var _ = require('underscore');
 var BaseURL = require('./BaseURL');
 var superagent = require('superagent');
@@ -34,6 +35,19 @@ var UserFetcher = {
       results = _.extend(results, usersByID);
       callback(null, results);
     }.bind(this));
+  },
+  getUsers: function(userIDs) {
+    var userByID = {};
+    _.each(userIDs, function(userID) {
+      var user = this.userCache_[userID];
+      if (user) {
+        userByID[userID] = user;
+      }
+    }, this);
+    return userByID;
+  },
+  ensureUsers: function(userIDs) {
+    this.fetchUsers(userIDs, function() {});
   },
 
   // private
