@@ -65,9 +65,17 @@ var ChipPileView = React.createClass({
   },
   render: function() {
     var color = this.props.color;
+    var style = {
+      display: 'inline-flex',
+      flexDirection: 'column',
+      marginLeft: '10px',
+      flexWrap: 'nowrap',
+      alignItems: 'center',
+    };
     return (
-      <div key={color}
-        className={'chip-pile ' + color}
+      <div
+        key={color}
+        style={style}
         onClick={this.props.onClick} >
         <ChipView color={color}
           highlighted={this.props.highlighted}
