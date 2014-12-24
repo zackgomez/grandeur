@@ -6,7 +6,6 @@ var express     = require('express');
 var browserify  = require('connect-browserify');
 var ReactAsync  = require('react-async');
 var nodejsx     = require('node-jsx').install();
-var App         = require('./client');
 var api         = require('./api');
 var Session = require('./Session');
 var morgan = require('morgan');
@@ -14,6 +13,7 @@ var User = require('./User');
 var express = require('express');
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
+var _ = require('underscore');
 var session = require('express-session')
   , passport = require('passport')
   , LocalStrategy = require('passport-local').Strategy;
@@ -22,18 +22,29 @@ var session = require('express-session')
 var development = process.env.NODE_ENV !== 'production';
 
 function renderApp(req, res, next) {
+  var document =
+'<!doctype html public>\n' +
+'<html>\n' +
+'<head>\n' +
+  '<title>Grandeur</title>\n' +
+  '<link href="/assets/style.css" rel="stylesheet"/>\n' +
+  '<script>window.__session = <%= session_data %></script>\n' +
+'</head>\n' +
+'<body>\n' +
+'  <div id="content" />\n' +
+'</body>\n' +
+'<script src="/assets/bundle.js"></script>\n' +
+'</html>\n';
+
+
   var path = url.parse(req.url).pathname;
   var session = Session.fetchServerSession(req, function(err, session) {
     if (err) {
       return next(err);
     }
-    var app = App({path: path, session: session});
-    ReactAsync.renderComponentToStringWithAsyncState(app, function(err, markup) {
-      if (err) {
-        return next(err);
-      }
-      res.send('<!doctype html>\n' + markup);
-    });
+    var session_data = session ? session.toJSON() : '';
+    res.send(_.template(document)({session_data: JSON.stringify(session_data)}));
+    return;
   });
 }
 
@@ -85,7 +96,7 @@ api.createApi(function (api) {
     }
     return next();
   };
-      
+
   app
     .use(cookieParser())
     .use(session({ secret: 'lj209nasdnfpvuadsfnvp' }))
@@ -93,8 +104,8 @@ api.createApi(function (api) {
     .use(bodyParser.json())
     .use(passport.initialize())
     .use(passport.session());
-  
-  
+
+
   app.post('/login',
       passport.authenticate('local', {
         failureRedirect: '../login',

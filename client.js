@@ -634,6 +634,9 @@ var LobbyPage = React.createClass({
     if (this.state.error) {
       return <div className="error">Lobby not found</div>;
     }
+    if (!this.state.lobby) {
+      return <div className="lobby-loading">Loading lobby...</div>;
+    }
     if (this.state.lobby.gameID) {
       return <GamePage gameID={this.state.lobby.gameID} session={this.props.session} />;
     }
@@ -778,26 +781,15 @@ var NotFoundHandler = React.createClass({
 var App = React.createClass({
   render: function() {
     var session = this.props.session;
-    var session_data = session
-        ? <script dangerouslySetInnerHTML={{__html: 'window.__session='+JSON.stringify(session.toJSON())}} />
-        : null;
     return (
-      <html>
-        <head>
-          {session_data}
-          <link rel="stylesheet" href="/assets/style.css" />
-          <link href='http://fonts.googleapis.com/css?family=Lato:100,300,400,700,100italic,300italic,400italic,700italic' rel='stylesheet' type='text/css' />
-          <script src="/assets/bundle.js" />
-        </head>
-        <Pages className="App" path={this.props.path}>
-          <Page path="/" handler={MainPage} session={session} />
-          <Page path="/login" handler={LoginPage} />
-          <Page path="/game/:gameID" handler={GamePage} session={session} />
-          <Page path="/lobby/:lobbyID" handler={LobbyPage} session={session}/>
-          <Page path="/lobby-list" handler={LobbyListPage} session={session}/>
-          <NotFound handler={NotFoundHandler} />
-        </Pages>
-      </html>
+      <Pages className="App" path={this.props.path}>
+        <Page path="/" handler={MainPage} session={session} />
+        <Page path="/login" handler={LoginPage} />
+        <Page path="/game/:gameID" handler={GamePage} session={session} />
+        <Page path="/lobby/:lobbyID" handler={LobbyPage} session={session}/>
+        <Page path="/lobby-list" handler={LobbyListPage} session={session}/>
+        <NotFound handler={NotFoundHandler} />
+      </Pages>
     );
   }
 });
@@ -805,7 +797,7 @@ var App = React.createClass({
 module.exports = App;
 
 var renderApp = function(session) {
-  React.renderComponent(<App session={session} />, document);
+  React.renderComponent(<App session={session} />, document.getElementById('content'));
 };
 
 var ws;
