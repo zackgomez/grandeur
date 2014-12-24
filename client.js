@@ -220,6 +220,9 @@ var PlayerView = React.createClass({
       player_name += ' (winner)';
       container_class_name += ' winning-player';
     }
+    var chip_count = _.reduce(Colors, function(memo, color) {
+      return memo + (player.chips[color] || 0);
+    }, 0);
 
     return (
       <div className={container_class_name}>
@@ -231,7 +234,7 @@ var PlayerView = React.createClass({
           actionStore={this.props.actionStore}
         />
         <div className="player-chips">
-          <span className="player-chips-title">Chips</span>
+          <span className="player-chips-title">Chips ({chip_count} / 10)</span>
           {chip_views}
         </div>
         <PlayerBoardView player={player} />
@@ -263,7 +266,7 @@ var PlayerHandView = React.createClass({
         faceDown={!is_session_player}
       />;
     }, this);
-    var title_view = cards.length > 0 ? <div className="player-hand-title">Hand</div> : null;
+    var title_view = cards.length > 0 ? <div className="player-hand-title">Hand ({cards.length} / 3)</div> : null;
     return (
       <div className="player-hand-view">
         {title_view}
