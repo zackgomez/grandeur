@@ -302,12 +302,6 @@ span.gem {
   display: flex;
   padding: 2px 0px;
 }
-.chip-pile {
-  display: inline-flex;
-  margin-left: 10px;
-  flex-wrap: nowrap;
-  align-items: center;
-}
 .chip-count {
   font-size: 24px;
   vertical-align: 50%;
