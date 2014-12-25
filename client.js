@@ -117,7 +117,7 @@ var DraftingView = React.createClass({
           onCardLeave:this.onCardLeave,
           highlighted:highlighted,
         };
-        return CardView(card_props);
+        return <CardView {...card_props} />;
       }, this);
       var is_deck_selected = has_requested_action &&
         ((selection && selection.level === level && !selection.cardID)
@@ -531,9 +531,9 @@ var LoginPage = React.createClass({
       }
       var user = res.body.user;
       var session = new Session(user);
+      renderApp(session);
       console.log('redirect to', res.body.redirect);
       this.transitionTo(res.body.redirect);
-      renderApp(session);
     }.bind(this));
     return false;
   },
@@ -742,6 +742,7 @@ var NotFoundHandler = React.createClass({
   }
 });
 
+var session = null;
 var App = React.createClass({
   render: function() {
     var session = this.props.session;
@@ -762,7 +763,8 @@ var routes = (
 
 module.exports = App;
 
-var renderApp = function(session) {
+var renderApp = function(s) {
+  session = s;
   Router.run(routes, Router.HistoryLocation, function (Handler) {
     React.render(<Handler session={session} />, document.body);
   });
