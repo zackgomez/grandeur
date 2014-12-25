@@ -181,22 +181,35 @@ Game.prototype.nextTurn = function() {
 };
 
 var isValidChipSelection = function(color_counts, supply) {
-  var num_colors = _.size(color_counts);
+  if (_.some(color_counts, function(count, color) {
+    return !_.contains(_.values(Colors), color);
+  })) {
+    return false;
+  }
   if (color_counts[Colors.JOKER] > 0) {
     return false;
   }
+
+  var filtered_colors = {};
+  _.each(color_counts, function(count, color) {
+    if (count > 0) {
+      filtered_colors[color] = count;
+    }
+  });
+
+  var num_colors = _.size(filtered_colors);
   if (num_colors <= 0 || num_colors > 3) {
     return false;
   }
   // handle double chip draft
-  var first_count = _.head(_.values(color_counts));
+  var first_count = _.head(_.values(filtered_colors));
   if (num_colors == 1 && first_count == 2) {
-    return supply[_.keys(color_counts)[0]] >= 4;
+    return supply[_.keys(filtered_colors)[0]] >= 4;
   }
 
   // must be single chip draft and have enough resources
-  return _.all(color_counts, function(count, color) {
-    return supply[color] >= count;
+  return _.all(filtered_colors, function(count, color) {
+    return count == 1 && supply[color] >= count;
   });
 };
 // returns the cost of a card given some supply of chips to pay with and some discount
