@@ -34,12 +34,38 @@ var ChipSupplyView = ChipViews.ChipSupplyView;
 var ChipPileView = ChipViews.ChipPileView;
 var ChipListView = ChipViews.ChipListView;
 var ReactCSSTransitionGroup = React.addons.CSSTransitionGroup;
+var ReactTransitionGroup = React.addons.TransitionGroup;
 var NobleView = require('./NobleView');
 var Player = require('./Player');
 
 function playerIsLocalPlayer(session, playerJSON) {
   return session.getUser().id === playerJSON.userID;
 }
+
+var CardLocationStore = {
+  getCardPosition: function(cardID) {
+    return this.cardPositions_[cardID];
+  },
+  setCardRect: function(cardID, rect) {
+    var position = {
+      x: rect.left + window.pageXOffset,
+      y: rect.top + window.pageYOffset,
+    };
+    this.cardPositions_[cardID] = position;
+  },
+  clearCardRect: function(cardID) {
+    //delete this.cardPositions_[cardID];
+  },
+  onCardRendered: function(card, element) {
+    if (element) {
+      this.setCardRect(card.id, element.getBoundingClientRect());
+    } else {
+      this.clearCardRect(card.id);
+    }
+  },
+
+  cardPositions_: {},
+};
 
 var NobleSupplyView = React.createClass({
   render: function() {
@@ -91,6 +117,9 @@ var DraftingView = React.createClass({
   onCardLeave: function(card) {
     this.setState({hoveredCardID: null});
   },
+  onCardRendered: function(card, element) {
+    CardLocationStore.onCardRendered(card, element);
+  },
   onDeckEnter: function(level) {
     this.setState({hoveredDeckLevel: level});
   },
@@ -115,6 +144,7 @@ var DraftingView = React.createClass({
           onDoubleClick:this.onCardDoubleClick,
           onCardEnter:this.onCardEnter,
           onCardLeave:this.onCardLeave,
+          onCardRendered:this.onCardRendered,
           highlighted:highlighted,
         };
         return <CardView {...card_props} />;
@@ -239,10 +269,14 @@ var PlayerHandView = React.createClass({
   onCardClick: function(card) {
     ActionStore.didClickHandCard(card.id);
   },
+  onCardRendered: function(card, element) {
+    CardLocationStore.onCardRendered(card, element);
+  },
   render: function() {
     var player = this.props.game.players[this.props.playerIndex];
     var is_session_player = playerIsLocalPlayer(this.props.session, player);
     var cards = _.map(player.hand, function(card) {
+      var card_position = CardLocationStore.getCardPosition(card.id);
       var highlighted = false;
       return <CardView
         key={card.id}
@@ -250,17 +284,19 @@ var PlayerHandView = React.createClass({
         onClick={this.onCardClick}
         highlighted={highlighted}
         faceDown={!is_session_player}
+        onCardRendered={this.onCardRendered}
+        initialPosition={card_position}
       />;
     }, this);
     var title_view = cards.length > 0 ? <div className="player-hand-title">Hand ({cards.length} / 3)</div> : null;
     return (
       <div className="player-hand-view">
         {title_view}
-        <div className="player-hand-cards">
-          <ReactCSSTransitionGroup transitionName="card">
-            {cards}
-          </ReactCSSTransitionGroup>
-        </div>
+        <ReactTransitionGroup
+          component="div"
+          className="player-hand-cards">
+          {cards}
+        </ReactTransitionGroup>
       </div>
     );
   },
@@ -274,12 +310,14 @@ var PlayerBoardView = React.createClass({
         return card.color === color;
       });
       var rendered_cards = _.map(cards, function(card) {
+        var card_position = CardLocationStore.getCardPosition(card.id);
         return <CardView
           key={card.id}
           card={card}
+          initialPosition={card_position}
         />;
       });
-      return (<div key={color} className="card-stack">{rendered_cards}</div>);
+      return (<ReactTransitionGroup component="div" key={color} className="card-stack">{rendered_cards}</ReactTransitionGroup>);
     });
     var noble_views = _.map(player.nobles, function (noble, i) {
       return (<NobleView key={i} noble={noble}/>);
@@ -398,7 +436,6 @@ var GamePage = React.createClass({
     if (!session) {
         return cb(null);
     }
-    console.log('params', this.getParams());
     var gameID = this.getParams().gameID;
     var gameStore = session.GameStore();
     gameStore.syncGameState(gameID, null, function() {
@@ -532,7 +569,6 @@ var LoginPage = React.createClass({
       var user = res.body.user;
       var session = new Session(user);
       renderApp(session);
-      console.log('redirect to', res.body.redirect);
       this.transitionTo(res.body.redirect);
     }.bind(this));
     return false;

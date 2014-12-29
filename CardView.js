@@ -13,10 +13,66 @@ var CardView = React.createClass({
     card: React.PropTypes.object.isRequired,
     faceDown: React.PropTypes.bool,
     highlighted: React.PropTypes.bool,
+    initialPosition: React.PropTypes.shape({
+      x: React.PropTypes.number.isRequired,
+      y: React.PropTypes.number.isRequired,
+    }),
     onCardEnter: React.PropTypes.func,
     onCardLeave: React.PropTypes.func,
     onClick: React.PropTypes.func,
     onDoubleClick: React.PropTypes.func,
+    onCardRendered: React.PropTypes.func,
+  },
+  wasRendered_: function() {
+    this.props.onCardRendered && this.props.onCardRendered(
+      this.props.card,
+      this.getDOMNode()
+    );
+  },
+  getInitialState: function() {
+    return {};
+  },
+  componentDidMount: function() {
+    this.wasRendered_();
+  },
+  componentWillUnmount: function() {
+    this.wasRendered_();
+  },
+  componentDidUpdate: function() {
+    this.wasRendered_();
+  },
+  componentWillEnter: function(callback) {
+    if (this.props.initialPosition) {
+      var rect = this.getDOMNode().getBoundingClientRect();
+      var current_position = {
+        x: rect.left + window.pageXOffset,
+        y: rect.top + window.pageYOffset,
+      };
+      var translation = {
+        x: this.props.initialPosition.x - current_position.x,
+        y: this.props.initialPosition.y - current_position.y,
+      };
+      console.log('will enter', this.props.card.id);
+      console.log('initial position', this.props.initialPosition);
+      console.log('current position', rect, current_position);
+      this.setState({style: {
+        transform: 'translate('+translation.x+'px,'+translation.y+'px)',
+      }});
+      setTimeout(function() {
+        callback();
+      }, 16);
+    } else {
+      callback();
+    }
+  },
+  componentDidEnter: function() {
+    this.setState({style: {
+      transition: 'transform .5s ease-in',
+    }});
+    this.wasRendered_();
+  },
+  componentWillLeave: function(callback) {
+    callback();
   },
   handleMouseEnter: function(e) {
     this.props.onCardEnter && this.props.onCardEnter(this.props.card);
@@ -43,8 +99,11 @@ var CardView = React.createClass({
     if (this.props.faceDown) {
       return <DeckView level={this.props.card.level} highlighted={this.props.highlighted} />;
     }
+    var style = {
+    };
+    style = _.extend(style, this.state.style || {});
     return (
-      <div className={'card card-color-'+this.props.card.color + (this.props.highlighted ? ' highlighted' : '')}
+      <div style={style} className={'card card-color-'+this.props.card.color + (this.props.highlighted ? ' highlighted' : '')}
         onMouseEnter={this.handleMouseEnter}
         onMouseLeave={this.handleMouseLeave}
         onClick={this.handleClick}
